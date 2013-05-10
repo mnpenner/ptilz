@@ -1,5 +1,4 @@
 <?php
-require_once 'Env.php';
 
 class Dbg {
     public static function dumpHtml($var) {

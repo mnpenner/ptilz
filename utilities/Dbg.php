@@ -23,7 +23,7 @@ class Dbg {
             echo '"'.addcslashes($var,"\0..\37\42\177..\377").'"';
         }
         elseif(is_bool($var)) {
-            echo($var ? 'true' : 'false');
+            echo $var ? 'true' : 'false';
         }
         elseif(is_int($var) || is_float($var)) {
             echo $var;

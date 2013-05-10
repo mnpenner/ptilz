@@ -14,7 +14,7 @@ class Set implements IteratorAggregate {
                     $this->set[$i] = true;
                 }
             } else {
-                throw new Exception(__CLASS__ . ' must be initialized with an array or iterable; ' . self::getType($iter) . ' provided');
+                throw new ArgumentTypeException(__CLASS__ . ' must be initialized with an array or iterable; ' . self::getType($iter) . ' provided');
             }
         } else {
             $this->set = array();
@@ -68,7 +68,7 @@ class Set implements IteratorAggregate {
         } elseif(is_array($x)) {
             return new Set(array_keys(array_intersect_key($this->set, self::flip($x))));
         }
-        throw new Exception('Cannot intersect set with object of type '.self::getType($x));
+        throw new ArgumentTypeException('Cannot intersect set with object of type '.self::getType($x));
     }
 
     public function union($x) {
@@ -77,7 +77,7 @@ class Set implements IteratorAggregate {
         } elseif(is_array($x)) {
             return new Set(array_keys(self::merge($this->set, self::flip($x))));
         }
-        throw new Exception('Cannot union set with object of type '.self::getType($x));
+        throw new ArgumentTypeException('Cannot union set with object of type '.self::getType($x));
     }
 
     public function count() {

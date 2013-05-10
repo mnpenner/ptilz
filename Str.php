@@ -18,7 +18,7 @@ class Str {
         return ob_get_clean();
     }
 
-    public static function strSplit($str) {
+    public static function split($str) {
         return preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
     }
 }

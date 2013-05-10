@@ -5,5 +5,5 @@ class Arr {
         return array_key_exists($key, $arr) ? $arr[$key] : $default;
     }
     
-    // TODO: add split and rsplit
+    // TODO: add regroup, rekey, dict, etc
 }

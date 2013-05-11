@@ -142,18 +142,27 @@ class Arr {
         }
         return $ret;
     }
-    
+
     public static function concat() {
         return call_user_func_array('array_merge', array_map('array_values', func_get_args()));
     }
-    
+
     public static function extend(&$array) {
         $arrays = array_slice(func_get_args(), 1);
         foreach($arrays as $arr) {
-            foreach($arr as $k=>$v) {
+            foreach($arr as $k => $v) {
                 $array[$k] = $v;
             }
         }
         return $array;
+    }
+
+    public static function zipdict($keys, $values) {
+        $keys = array_intersect_key($keys, $values);
+        $out = array();
+        foreach($keys as $k => $_) {
+            $out[$keys[$k]] = $values[$k];
+        }
+        return $out;
     }
 }

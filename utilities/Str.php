@@ -22,5 +22,13 @@ class Str {
         return preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
     }
 
+    private static function strlen($str) {
+        return function_exists('mb_strlen') ? mb_strlen($str) : count(self::split($str));
+    }
+
+    public static function cEscapeStr($str) {
+        return '"'.addcslashes($str,"\0..\37\42\134\177..\377").'"';
+    }
+
     // TODO: add rsplit
 }

@@ -91,4 +91,8 @@ class Set implements IteratorAggregate {
     public function getIterator() {
         return new ArrayIterator(array_keys($this->set));
     }
+
+    public function __toString() {
+        return '{'.implode(', ',array_keys($this->set)).'}';
+    }
 }

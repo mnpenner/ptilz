@@ -165,4 +165,14 @@ class Arr {
         }
         return $out;
     }
+
+    public static function remove(array $input, callable $callback) {
+        $ret = [];
+        foreach($input as $val) {
+            if(!$callback($val)) {
+                $ret[] = $val;
+            }
+        }
+        return $ret;
+    }
 }

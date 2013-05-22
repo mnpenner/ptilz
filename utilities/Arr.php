@@ -131,14 +131,21 @@ class Arr {
     }
 
 
-    // TODO: allow $key to be an array
-    public static function regroup(array $arr, $key, $unset = false) {
+    public static function regroup(array $arr, $keys, $unset = false) {
+        $keys = (array)$keys;
+        $key = array_shift($keys);
+
         $ret = array();
         foreach($arr as $row) {
-            $i = $row[$key];
-            if(!isset($ret[$i])) $ret[$i] = array();
+            $k = $row[$key];
+            if(!isset($ret[$k])) $ret[$k] = array();
             if($unset) unset($row[$key]);
-            $ret[$i][] = $row;
+            $ret[$k][] = $row;
+        }
+        if($keys) {
+            foreach($ret as $k => $row) {
+                $ret[$k] = self::regroup($row, $keys, $unset);
+            }
         }
         return $ret;
     }

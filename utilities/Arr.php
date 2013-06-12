@@ -182,4 +182,14 @@ class Arr {
         }
         return $ret;
     }
+    
+    public static function isDict($arr) {
+		if(!is_array($arr)) return false;
+		$i = 0;
+		foreach($arr as $k=>$v) {
+			if($k !== $i) return true;
+			++$i;
+		}
+		return false;
+	}
 }

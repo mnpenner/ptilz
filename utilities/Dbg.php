@@ -76,4 +76,8 @@ class Dbg {
             }
         }
     }
+
+    public static function getType($var) {
+        return is_object($var) ? get_class($var) : gettype($var);
+    }
 }

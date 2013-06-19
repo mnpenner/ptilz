@@ -50,7 +50,7 @@ class CsvReader implements IteratorAggregate {
 
     public function readline() {
         $line = fgetcsv($this->fp, $this->max_length, $this->delimiter, $this->enclosure, $this->escape);
-        if($this->headers) {
+        if($line !== false && $this->headers) {
             $line = Arr::zipdict($this->headers, $line);
         }
         return $line;

@@ -76,8 +76,6 @@ class CsvIterator implements Iterator {
 
     public function __construct(CsvReader $csv) {
         $this->csv = $csv;
-        $this->line_nbr = 0;
-        $this->line = null;
     }
 
     public function current() {
@@ -99,5 +97,7 @@ class CsvIterator implements Iterator {
 
     public function rewind() {
         $this->csv->rewind();
+        $this->line_nbr = -1;
+        $this->next();
     }
 }

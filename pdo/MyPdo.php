@@ -60,7 +60,7 @@ class MyPdo extends PdoPlus {
         $select_sql = $pk===null ? '1' : self::quote_identifier($pk);
         $table_sql = self::quote_identifier($table);
         $where_sql = self::where_sql(array_keys($where));
-        $result = $this->prepare_execute("SELECT $select_sql FROM $table_sql WHERE $where_sql", $where)->fetchColumn();
+        $result = $this->prepare("SELECT $select_sql FROM $table_sql WHERE $where_sql")->execute($where)->fetchColumn();
         return $result!==false ? $result : $this->insert($table, $data);
     }
 
@@ -101,7 +101,7 @@ class MyPdo extends PdoPlus {
         }
         $where_sql = $where_arr ? implode(' AND ',$where_arr) : '1';
 
-        return $this->prepare_execute("UPDATE $table_sql SET $set_sql WHERE $where_sql",$values);
+        return $this->prepare("UPDATE $table_sql SET $set_sql WHERE $where_sql")->execute($values);
     }
 
     public function exists($table, $where=array()) {
@@ -117,7 +117,7 @@ class MyPdo extends PdoPlus {
         }
         $where_sql = $where_pairs ? implode(' AND ',$where_pairs) : '1';
         $table_sql = self::quote_identifier($table);
-        return (bool)$this->prepare_execute("SELECT EXISTS(SELECT * FROM $table_sql WHERE $where_sql)",$where_values);
+        return (bool)$this->prepare("SELECT EXISTS(SELECT * FROM $table_sql WHERE $where_sql)")->execute($where_values)->fetchColumn();
     }
 
     private static function where_sql($where) {

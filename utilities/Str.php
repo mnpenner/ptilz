@@ -55,10 +55,10 @@ class Str {
      * @param string $str   The input string.
      * @param string $delim The boundary string.
      * @param int $limit    Maximum of limit elements with the last element containing the rest of string.
-     * @param bool $pad     Pad the returned array up to the specified limit with empty strings. Useful when used with list(...) = rsplit(...) to avoid warnings.
+     * @param mixed $pad    If $limit and $pad are provided, the result will be padded up to the limit with this value. Useful when used with list(...) = rsplit(...) to avoid warnings.
      * @return array
      */
-    public static function rsplit($str,$delim,$limit=PHP_INT_MAX,$pad=false) {
+    public static function rsplit($str,$delim,$limit=PHP_INT_MAX,$pad=null) {
         $parts = array();
         for($i=$limit; $i>1; --$i) {
             $pos = strrpos($str,$delim);
@@ -67,8 +67,8 @@ class Str {
             $str = substr($str,0,$pos);
         }
         array_unshift($parts,$str);
-        if($pad && $limit !== PHP_INT_MAX && count($parts)<$limit) {
-            $parts = array_pad($parts, $limit, '');
+        if(func_get_args() >= 4 && $limit !== PHP_INT_MAX && count($parts)<$limit) {
+            $parts = array_pad($parts, $limit, $pad);
         }
         return $parts;
     }

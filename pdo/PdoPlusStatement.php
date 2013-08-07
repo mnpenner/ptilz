@@ -4,16 +4,21 @@ class PdoPlusStatement extends PDOStatement {
     protected function __construct() {}
 
     /**
-     * @param array|mixed $input_parameters An array of values with as many elements as there are bound parameters in the SQL statement being executed, or a single value to be matched with a single parameter marker.
+     * @param array|mixed $input_parameters An array of values with as many elements as there are bound parameters in the SQL statement being executed, or one or more non-array arguments to be matched with sequential parameter markers.
      * @throws PDOException
      * @return PdoPlusStatement
      */
-    public function execute($input_parameters=array()) {
-        if(!is_array($input_parameters)) $input_parameters = array($input_parameters);
-        if(parent::execute($input_parameters)===false) {
-            throw new PDOException("Failed to execute statement");
+    public function execute($input_parameters=null) {
+        $args = func_get_args();
+        $argc = func_num_args();
+        if($argc===0) {
+            parent::execute();
+        } else {
+            if($argc===1 && is_array($args[0])) {
+                $args = $args[0];
+            }
+            parent::execute($args);
         }
         return $this;
     }
 }
-

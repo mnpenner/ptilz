@@ -21,4 +21,12 @@ class PdoPlusStatement extends PDOStatement {
         }
         return $this;
     }
+
+    /**
+     * Returns an array containing all of the remaining rows in the result set
+     * @return array An associative array using the first column as the key and the remainder as associative values
+     */
+    public function fetchKeyAssoc() {
+        return array_map('reset', $this->fetchAll(PDO::FETCH_GROUP|PDO::FETCH_ASSOC));
+    }
 }

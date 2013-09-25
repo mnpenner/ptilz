@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @method PdoPlusStatement prepare(string $statement, array $driver_options=array()) Prepares a statement for execution and returns a statement object
- */
 class MyPdo extends PdoPlus {
     const LOW_PRIORITY = 1;
     const DELAYED = 2;
@@ -101,7 +98,7 @@ class MyPdo extends PdoPlus {
         }
         $where_sql = $where_arr ? implode(' AND ',$where_arr) : '1';
 
-        return $this->prepare("UPDATE $table_sql SET $set_sql WHERE $where_sql")->execute($values);
+        return (int)$this->prepare("UPDATE $table_sql SET $set_sql WHERE $where_sql")->execute($values)->rowCount();
     }
 
     public function exists($table, $where=array()) {
@@ -147,8 +144,10 @@ class MyPdo extends PdoPlus {
      * @return string
      * @see http://dev.mysql.com/doc/refman/5.6/en/identifiers.html
      */
-    protected static function quote_identifier($identifier) {
-        return '`' . str_replace('`', '``', $identifier) . '`';
+    public static function quote_identifier($identifier) {
+        return implode('.',array_map(function($id) {
+            return '`' . str_replace('`', '``', $id) . '`';
+        },explode('.',$identifier)));
     }
 
     public function truncate($table) {
@@ -191,13 +190,14 @@ class MyPdo extends PdoPlus {
         return $this->query($sql);
     }
 
-    /**
-     * Quotes a string for use in a query.
-     *
-     * @param mixed $value The value to be quoted.
-     * @return string Returns a quoted string that is theoretically safe to pass into an SQL statement.
-     */
-    public function quote($value) {
+	/**
+	 * Quotes a string for use in a query.
+	 *
+	 * @param mixed $value The value to be quoted.
+	 * @param null $parameter_type Provides a data type hint for drivers that have alternate quoting styles. Not used.
+	 * @return string Returns a quoted string that is theoretically safe to pass into an SQL statement.
+	 */
+    public function quote($value, $parameter_type=null) {
         if(is_null($value)) return 'NULL';
         elseif(is_bool($value)) return $value ? 'TRUE' : 'FALSE';
         elseif(is_int($value)||is_float($value)) return $value;
@@ -216,14 +216,18 @@ class MyPdo extends PdoPlus {
      * @param bool $null Allow null
      * @param bool|null|string $default Default value. Use PHP true/false/null to indicate their MySQL equivalents as strings will be automatically quoted.
      * @param bool $silent True to suppress "duplicate field name" exceptions. Function will return `false` instead.
-     * @return bool|int Number of affected rows, or `false` if the field already exists and `$silent` is truthy.
+     * @param string $after Add new column after this one. Default is to add column last.
      * @throws Exception|PDOException
+     * @return bool|int Number of affected rows, or `false` if the field already exists and `$silent` is truthy.
      */
-    public function add_column($table, $column_name, $type, $null, $default=null, $silent=true) {
+    public function add_column($table, $column_name, $type, $null, $default=null, $silent=true, $after=null) {
         $sql = 'ALTER TABLE '.self::quote_identifier($table).' ADD '.self::quote_identifier($column_name).' '.$type;
         if(!$null) $sql .= ' NOT NULL';
         if(func_num_args() >= 5) {
             $sql .= ' DEFAULT '.$this->quote($default);
+        }
+        if($after) {
+            $sql .= ' AFTER '.self::quote_identifier($after);
         }
         try {
             return $this->exec($sql);
@@ -231,6 +235,10 @@ class MyPdo extends PdoPlus {
             if($silent && $e->errorInfo[1] === self::ER_DUP_FIELDNAME) return false;
             throw $e;
         }
+    }
+
+    public function use_database($dbname) {
+        return $this->exec('USE ' . self::quote_identifier($dbname));
     }
 
     const ER_HASHCHK = 1000;

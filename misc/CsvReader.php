@@ -51,9 +51,18 @@ class CsvReader implements IteratorAggregate {
     public function readline() {
         $line = fgetcsv($this->fp, $this->max_length, $this->delimiter, $this->enclosure, $this->escape);
         if($line !== false && $this->headers) {
-            $line = Arr::zipdict($this->headers, $line);
+            $line = self::zipdict($this->headers, $line);
         }
         return $line;
+    }
+
+    private static function zipdict($keys, $values) {
+        $len = min(count($keys),count($values));
+        $out = array();
+        for($i=0; $i<$len; ++$i) {
+            $out[$keys[$i]?:$i] = $values[$i];
+        }
+        return $out;
     }
 
     public function __destruct() {

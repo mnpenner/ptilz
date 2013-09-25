@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @method PdoPlusStatement query(string $statement) Executes an SQL statement in a single function call, returning the result set (if any)
+ * @method PdoPlusStatement prepare(string $statement, array $driver_options=array()) Prepares a statement for execution and returns a statement object
+ */
 class PdoPlus extends PDO {
     /**
      * @param string $identifier
@@ -57,6 +61,9 @@ class PdoPlus extends PDO {
         return $this->prepare_execute('SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME=?', array($database, $table))->fetchAll(PDO::FETCH_COLUMN);
     }
 
+	public function column_exists($database, $table, $column) {
+		return $this->prepare('SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME=? AND COLUMN_NAME=? LIMIT 1')->execute(array($database, $table, $column))->fetch(PDO::FETCH_COLUMN);
+	}
     public function interactive() {
         while(true) {
             $sql = readline('SQL> ');
@@ -77,4 +84,3 @@ class PdoPlus extends PDO {
         }
     }
 }
-

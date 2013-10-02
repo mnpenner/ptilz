@@ -72,4 +72,14 @@ class Str {
         }
         return $parts;
     }
+
+    /**
+     * @static
+     * @param array $dict Search => Replace pairs
+     * @param string $input Input
+     * @return string
+     */
+    public static function replace_assoc($dict,$input) {
+        return str_replace(array_keys($dict),array_values($dict),$input);
+    }
 }

@@ -30,7 +30,7 @@ class Json {
                 return $var->str;
             }
             if($var instanceof JsonSerializable) {
-                return json_encode($var->jsonSerialize());
+                return json_encode($var->jsonSerialize(), $options);
             }
             return json_encode($var, $options);
         }

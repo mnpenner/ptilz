@@ -2,7 +2,7 @@
 
 class Json {
     /**
-     * JSON-encodes a value. Escaping can be prevented on a sub-element via Json::literal.
+     * JSON-encodes a value. Escaping can be prevented on a sub-element via WxJson::literal.
      *
      * @param mixed $var The value being encoded. Can be any type except a resource.
      * @param int $options Options passed to `json_encode`. Everything except `JSON_PRETTY_PRINT` should work.
@@ -11,9 +11,6 @@ class Json {
      * @see http://us3.php.net/manual/en/json.constants.php
      */
     public static function encode($var, $options=0) {
-        if(is_scalar($var)) {
-            return json_encode($var, $options);
-        }
         if(is_array($var)) {
             if(self::is_assoc($var)) {
                 $bits = array();
@@ -32,9 +29,8 @@ class Json {
             if($var instanceof JsonSerializable) {
                 return json_encode($var->jsonSerialize(), $options);
             }
-            return json_encode($var, $options);
         }
-        throw new JsonException('Could not json encode variable of type '.gettype($var));
+        return json_encode($var, $options);
     }
 
     /**

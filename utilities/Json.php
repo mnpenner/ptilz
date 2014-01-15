@@ -2,7 +2,7 @@
 
 class Json {
     /**
-     * JSON-encodes a value. Escaping can be prevented on a sub-element via WxJson::literal.
+     * JSON-encodes a value. Escaping can be prevented on a sub-element via Json::literal.
      *
      * @param mixed $var The value being encoded. Can be any type except a resource.
      * @param int $options Options passed to `json_encode`. Everything except `JSON_PRETTY_PRINT` should work.

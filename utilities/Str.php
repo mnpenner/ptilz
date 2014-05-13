@@ -18,12 +18,23 @@ class Str {
         return ob_get_clean();
     }
 
-    public static function split($str) {
+    /**
+     * Splits a string into an array of characters. Works on multi-byte strings.
+     *
+     * @param $str
+     * @return array
+     */
+    public static function splitChars($str) {
         return preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
     }
 
+    /**
+     * Returns the length of a string. Works on multi-byte strings.
+     * @param $str
+     * @return int
+     */
     private static function strlen($str) {
-        return function_exists('mb_strlen') ? mb_strlen($str) : count(self::split($str));
+        return function_exists('mb_strlen') ? mb_strlen($str) : preg_match_all("/./us",$str);
     }
 
     public static function cEscapeStr($str) {
@@ -81,5 +92,20 @@ class Str {
      */
     public static function replace_assoc($dict,$input) {
         return str_replace(array_keys($dict),array_values($dict),$input);
+    }
+
+    public static function random($len, $chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') {
+        $str = '';
+        $randMax = strlen($chars)-1;
+
+        while($len--) {
+            $str .= $chars[mt_rand(0,$randMax)];
+        }
+
+        return $str;
+    }
+
+    public static function isEmpty($str){
+        return $str === null || trim($str) === '';
     }
 }

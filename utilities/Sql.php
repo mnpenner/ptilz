@@ -9,7 +9,7 @@ class Sql {
     public static function quote($value, PDO $conn=null) {
         if(is_null($value)) return 'NULL';
         elseif(is_bool($value)) return $value ? '1' : '0';
-        elseif(is_int($value) || is_float($value) || is_a($value,'RawString')) return (string)$value;
+        elseif(is_int($value) || is_float($value) || is_a($value,'RawString') || is_a($value,'BinaryString')) return (string)$value;
         elseif(is_array($value)) {
             if(Arr::isAssoc($value)) {
                 $pairs = [];
@@ -31,6 +31,10 @@ class Sql {
      */
     public static function raw($str) {
         return new RawString($str);
+    }
+
+    public static function bin($str) {
+        return new BinaryString($str);
     }
 
     public static function escapeId($id, $forbidQualified = false) {

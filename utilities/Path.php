@@ -35,10 +35,10 @@ class Path {
      * @see http://nodejs.org/api/path.html#path_path_normalize_p
      */
     public static function normalize($path) {
-        $path = preg_replace('~[/\\\\]+~','/', $path);
-        if($path === '/') return DIRECTORY_SEPARATOR;
+        $path = preg_replace('~[/\\\\]+~',DIRECTORY_SEPARATOR, $path);
+        if($path === DIRECTORY_SEPARATOR) return $path;
         $out = [];
-        foreach(explode('/',rtrim($path,'/')) as $p) {
+        foreach(explode(DIRECTORY_SEPARATOR,rtrim($path,DIRECTORY_SEPARATOR)) as $p) {
             if($p === '.') continue;
             if($p === '..') array_pop($out);
             else $out[] = $p;

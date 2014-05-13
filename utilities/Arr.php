@@ -183,8 +183,7 @@ class Arr {
         return $ret;
     }
     
-    public static function isDict($arr) {
-		if(!is_array($arr)) return false;
+    public static function isAssoc(array $arr) {
 		$i = 0;
 		foreach($arr as $k=>$v) {
 			if($k !== $i) return true;
@@ -192,4 +191,13 @@ class Arr {
 		}
 		return false;
 	}
+
+    public static function isNumeric(array $arr) {
+        $i = 0;
+        foreach($arr as $k=>$v) {
+            if($k !== $i) return false;
+            ++$i;
+        }
+        return true;
+    }
 }

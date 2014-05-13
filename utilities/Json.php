@@ -12,19 +12,19 @@ class Json {
      */
     public static function encode($var, $options=0) {
         if(is_array($var)) {
-            if(self::is_assoc($var)) {
+            if(self::isAssoc($var)) {
                 $bits = array();
                 foreach($var as $k => $v) {
                     $bits[] = json_encode($k, $options) . ':' . self::encode($v);
                 }
                 return '{' . implode(',', $bits) . '}';
             } else {
-                return '[' . implode(',',array_map(array('self', __FUNCTION__), $var)) . ']';
+                return '[' . implode(',',array_map(__METHOD__, $var)) . ']';
             }
         }
         if(is_object($var)) {
-            if($var instanceof _JsLiteral) {
-                return $var->str;
+            if($var instanceof RawString) {
+                return (string)$var;
             }
             if($var instanceof JsonSerializable) {
                 return json_encode($var->jsonSerialize(), $options);
@@ -37,18 +37,41 @@ class Json {
      * Returns a "literal" or "raw" value which will not be escaped by Json::encode
      *
      * @param string $str Raw value (should be valid JavaScript)
-     * @return _JsLiteral
+     * @return RawString
      */
-    public static function literal($str) {
-        return new _JsLiteral($str);
+    public static function raw($str) {
+        return new RawString($str);
     }
 
-    private static function is_assoc($arr) {
+    private static function isAssoc($arr) {
         $i = 0;
         foreach($arr as $k => $v) {
             if($k !== $i++) return true;
         }
         return false;
+    }
+
+    private static $error_codes = [
+        JSON_ERROR_NONE => "No error has occurred",
+        JSON_ERROR_DEPTH => "The maximum stack depth has been exceeded",
+        JSON_ERROR_STATE_MISMATCH => "Invalid or malformed JSON",
+        JSON_ERROR_CTRL_CHAR => "Control character error, possibly incorrectly encoded",
+        JSON_ERROR_SYNTAX => "Syntax error",
+        JSON_ERROR_UTF8 => "Malformed UTF-8 characters, possibly incorrectly encoded",
+        JSON_ERROR_RECURSION => "One or more recursive references in the value to be encoded",
+        JSON_ERROR_INF_OR_NAN => "One or more NAN or INF values in the value to be encoded",
+        JSON_ERROR_UNSUPPORTED_TYPE => "A value of a type that cannot be encoded was given",
+
+    ];
+
+    public static function decode($str) {
+        $result = json_decode($str, true);
+        $error_code = json_last_error();
+        if($error_code !== JSON_ERROR_NONE) {
+            $error_string = array_key_exists($error_code, self::$error_codes) ? self::$error_codes[$error_code] : "Unknown error code $error_code";
+            throw new JsonException("\"$error_string\" decoding JSON ".$str);
+        }
+        return $result;
     }
 }
 
@@ -69,13 +92,3 @@ if(!interface_exists('JsonSerializable')) {
     }
 }
 
-/**
- * Internal class used to prevent JSON-encoding (do not use directly)
- * @internal
- */
-class _JsLiteral {
-    public $str;
-    function __construct($str) {
-        $this->str = $str;
-    }
-}

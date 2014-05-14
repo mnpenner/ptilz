@@ -10,6 +10,7 @@ class Sql {
         if(is_null($value)) return 'NULL';
         elseif(is_bool($value)) return $value ? '1' : '0';
         elseif(is_int($value) || is_float($value) || is_a($value,'RawString') || is_a($value,'BinaryString')) return (string)$value;
+        elseif($value instanceof DateTime) return "'".$value->format('Y-m-d H:i:s')."'";
         elseif(is_array($value)) {
             if(Arr::isAssoc($value)) {
                 $pairs = [];

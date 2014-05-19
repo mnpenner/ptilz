@@ -3,7 +3,7 @@
 class Sql {
 
     public static function escapeLike($str) {
-        return str_replace(['%', '_'], ['\%', '\_'], $str);
+        return str_replace(['%', '_'], ['\\%', '\\_'], $str);
     }
 
     public static function quote($value, PDO $conn=null) {

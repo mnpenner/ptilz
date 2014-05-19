@@ -110,21 +110,21 @@ class Arr {
      * Takes an array (usually containing 2-tuples) and turns it into a dictionary (associative array)
      *
      * @param array $arr       Array to convert
-     * @param int|string $kk   Key that holds keys
-     * @param int|string $vk   Key that holds values
+     * @param int|string $k0   Key that holds keys
+     * @param int|string $k1   Key that holds values
      *
      * @return array Dictionary
      */
-    public static function dict(array $arr, $kk = 0, $vk = 1) {
+    public static function dict(array $arr, $k0 = 0, $k1 = 1) {
         $dict = array();
         foreach($arr as $t) {
-            if(isset($dict[$t[$kk]])) {
-                if(!is_array($dict[$t[$kk]])) {
-                    $dict[$t[$kk]] = array($dict[$t[$kk]]);
+            if(isset($dict[$t[$k0]])) {
+                if(!is_array($dict[$t[$k0]])) {
+                    $dict[$t[$k0]] = array($dict[$t[$k0]]);
                 }
-                $dict[$t[$kk]][] = $t[$vk];
+                $dict[$t[$k0]][] = $t[$k1];
             } else {
-                $dict[$t[$kk]] = $t[$vk];
+                $dict[$t[$k0]] = $t[$k1];
             }
         }
         return $dict;
@@ -175,9 +175,9 @@ class Arr {
 
     public static function remove(array $input, callable $callback) {
         $ret = [];
-        foreach($input as $val) {
-            if(!$callback($val)) {
-                $ret[] = $val;
+        foreach($input as $key=>$val) {
+            if(!$callback($val,$key)) {
+                $ret[$key] = $val;
             }
         }
         return $ret;

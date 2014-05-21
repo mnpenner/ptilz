@@ -4,9 +4,9 @@ class Arr {
     /**
      * Retrieve a value from an array by key, otherwise a default value.
      *
-     * @param array $arr        Array
-     * @param int|string $key   Key
-     * @param mixed $default    Default value if key is not found
+     * @param array $arr Array
+     * @param int|string $key Key
+     * @param mixed $default Default value if key is not found
      *
      * @return mixed
      */
@@ -17,9 +17,9 @@ class Arr {
     /**
      * Rekey an array with a column of your choice
      *
-     * @param array $arr    Array to rekey
-     * @param string $key   Column to use as new key
-     * @param bool $unset   Remove the key from inside each record
+     * @param array $arr Array to rekey
+     * @param string $key Column to use as new key
+     * @param bool $unset Remove the key from inside each record
      *
      * @return array Rekeyed array
      */
@@ -54,7 +54,7 @@ class Arr {
      *
      * @param array $array
      * @param array $keys
-     * @param bool $reorder    Reorder the key/value pairs in array to match that of $keys, and insert null values where keys are missing
+     * @param bool $reorder Reorder the key/value pairs in array to match that of $keys, and insert null values where keys are missing
      *
      * @return array
      */
@@ -70,6 +70,13 @@ class Arr {
         }
     }
 
+    /**
+     * "Pops" an element out of an array and returns it. `null` key will return the last element.
+     *
+     * @param array $array
+     * @param string $key
+     * @return mixed
+     */
     public static function pop(array &$array, $key = null) {
         if($key !== null) {
             $ret = $array[$key];
@@ -109,9 +116,9 @@ class Arr {
     /**
      * Takes an array (usually containing 2-tuples) and turns it into a dictionary (associative array)
      *
-     * @param array $arr       Array to convert
-     * @param int|string $k0   Key that holds keys
-     * @param int|string $k1   Key that holds values
+     * @param array $arr Array to convert
+     * @param int|string $k0 Key that holds keys
+     * @param int|string $k1 Key that holds values
      *
      * @return array Dictionary
      */
@@ -150,10 +157,21 @@ class Arr {
         return $ret;
     }
 
+    /**
+     * Concatenates one or more arrays. Values will never be overwritten. Result will have numeric indices.
+     *
+     * @return mixed
+     */
     public static function concat() {
         return call_user_func_array('array_merge', array_map('array_values', func_get_args()));
     }
 
+    /**
+     * Merges one or more arrays into the first one. The first array will be modified in-place and returned for convenience.
+     *
+     * @param $array
+     * @return mixed
+     */
     public static function extend(&$array) {
         $arrays = array_slice(func_get_args(), 1);
         foreach($arrays as $arr) {
@@ -164,7 +182,14 @@ class Arr {
         return $array;
     }
 
-    public static function zipdict($keys, $values) {
+    /**
+     * Takes keys from one aray and values from another and combines them into a dictionary.
+     *
+     * @param array $keys
+     * @param array $values
+     * @return array
+     */
+    public static function zipdict(array $keys, array $values) {
         $keys = array_intersect_key($keys, $values);
         $out = array();
         foreach($keys as $k => $_) {
@@ -173,31 +198,86 @@ class Arr {
         return $out;
     }
 
+    /**
+     * Removes elements from array that do not pass the callback.
+     *
+     * @param array $input
+     * @param callable $callback
+     * @return array
+     */
     public static function remove(array $input, callable $callback) {
         $ret = [];
-        foreach($input as $key=>$val) {
-            if(!$callback($val,$key)) {
+        foreach($input as $key => $val) {
+            if(!$callback($val, $key)) {
                 $ret[$key] = $val;
             }
         }
         return $ret;
     }
-    
-    public static function isAssoc(array $arr) {
-		$i = 0;
-		foreach($arr as $k=>$v) {
-			if($k !== $i) return true;
-			++$i;
-		}
-		return false;
-	}
 
+    /**
+     * Determines if an array is "associative" (like a dictionary or hash map). True if at least one index is "out of place".
+     *
+     * @param array $arr
+     * @return bool
+     */
+    public static function isAssoc(array $arr) {
+        $i = 0;
+        foreach($arr as $k => $v) {
+            if($k !== $i) return true;
+            ++$i;
+        }
+        return false;
+    }
+
+    /**
+     * Determines if an array is "real" -- that is, contains only sequential integer indices starting with 0.
+     *
+     * @param array $arr
+     * @return bool
+     */
     public static function isNumeric(array $arr) {
         $i = 0;
-        foreach($arr as $k=>$v) {
+        foreach($arr as $k => $v) {
             if($k !== $i) return false;
             ++$i;
         }
         return true;
+    }
+
+    /**
+     * Returns the first element in an array.
+     *
+     * @param array $arr
+     * @return mixed
+     */
+    public static function first(array $arr) {
+        return reset($array);
+    }
+
+    /**
+     * Returns the last element in an array
+     *
+     * @param array $arr
+     * @return mixed
+     */
+    public static function last(array $arr) {
+        return end($array);
+    }
+
+    /**
+     * Flatten a multi-dimensional array into a single level.
+     *
+     * @param  array $array
+     * @return array
+     */
+    public static function flatten($array) {
+        $return = array();
+
+        array_walk_recursive($array, function ($x) use (&$return) {
+            $return[] = $x;
+        });
+
+        return $return;
     }
 }

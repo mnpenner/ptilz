@@ -39,6 +39,7 @@ class Sql {
     }
 
     public static function escapeId($id, $forbidQualified = false) {
+        if($id instanceof RawString) return (string)$id;
         if(is_array($id)) {
             return implode(',', array_map(function ($x) use ($forbidQualified) {
                 return Sql::escapeId($x, $forbidQualified);

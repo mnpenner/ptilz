@@ -94,7 +94,16 @@ class Str {
         return str_replace(array_keys($dict),array_values($dict),$input);
     }
 
+    /**
+     * Generate a random string from the given alphabet.
+     *
+     * @param int $len String length
+     * @param string $chars Characters to choose from
+     * @return string Random string
+     * @throws Exception
+     */
     public static function random($len, $chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') {
+        if($len < 0) throw new Exception("Length must be non-negative");
         $str = '';
         $randMax = strlen($chars)-1;
 
@@ -107,10 +116,13 @@ class Str {
 
     /**
      * Generates a cryptographically secure random string from the alphabet ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_
+     *
      * @param $len String length
+     * @throws Exception
      * @return string
      */
     public static function securand($len) {
+        if($len < 0) throw new Exception("Length must be non-negative");
         return strtr(substr(base64_encode(openssl_random_pseudo_bytes(ceil($len * 3 / 4))), 0, $len), '+/', '-_');
     }
 

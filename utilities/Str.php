@@ -105,6 +105,15 @@ class Str {
         return $str;
     }
 
+    /**
+     * Generates a cryptographically secure random string from the alphabet ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_
+     * @param $len String length
+     * @return string
+     */
+    public static function securand($len) {
+        return strtr(substr(base64_encode(openssl_random_pseudo_bytes(ceil($len * 3 / 4))), 0, $len), '+/', '-_');
+    }
+
     public static function isEmpty($str){
         return $str === null || trim($str) === '';
     }

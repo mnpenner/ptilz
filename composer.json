@@ -1,0 +1,15 @@
+{
+    "name": "mnbayazit/php-utilities",
+    "description": "PHP utilities",
+    "minimum-stability": "dev",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Mark Bayazit",
+            "email": "mnbayazit@gmail.com"
+        }
+    ],
+    "require-dev": {
+        "raveren/kint": "dev-master"
+    }
+}

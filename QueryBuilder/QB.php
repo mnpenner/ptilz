@@ -11,11 +11,11 @@ class QB {
      * @return Identifier
      */
     public static function id($id, $forbidQualified = false) {
-        return $id instanceof Identifier ? $id : new Identifier($id, $forbidQualified);
+        return $id instanceof Expr ? $id : new Identifier($id, $forbidQualified);
     }
 
     public static function val($val) {
-        return $val instanceof Value ? $val : new Value($val);
+        return $val instanceof Expr ? $val : new Value($val);
     }
 
     /**
@@ -31,6 +31,34 @@ class QB {
      */
     public static function exists() {
         return call_user_func_array([new SubQuery('EXISTS'), 'from'], func_get_args());
+    }
+
+    public static function eq($lhs,$rhs) {
+        return new ComparisonExpr('=',$lhs,$rhs);
+    }
+
+    public static function gt($lhs,$rhs) {
+        return new ComparisonExpr('>',$lhs,$rhs);
+    }
+
+    public static function gte($lhs,$rhs) {
+        return new ComparisonExpr('>=',$lhs,$rhs);
+    }
+
+    public static function lt($lhs,$rhs) {
+        return new ComparisonExpr('<',$lhs,$rhs);
+    }
+
+    public static function lte($lhs,$rhs) {
+        return new ComparisonExpr('<=',$lhs,$rhs);
+    }
+
+    public static function nse($lhs,$rhs) {
+        return new ComparisonExpr('<=>',$lhs,$rhs);
+    }
+
+    public static function neq($lhs,$rhs) {
+        return new ComparisonExpr('!=',$lhs,$rhs);
     }
 
     /**

@@ -9,4 +9,8 @@ class SubQuery extends SelectQuery {
         parent::__construct();
         $this->type = $type;
     }
+
+    public function toSql() {
+        return ($this->type?:'').'('.parent::toSql().')';
+    }
 }

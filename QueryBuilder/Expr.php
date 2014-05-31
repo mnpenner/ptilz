@@ -1,6 +1,6 @@
 <?php
 namespace QueryBuilder;
 
-class Expr {
+abstract class Expr extends QueryBuilder {
 
 }

@@ -18,6 +18,10 @@ class QB {
         return $val instanceof Expr ? $val : new Value($val);
     }
 
+    public static function raw($val) {
+        return $val instanceof Expr ? $val : new RawSql($val);
+    }
+
     /**
      * @param string|null $type
      * @return SubQuery
@@ -53,10 +57,32 @@ class QB {
         return new ComparisonExpr('<=',$lhs,$rhs);
     }
 
+    public static function isNull($val){
+
+    }
+
+    public static function notNull($val) {
+
+    }
+
+
+
+    /**
+     * Null-safe equals comparison
+     * @param $lhs
+     * @param $rhs
+     * @return ComparisonExpr
+     */
     public static function nse($lhs,$rhs) {
         return new ComparisonExpr('<=>',$lhs,$rhs);
     }
 
+    /**
+     * Not equal comparison
+     * @param $lhs
+     * @param $rhs
+     * @return ComparisonExpr
+     */
     public static function neq($lhs,$rhs) {
         return new ComparisonExpr('!=',$lhs,$rhs);
     }

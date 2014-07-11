@@ -313,7 +313,6 @@ class Arr {
      * @return bool
      */
     public static function isAssoc(array $arr) {
-        if($arr === []) return null;
         $i = 0;
         foreach($arr as $k => $v) {
             if($k !== $i) return true;
@@ -329,7 +328,6 @@ class Arr {
      * @return bool
      */
     public static function isNumeric(array $arr) {
-        if($arr === []) return null;
         $i = 0;
         foreach($arr as $k => $v) {
             if($k !== $i) return false;

@@ -17,7 +17,7 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse(Arr::isNumeric([1 => 'a', 2 => 'b']));
         $this->assertFalse(Arr::isNumeric([1 => 'b', 0 => 'a']));
         $this->assertFalse(Arr::isNumeric(['a' => 1]));
-        $this->assertNull(Arr::isNumeric([]));
+        $this->assertTrue(Arr::isNumeric([]));
     }
 
     function testIsAssoc() {
@@ -26,7 +26,7 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(Arr::isAssoc([1 => 'a', 2 => 'b']));
         $this->assertTrue(Arr::isAssoc([1 => 'b', 0 => 'a']));
         $this->assertTrue(Arr::isAssoc(['a' => 1]));
-        $this->assertNull(Arr::isAssoc([]));
+        $this->assertFalse(Arr::isAssoc([]));
     }
 
     public static function isOdd($val) {

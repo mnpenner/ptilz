@@ -45,6 +45,15 @@ abstract class Math {
         return bccomp($val, PHP_INT_MIN) < 0 || bccomp($val, PHP_INT_MAX) > 0 ? (string)$val : (int)$val;
     }
 
+    /**
+     * Converts from one base to another.
+     *
+     * @param string $num
+     * @param int    $fromBase
+     * @param int    $toBase
+     * @param string $chars
+     * @return string
+     */
     public static function changeBase($num, $fromBase, $toBase, $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') {
         return self::decToAnyBase(self::anyBaseToDec($num, $fromBase, $chars), $toBase, $chars);
     }

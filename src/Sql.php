@@ -8,6 +8,8 @@ use Ptilz\Exceptions\ArgumentTypeException;
 use Ptilz\Exceptions\UnreachableException;
 
 class Sql {
+    /** @var PDO|mysqli Default connection used for escaping values  */
+    public static $defaultConnection = null;
 
     public static function escapeLike($str) {
         return str_replace(['%', '_'], ['\\%', '\\_'], $str);
@@ -34,6 +36,7 @@ class Sql {
             }
             return '(' . implode(', ', array_map(__METHOD__, $value)) . ')';
         } elseif(is_string($value)) {
+            if($conn === null) $conn = self::$defaultConnection;
             if($conn === null) return "'" . str_replace(["'", '\\', "\0", "\t", "\n", "\r", "\x08", "\x1a"], ["''", '\\\\', '\\0', '\\t', '\\n', '\\r', '\\b', '\\Z'], $value) . "'";
             if($conn instanceof PDO) return $conn->quote($value, PDO::PARAM_STR);
             if($conn instanceof mysqli) $conn->real_escape_string($value);

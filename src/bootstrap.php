@@ -1,4 +1,10 @@
 <?php
+
+if(!defined('PHP_INT_MIN')) {
+    /** The smallest integer supported in this build of PHP. */
+    define('PHP_INT_MIN', ~PHP_INT_MAX);
+}
+
 if(!function_exists('with')) {
     /**
      * Return the given object. Useful for chaining.

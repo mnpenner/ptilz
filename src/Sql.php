@@ -2,8 +2,9 @@
 namespace Ptilz;
 
 use DateTime;
-use Exception;
+use mysqli;
 use PDO;
+use Ptilz\Exceptions\ArgumentTypeException;
 use Ptilz\Exceptions\UnreachableException;
 
 class Sql {
@@ -12,7 +13,13 @@ class Sql {
         return str_replace(['%', '_'], ['\\%', '\\_'], $str);
     }
 
-    public static function quote($value, PDO $conn = null) {
+    /**
+     * @param mixed $value
+     * @param PDO|mysqli $conn
+     * @throws Exceptions\ArgumentTypeException
+     * @return string
+     */
+    public static function quote($value, $conn = null) {
         if(is_null($value)) return 'NULL';
         elseif(is_bool($value)) return $value ? '1' : '0';
         elseif(is_int($value) || is_float($value) || $value instanceof _RawSql) return (string)$value;
@@ -26,8 +33,13 @@ class Sql {
                 return implode(', ', $pairs);
             }
             return '(' . implode(', ', array_map(__METHOD__, $value)) . ')';
+        } elseif(is_string($value)) {
+            if($conn === null) return "'" . str_replace(["'", '\\', "\0", "\t", "\n", "\r", "\x08", "\x1a"], ["''", '\\\\', '\\0', '\\t', '\\n', '\\r', '\\b', '\\Z'], $value) . "'";
+            if($conn instanceof PDO) return $conn->quote($value, PDO::PARAM_STR);
+            if($conn instanceof mysqli) $conn->real_escape_string($value);
+            throw new ArgumentTypeException('conn', 'PDO|mysqli');
         }
-        return $conn ? $conn->quote($value) : "'" . str_replace(["'", '\\', "\0", "\t", "\n", "\r", "\x08", "\x1a"], ["''", '\\\\', '\\0', '\\t', '\\n', '\\r', '\\b', '\\Z'], $value) . "'";
+        throw new ArgumentTypeException('value', 'string');
     }
 
     /**
@@ -41,7 +53,7 @@ class Sql {
     }
 
     public static function bin($str) {
-        return $str === null || $str === '' ? $str : new _RawSql('0x'.bin2hex($str));
+        return $str === null || $str === '' ? $str : new _RawSql('0x' . bin2hex($str));
     }
 
     public static function escapeId($id, $forbidQualified = false) {

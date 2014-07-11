@@ -300,4 +300,15 @@ class ArrTest extends PHPUnit_Framework_TestCase {
     function testFlatten() {
         $this->assertSame([1, 2, 3, 4, 5, 6], Arr::flatten([[1, [], 2, 3], [4, [5], 6]]));
     }
+
+    function testReadable() {
+        $this->assertSame('', Arr::readable([]));
+        $this->assertSame('A', Arr::readable(['A']));
+        $this->assertSame('A and B', Arr::readable(['A', 'B']));
+        $this->assertSame('A, B and C', Arr::readable(['A', 'B', 'C']));
+        $this->assertSame('A, B or C', Arr::readable(['A', 'B', 'C'], ' or '));
+        $this->assertSame('A; B or C', Arr::readable(['A', 'B', 'C'], ' or ', '; '));
+        $this->assertSame('A or B', Arr::readable(['A', 'B'], ' or ', '; ', true));
+        $this->assertSame('A; B; or C', Arr::readable(['A', 'B', 'C'], ' or ', '; ', true));
+    }
 }

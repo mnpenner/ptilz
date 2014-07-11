@@ -395,4 +395,21 @@ class Arr {
 
         return $return;
     }
+
+    /**
+     * Human-friendly implode.
+     *
+     * @param string[] $pieces List of strings to join together
+     * @param string $last Token to insert before the last element when there are 2 or more elements
+     * @param string $glue Token to insert between each element when there are 3 or more elements
+     * @param bool $serial Use a serial/Oxford/Harvard comma when there are 3 or more elemeents
+     * @return string
+     */
+    public static function readable($pieces, $last = ' and ', $glue = ', ', $serial = false) {
+        if(count($pieces) <= 2) return implode($last, $pieces);
+        $last_el = array_pop($pieces);
+        $ret = implode($glue, $pieces);
+        if($serial) $ret .= rtrim($glue);
+        return $ret . $last . $last_el;
+    }
 }

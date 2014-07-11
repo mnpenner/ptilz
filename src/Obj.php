@@ -36,4 +36,12 @@ abstract class Obj {
         var_dump($var);
         return rtrim(ob_get_clean(),"\r\n");
     }
+
+    public static function isTruthy($var) {
+        return !self::isFalsey($var);
+    }
+
+    public static function isFalsey($var) {
+        return in_array($var, [false, null, '', 0, []], true);
+    }
 }

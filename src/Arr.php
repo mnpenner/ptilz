@@ -270,9 +270,7 @@ class Arr {
     public static function filter(array $input, callable $callback = null) {
         if($input === []) return [];
         if($callback === null) {
-            $callback = function ($val, $key) {
-                return !in_array($val, [false, null, '', 0, []], true);
-            };
+            $callback = ['Ptilz\Obj','isTruthy'];
         }
         $assoc = self::isAssoc($input);
         $ret = [];

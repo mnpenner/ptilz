@@ -9,7 +9,7 @@ class MathTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(0, Math::clamp(0, -3, 2));
     }
 
-    function testHexdec() {
+    function testHexToDec() {
         $this->assertSame(15, Math::hexToDec('f'));
         $this->assertSame(15, Math::hexToDec('F'));
         $this->assertSame(16, Math::hexToDec('10'));
@@ -17,19 +17,19 @@ class MathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('9223372036854775808', Math::hexToDec('8000000000000000'));
     }
 
-    function testDechex() {
+    function testDecToHex() {
         $this->assertSame('a', Math::decToHex(10));
         $this->assertSame('A', Math::decToHex(10, true));
         $this->assertSame('7fffffffffffffff', Math::decToHex(9223372036854775807));
         $this->assertSame('8000000000000000', Math::decToHex('9223372036854775808'));
     }
 
-    function testDec2base() {
+    function testAnyDecToBase() {
         $this->assertSame('aZl8N0y58M7', Math::decToAnyBase(9223372036854775807, 62));
         $this->assertSame('aZl8N0y58M8', Math::decToAnyBase('9223372036854775808', 62));
     }
 
-    function testBase2dec() {
+    function testAnyBaseToDec() {
         $this->assertSame(9223372036854775807, Math::anyBaseToDec('aZl8N0y58M7', 62));
         $this->assertSame('9223372036854775808', Math::anyBaseToDec('aZl8N0y58M8', 62));
     }

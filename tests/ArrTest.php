@@ -33,21 +33,21 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         return ($val & 1) === 1;
     }
 
-    public static function startUnderscore($_, $key) {
+    public static function isPrivate($_, $key) {
         return is_string($key) && strlen($key) >= 1 && $key[0] === '_';
     }
 
     function testRemove() {
         $this->assertSame([2, 4, 6], Arr::remove([1, 2, 3, 4, 5, 6], ['ArrTest', 'isOdd']));
         $this->assertSame(['b' => 2], Arr::remove(['a' => 1, 'b' => 2], ['ArrTest', 'isOdd']));
-        $this->assertSame(['username' => 'mark'], Arr::remove(['username' => 'mark', '_password' => 'secret'], ['ArrTest', 'startUnderscore']));
+        $this->assertSame(['username' => 'mark'], Arr::remove(['username' => 'mark', '_password' => 'secret'], ['ArrTest', 'isPrivate']));
     }
 
     function testFilter() {
-        $this->assertSame([1, 3, 5], Arr::filter([1, 2, 3, 4, 5, 6], ['ArrTest', 'isOdd']));
-        $this->assertSame(['a' => 1], Arr::filter(['a' => 1, 'b' => 2], ['ArrTest', 'isOdd']));
-        $this->assertSame(['_foo' => 'bar'], Arr::filter(['_foo' => 'bar', 'baz'], ['ArrTest', 'startUnderscore']));
-        $this->assertSame(['0', "\0", -1, 1, true, [0]], Arr::filter(['', '0', "\0", -1, 0, 1, true, false, null, [], [0]]));
+        $this->assertSame([1, 3, 5], Arr::filter([1, 2, 3, 4, 5, 6], ['ArrTest', 'isOdd']), "Filter by value");
+        $this->assertSame(['a' => 1], Arr::filter(['a' => 1, 'b' => 2], ['ArrTest', 'isOdd']), "Filter, maintaining keys");
+        $this->assertSame(['_foo' => 'bar'], Arr::filter(['_foo' => 'bar', 'baz'], ['ArrTest', 'isPrivate']), "Filter by key");
+        $this->assertSame(['0', "\0", -1, 1, true, [0]], Arr::filter(['', '0', "\0", -1, 0, 1, true, false, null, [], [0]]), "Default filter");
     }
 
     function testFirstValue() {

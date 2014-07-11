@@ -1,7 +1,6 @@
 <?php
 namespace Ptilz;
 use Ptilz\Exceptions\JsonException;
-use JsonSerializable;
 
 class Json {
     /**
@@ -15,10 +14,10 @@ class Json {
      */
     public static function encode($var, $options = 0) {
         if(is_array($var)) {
-            if(self::isAssoc($var)) {
-                $bits = array();
+            if(($options & JSON_FORCE_OBJECT) === JSON_FORCE_OBJECT || Arr::isAssoc($var)) {
+                $bits = [];
                 foreach($var as $k => $v) {
-                    $bits[] = json_encode($k, $options) . ':' . self::encode($v);
+                    $bits[] = json_encode((string)$k, $options) . ':' . self::encode($v, $options);
                 }
                 return '{' . implode(',', $bits) . '}';
             } else {
@@ -26,11 +25,11 @@ class Json {
             }
         }
         if(is_object($var)) {
-            if($var instanceof RawString) {
+            if($var instanceof _RawJson) {
                 return (string)$var;
             }
             if($var instanceof JsonSerializable) {
-                return json_encode($var->jsonSerialize(), $options);
+                return self::encode($var->jsonSerialize(), $options);
             }
         }
         return json_encode($var, $options);
@@ -40,18 +39,10 @@ class Json {
      * Returns a "literal" or "raw" value which will not be escaped by Json::encode
      *
      * @param string $str Raw value (should be valid JavaScript)
-     * @return RawString
+     * @return _RawJson
      */
     public static function raw($str) {
-        return new RawString($str);
-    }
-
-    private static function isAssoc($arr) {
-        $i = 0;
-        foreach($arr as $k => $v) {
-            if($k !== $i++) return true;
-        }
-        return false;
+        return new _RawJson($str);
     }
 
     private static $error_codes = [
@@ -67,32 +58,22 @@ class Json {
 
     ];
 
-    public static function decode($str) {
-        $result = json_decode($str, true);
+    /**
+     * Decodes a JSON string. Throws an exception on error.
+     *
+     * @param string $str The json string being decoded.
+     * @param bool $assoc When TRUE, returned objects will be converted into associative arrays.
+     * @param int $depth User specified recursion depth.
+     * @param int $options Bitmask of JSON decode options.
+     * @return mixed
+     * @throws Exceptions\JsonException
+     */
+    public static function decode($str, $assoc = true, $depth = 512, $options = 0) {
+        $result = json_decode($str, $assoc, $depth, $options);
         $error_code = json_last_error();
         if($error_code !== JSON_ERROR_NONE) {
-            $error_string = array_key_exists($error_code, self::$error_codes) ? self::$error_codes[$error_code] : "Unknown error code $error_code";
-            throw new JsonException("\"$error_string\" decoding JSON " . $str);
+            throw new JsonException(Arr::get(self::$error_codes, $error_code, "Unknown error"), $error_code);
         }
         return $result;
     }
 }
-
-if(!class_exists('Ptilz\Exceptions\JsonException')) {
-    class JsonException extends Exception {
-    }
-}
-
-if(!interface_exists('JsonSerializable')) {
-    /**
-     * Objects implementing JsonSerializable can customize their JSON representation when encoded with `json_encode()` or `Json::encode`.
-     */
-    interface JsonSerializable {
-        /**
-         * Serializes the object to a value that can be serialized natively by `json_encode()`.
-         * @return mixed Data which can be serialized by `json_encode()`, which is a value of any type other than a resource.
-         */
-        public function jsonSerialize();
-    }
-}
-

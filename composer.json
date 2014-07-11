@@ -11,5 +11,11 @@
     ],
     "require-dev": {
         "raveren/kint": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ptilz\\": "src/"
+        },
+        "files": ["src/functions.php"]
     }
 }

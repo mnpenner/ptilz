@@ -16,6 +16,6 @@
         "psr-4": {
             "Ptilz\\": "src/"
         },
-        "files": ["src/functions.php"]
+        "files": ["src/Functions.php"]
     }
 }

@@ -8,7 +8,7 @@ use Ptilz\Exceptions\ArgumentTypeException;
 use Ptilz\Exceptions\UnreachableException;
 use Ptilz\Internal\RawSql;
 
-class Sql {
+abstract class Sql {
     /** @var PDO|mysqli Default connection used for escaping values  */
     public static $defaultConnection = null;
 

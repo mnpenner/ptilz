@@ -35,7 +35,7 @@ class Arr {
     }
 
     /**
-     * Extract a single column from an array.
+     * Extract a single column from an array. Maintains parent key for associative arrays.
      *
      * @param array $array
      * @param int|string $key
@@ -43,11 +43,16 @@ class Arr {
      * @return array
      */
     public static function pluck(array $array, $key) {
-        $ret = array();
-        foreach($array as $k => $v) {
-            $ret[$k] = $v[$key];
+        if($array === []) return [];
+        if(self::isAssoc($array)) {
+            $ret = [];
+            foreach($array as $k => $v) {
+                $ret[$k] = $v[$key];
+            }
+            return $ret;
+        } else {
+            return array_column($array, $key);
         }
-        return $ret;
     }
 
     /**
@@ -101,14 +106,14 @@ class Arr {
      * @return array    Array of arrays
      */
     public static function zip() {
-        $result = array();
+        $result = [];
         $func_args = func_get_args();
-        $args = array_map('array_values', $func_args);
-        $min = min(array_map('count', $args));
-        for($i = 0; $i < $min; ++$i) {
-            $result[$i] = array();
-            foreach($args as $j => $arr) {
-                $result[$i][$j] = $arr[$i];
+        $keys = array_keys(call_user_func_array('self::merge', $func_args));
+
+        foreach($keys as $i) {
+            $result[$i] = [];
+            foreach($func_args as $j => $arr) {
+                $result[$i][$j] = self::get($arr, $i, null);
             }
         }
         return $result;
@@ -139,20 +144,63 @@ class Arr {
     }
 
 
-    public static function regroup(array $arr, $keys, $unset = false) {
-        $keys = (array)$keys;
+    /**
+     * Regroup an array by a key. For example, given array
+     *
+     *     $people = array(array('name'=>'Mark','role'=>'Dev'),array('name'=>'Nathan','role'=>'CSR'),array('name'=>'Jason','role'=>'CSR'),array('name'=>'Brian','role'=>'Dev'),);
+     *
+     * If you called `regroup($people,'role')`, you'd get:
+     *
+     *        array(
+     *            Dev ⇒ array(
+     *                0 ⇒ array(
+     *                    name ⇒ "Mark"
+     *                    role ⇒ "Dev"
+     *                )
+     *                1 ⇒ array(
+     *                    name ⇒ "Bryan"
+     *                    role ⇒ "Dev"
+     *                )
+     *            )
+     *            CSR ⇒ array(
+     *                0 ⇒ array(
+     *                    name ⇒ "Nathan"
+     *                    role ⇒ "CSR"
+     *                )
+     *                1 ⇒ array(
+     *                    name ⇒ "Jason"
+     *                    role ⇒ "CSR"
+     *                )
+     *            )
+     *        )
+     *
+     * @param array $arr Array to regroup
+     * @param array|int|string $keys Array key to group by
+     * @param bool $unset Unset the key to remove redundant information
+     * @param bool $flatten Flatten the last level so that it is a dictionary rather than a numeric array.
+     *
+     * @return array    Regrouped array
+     */
+    public static function regroup(array $arr, $keys, $unset = false, $flatten = false) {
+        if(!is_array($keys)) {
+            $keys = [$keys];
+        }
         $key = array_shift($keys);
 
         $ret = array();
         foreach($arr as $row) {
-            $k = $row[$key];
-            if(!isset($ret[$k])) $ret[$k] = array();
+            $i = $row[$key];
             if($unset) unset($row[$key]);
-            $ret[$k][] = $row;
+            if($flatten && !$keys) {
+                $ret[$i] = count($row) === 1 ? reset($row) : $row;
+            } else {
+                if(!isset($ret[$i])) $ret[$i] = [];
+                $ret[$i][] = $row;
+            }
         }
         if($keys) {
-            foreach($ret as $k => $row) {
-                $ret[$k] = self::regroup($row, $keys, $unset);
+            foreach($ret as $i => $row) {
+                $ret[$i] = self::regroup($row, $keys, $unset, $flatten);
             }
         }
         return $ret;
@@ -161,10 +209,28 @@ class Arr {
     /**
      * Concatenates one or more arrays. Values will never be overwritten. Result will have numeric indices.
      *
+     * @param array $array1
      * @return mixed
      */
-    public static function concat() {
+    public static function concat(array $array1) {
         return call_user_func_array('array_merge', array_map('array_values', func_get_args()));
+    }
+
+    /**
+     * Forces an associative merge, whether or not the array keys are numeric.
+     *
+     * @param $array1
+     * @return mixed
+     */
+    public static function merge(array $array1) {
+        $args = func_get_args();
+        $ret = array_shift($args);
+        foreach($args as $arr) {
+            foreach($arr as $k => $v) {
+                $ret[$k] = $v;
+            }
+        }
+        return $ret;
     }
 
     /**
@@ -173,13 +239,8 @@ class Arr {
      * @param $array
      * @return mixed
      */
-    public static function extend(&$array) {
-        $arrays = array_slice(func_get_args(), 1);
-        foreach($arrays as $arr) {
-            foreach($arr as $k => $v) {
-                $array[$k] = $v;
-            }
-        }
+    public static function extend(array &$array) {
+        $array = call_user_func_array('array_merge', func_get_args());
         return $array;
     }
 
@@ -200,17 +261,46 @@ class Arr {
     }
 
     /**
-     * Removes elements from array that do not pass the callback.
+     * Removes all elements from an array that do not pass the filter.
      *
-     * @param array $input
-     * @param callable $callback
+     * @param array $input Array to filter
+     * @param callable $callback A function with the signature function($value, $key)
+     * @return array
+     */
+    public static function filter(array $input, callable $callback = null) {
+        if($input === []) return [];
+        if($callback === null) {
+            $callback = function ($val, $key) {
+                return !in_array($val, [false, null, '', 0, []], true);
+            };
+        }
+        $assoc = self::isAssoc($input);
+        $ret = [];
+        foreach($input as $key => $val) {
+            if($callback($val, $key)) {
+                if($assoc) $ret[$key] = $val;
+                else $ret[] = $val;
+            }
+        }
+        return $ret;
+    }
+
+
+    /**
+     * Removes elements from array for which a callback returns true.
+     *
+     * @param array $input Array to filter
+     * @param callable $callback A function with the signature function($value, $key)
      * @return array
      */
     public static function remove(array $input, callable $callback) {
+        if($input === []) return [];
+        $assoc = self::isAssoc($input);
         $ret = [];
         foreach($input as $key => $val) {
             if(!$callback($val, $key)) {
-                $ret[$key] = $val;
+                if($assoc) $ret[$key] = $val;
+                else $ret[] = $val;
             }
         }
         return $ret;
@@ -223,6 +313,7 @@ class Arr {
      * @return bool
      */
     public static function isAssoc(array $arr) {
+        if($arr === []) return null;
         $i = 0;
         foreach($arr as $k => $v) {
             if($k !== $i) return true;
@@ -238,6 +329,7 @@ class Arr {
      * @return bool
      */
     public static function isNumeric(array $arr) {
+        if($arr === []) return null;
         $i = 0;
         foreach($arr as $k => $v) {
             if($k !== $i) return false;
@@ -247,23 +339,45 @@ class Arr {
     }
 
     /**
-     * Returns the first element in an array.
+     * Returns the value of the first element in the array.
      *
      * @param array $arr
      * @return mixed
      */
-    public static function first(array $arr) {
-        return reset($array);
+    public static function firstValue(array $arr) {
+        return reset($arr);
     }
 
     /**
-     * Returns the last element in an array
+     * Returns the key of the first element in an array.
      *
      * @param array $arr
      * @return mixed
      */
-    public static function last(array $arr) {
-        return end($array);
+    public static function firstKey(array $arr) {
+        reset($arr);
+        return key($arr);
+    }
+
+    /**
+     * Returns the value of the last element in an array
+     *
+     * @param array $arr
+     * @return mixed
+     */
+    public static function lastValue(array $arr) {
+        return end($arr);
+    }
+
+    /**
+     * Returns the key of the last element in an array
+     *
+     * @param array $arr
+     * @return mixed
+     */
+    public static function lastKey(array $arr) {
+        end($arr);
+        return key($arr);
     }
 
     /**
@@ -273,7 +387,7 @@ class Arr {
      * @return array
      */
     public static function flatten($array) {
-        $return = array();
+        $return = [];
 
         array_walk_recursive($array, function ($x) use (&$return) {
             $return[] = $x;

@@ -5,11 +5,11 @@ namespace Ptilz;
  * Internal class used to prevent escaping.
  * @internal
  */
-class BinaryString {
+class _RawSql {
     private $data;
 
-    function __construct($bin) {
-        $this->data = ($bin === null || $bin === '') ? "''" : '0x' . bin2hex($bin);
+    function __construct($str) {
+        $this->data = $str;
     }
 
     function __toString() {

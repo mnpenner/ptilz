@@ -5,7 +5,7 @@ namespace Ptilz;
  * Internal class used to prevent escaping.
  * @internal
  */
-class RawString {
+class _RawJson {
     private $data;
 
     function __construct($str) {

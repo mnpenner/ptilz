@@ -6,5 +6,4 @@ use Exception;
 /**
  * Thrown when a feature is not yet implemented.
  */
-class NotImplementedException extends Exception {
-}
+class NotImplementedException extends Exception {}

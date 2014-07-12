@@ -8,6 +8,7 @@ use Ptilz\Exceptions\NotImplementedException;
  * Functions for working with binary data
  */
 abstract class Bin {
+    private static $_unpackArgPrefix = "\036";
 
     public static function unpack(array $formatArray, $data, &$offset = 0) {
         $packArgs = [];
@@ -32,11 +33,11 @@ abstract class Bin {
                     | double
                 )
                 | (?<type>str) (?:\[ (?<len>[^\]]+) \])
+                | (?<type>@) (?<len>[-+]?\d+)
             )\z
             ~Amsx';
 
-        $invalidPrefix = "\036"; // added to elements that have an invalid name
-        $stripPrefix = false;
+        $doStrip = false;
 
         foreach($formatArray as $key => $type) {
             if(!preg_match($patt, $type, $m)) {
@@ -104,8 +105,7 @@ abstract class Bin {
                     if(preg_match('~\d+\z~A', $m['len'])) {
                         $strlen = (int)$m['len'];
                     } else {
-                        $packFormatStr = implode('/', $packArgs);
-                        Arr::extend($result, unpack($packFormatStr, $data));
+                        self::_doUnpack($result, $packArgs, $data, $doStrip);
                         $packArgs = ["@$offset"];
                         if(!array_key_exists($m['len'], $result)) {
                             throw new ArgumentException("Length value '$m[len]' not found for `$key`");
@@ -115,27 +115,40 @@ abstract class Bin {
                     $formatStr = 'a' . $strlen;
                     $offset += $strlen;
                     break;
+                case '@':
+                    if($m['len'][0] === '-' || $m['len'][0] === '+') {
+                        $offset += (int)$m['len'];
+                    } else {
+                        $offset = (int)$m['len'];
+                    }
+                    $packArgs[] = "@$offset";
+                    continue 2; // we don't want to add a name to this, skip over the junk below
                 default:
                     throw new NotImplementedException("Type '$m[type]' has not been implemented yet");
             }
 
             if(is_int($key) || preg_match('~\d~A', $key)) {
-                $key = $invalidPrefix . $key;
-                $stripPrefix = true;
+                $key = self::$_unpackArgPrefix . $key;
+                $doStrip = true;
             }
 
             $formatStr .= $key;
             $packArgs[] = $formatStr;
         }
 
-        $packFormatStr = implode('/', $packArgs);
-        Arr::extend($result, unpack($packFormatStr, $data));
-
-        if($stripPrefix) {
-            $result = Arr::stripKeyPrefix($result, $invalidPrefix, false);
-        }
-
+        self::_doUnpack($result, $packArgs, $data, $doStrip);
         return $result;
+    }
+
+    private static function _doUnpack(&$result, $packArgs, $binStr, &$doStrip) {
+        $formatStr = implode('/', $packArgs);
+//        echo "FORMAT: $packFormatStr\n";
+        $unpacked = unpack($formatStr, $binStr);
+        if($doStrip) {
+            $unpacked = Arr::stripKeyPrefix($unpacked, self::$_unpackArgPrefix, false);
+            $doStrip = false;
+        }
+        Arr::extend($result, $unpacked);
     }
 
     /**

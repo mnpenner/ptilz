@@ -56,7 +56,7 @@ class Sql {
     }
 
     public static function bin($str) {
-        return $str === null || $str === '' ? $str : new _RawSql('0x' . bin2hex($str));
+        return Str::isEmpty($str) ? $str : new _RawSql('0x' . bin2hex($str));
     }
 
     public static function escapeId($id, $forbidQualified = false) {

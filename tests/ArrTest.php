@@ -17,7 +17,7 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse(Arr::isNumeric([1 => 'a', 2 => 'b']));
         $this->assertFalse(Arr::isNumeric([1 => 'b', 0 => 'a']));
         $this->assertFalse(Arr::isNumeric(['a' => 1]));
-        $this->assertNull(Arr::isNumeric([]));
+        $this->assertTrue(Arr::isNumeric([]));
     }
 
     function testIsAssoc() {
@@ -26,7 +26,7 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(Arr::isAssoc([1 => 'a', 2 => 'b']));
         $this->assertTrue(Arr::isAssoc([1 => 'b', 0 => 'a']));
         $this->assertTrue(Arr::isAssoc(['a' => 1]));
-        $this->assertNull(Arr::isAssoc([]));
+        $this->assertFalse(Arr::isAssoc([]));
     }
 
     public static function isOdd($val) {
@@ -134,8 +134,8 @@ class ArrTest extends PHPUnit_Framework_TestCase {
             'd' => 4,
             'e' => 5,
         ];
-        $this->assertSame(['b' => 2, 'd' => 4], Arr::keys($arr, ['d', 'b']));
-        $this->assertSame(['d' => 4, 'b' => 2], Arr::keys($arr, ['d', 'b'], true));
+        $this->assertSame(['b' => 2, 'd' => 4], Arr::only($arr, ['d', 'b']));
+        $this->assertSame(['d' => 4, 'b' => 2], Arr::only($arr, ['d', 'b'], true));
     }
 
     function testPop() {
@@ -157,6 +157,16 @@ class ArrTest extends PHPUnit_Framework_TestCase {
             'c' => 3,
             'e' => 5,
         ],$arr);
+    }
+
+    function testKeysUnion() {
+        $this->assertSame(['a', 'b', 'c'], Arr::keysUnion(['a' => 1, 'b' => 2], ['b' => 2, 'c' => 3]));
+        $this->assertSame([0, 1, 2, 3], Arr::keysUnion([1, 2, 3], ['a', 'b', 'c'], ['W', 'X', 'Y', 'Z']));
+    }
+
+    function testKeysIntersection() {
+        $this->assertSame(['b'], Arr::keysIntersection(['a' => 1, 'b' => 2], ['b' => 2, 'c' => 3]));
+        $this->assertSame([0, 1, 2], Arr::keysIntersection([1, 2, 3], ['a', 'b', 'c'], ['W', 'X', 'Y', 'Z']));
     }
 
     function testZip() {
@@ -310,5 +320,31 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('A; B or C', Arr::readable(['A', 'B', 'C'], ' or ', '; '));
         $this->assertSame('A or B', Arr::readable(['A', 'B'], ' or ', '; ', true));
         $this->assertSame('A; B; or C', Arr::readable(['A', 'B', 'C'], ' or ', '; ', true));
+    }
+
+    function testTranspose() {
+        $mat = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+        ];
+        $trans = [
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+        ];
+        $this->assertSame($trans, Arr::transpose($mat));
+
+        $mat = [
+            'a' => [1 => 'a1', 2 => 'a2', 3 => 'a3'],
+            'b' => [1 => 'b1', 2 => 'b2', 3 => 'b3'],
+            'c' => [1 => 'c1', 2 => 'c2', 3 => 'c3']
+        ];
+        $trans = [
+            1 => ['a' => 'a1', 'b' => 'b1', 'c' => 'c1'],
+            2 => ['a' => 'a2', 'b' => 'b2', 'c' => 'c2'],
+            3 => ['a' => 'a3', 'b' => 'b3', 'c' => 'c3'],
+        ];
+        $this->assertSame($trans, Arr::transpose($mat));
     }
 }

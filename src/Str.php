@@ -2,7 +2,10 @@
 namespace Ptilz;
 use Exception;
 
-class Str {
+/**
+ * String helper methods.
+ */
+abstract class Str {
     public static function startsWith($haystack, $needle, $case_sensitive = true) {
         $substr = substr($haystack, 0, strlen($needle));
         return $case_sensitive ? $substr === $needle : mb_strtolower($substr) === mb_strtolower($needle);

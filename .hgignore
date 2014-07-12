@@ -1,0 +1,14 @@
+syntax: regexp
+
+# folders
+^vendor/
+
+# dotfiles
+(?<![^/])\.
+
+# extensions
+~$
+\.(tar\.gz|orig|pyc)$
+
+# special files
+(?<![^/])Thumbs\.db$

@@ -1,6 +1,7 @@
 <?php
 namespace Ptilz;
 use Ptilz\Exceptions\JsonException;
+use Ptilz\Internal\RawJson;
 
 class Json {
     /**
@@ -25,7 +26,7 @@ class Json {
             }
         }
         if(is_object($var)) {
-            if($var instanceof _RawJson) {
+            if($var instanceof RawJson) {
                 return (string)$var;
             }
             if($var instanceof JsonSerializable) {
@@ -39,10 +40,10 @@ class Json {
      * Returns a "literal" or "raw" value which will not be escaped by Json::encode
      *
      * @param string $str Raw value (should be valid JavaScript)
-     * @return _RawJson
+     * @return RawJson
      */
     public static function raw($str) {
-        return new _RawJson($str);
+        return new RawJson($str);
     }
 
     private static $error_codes = [

@@ -1,11 +1,11 @@
 <?php
-namespace Ptilz;
+namespace Ptilz\Internal;
 
 /**
  * Internal class used to prevent escaping.
  * @internal
  */
-class _RawJson {
+class RawJson {
     private $data;
 
     function __construct($str) {

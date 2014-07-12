@@ -64,7 +64,7 @@ class Arr {
      *
      * @return array
      */
-    public static function keys(array $array, array $keys, $reorder = false) {
+    public static function only(array $array, array $keys, $reorder = false) {
         if($reorder) {
             $ret = array();
             foreach($keys as $key) {
@@ -108,7 +108,7 @@ class Arr {
     public static function zip() {
         $result = [];
         $func_args = func_get_args();
-        $keys = array_keys(call_user_func_array('self::merge', $func_args));
+        $keys = call_user_func_array('self::keysUnion', $func_args);
 
         foreach($keys as $i) {
             $result[$i] = [];
@@ -270,9 +270,7 @@ class Arr {
     public static function filter(array $input, callable $callback = null) {
         if($input === []) return [];
         if($callback === null) {
-            $callback = function ($val, $key) {
-                return !in_array($val, [false, null, '', 0, []], true);
-            };
+            $callback = ['Ptilz\Obj','isTruthy'];
         }
         $assoc = self::isAssoc($input);
         $ret = [];
@@ -313,7 +311,6 @@ class Arr {
      * @return bool
      */
     public static function isAssoc(array $arr) {
-        if($arr === []) return null;
         $i = 0;
         foreach($arr as $k => $v) {
             if($k !== $i) return true;
@@ -329,7 +326,6 @@ class Arr {
      * @return bool
      */
     public static function isNumeric(array $arr) {
-        if($arr === []) return null;
         $i = 0;
         foreach($arr as $k => $v) {
             if($k !== $i) return false;
@@ -411,5 +407,46 @@ class Arr {
         $ret = implode($glue, $pieces);
         if($serial) $ret .= rtrim($glue);
         return $ret . $last . $last_el;
+    }
+
+    /**
+     * Reflect a matrix over its main diagonal, switching the rows and columns.
+     *
+     * @param array $mat
+     * @return array|mixed
+     */
+    public static function transpose(array $mat) {
+        if(self::isNumeric($mat)) {
+            array_unshift($mat, null);
+            return call_user_func_array('array_map', $mat);
+        } else {
+            $T = [];
+            foreach($mat as $m => $row) {
+                foreach($row as $n => $val) {
+                    $T[$n][$m] = $val;
+                }
+            }
+            return $T;
+        }
+    }
+
+    /**
+     * Returns the union of the keys found in each input array.
+     *
+     * @param array $array1
+     * @return array
+     */
+    public static function keysUnion(array $array1){
+        return array_keys(call_user_func_array('self::merge', func_get_args()));
+    }
+
+    /**
+     * Returns the intersection of the keys found in each input array.
+     *
+     * @param array $array1
+     * @return array
+     */
+    public static function keysIntersection(array $array1) {
+        return array_keys(call_user_func_array('array_intersect_key', func_get_args()));
     }
 }

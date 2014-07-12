@@ -2,7 +2,7 @@
 namespace Ptilz;
 use Exception;
 
-class Path {
+abstract class Path {
     public static function join() {
         return self::normalize(implode(DIRECTORY_SEPARATOR, func_get_args()));
     }
@@ -25,6 +25,7 @@ class Path {
     }
 
     public static function isAbsolute($path) {
+        // fixme: Windows paths needs improvements
         if($path === null || $path === '') throw new Exception("Empty path");
         return $path[0] === DIRECTORY_SEPARATOR || preg_match('~\A[A-Z]:(?![^/\\\\])~i', $path) > 0;
     }

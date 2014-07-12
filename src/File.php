@@ -13,7 +13,7 @@ class File {
      */
     public function unique($dir, $ext = '', $chars='0123456789abcdefghijklmnopqrstuvwxyz_-') {
         for($i = 0; $i < 1000; ++$i) {
-            $path = Path::join($dir, Math::base_encode(Math::bchexdec(uniqid()), null, $chars));
+            $path = Path::join($dir, Math::decToAnyBase(Math::hexToDec(uniqid()), null, $chars));
             if($ext) $path .= '.' . $ext;
             $fp = @fopen($path, 'x');
             if($fp !== false) return new static($fp, $path);

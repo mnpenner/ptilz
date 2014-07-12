@@ -35,5 +35,8 @@ class BinTest extends PHPUnit_Framework_TestCase {
 
         $test1 = Bin::unpack(['str[4]', '-uint16'], $fileContents, $offset);
         $this->assertSame(["PK\x03\x04", 10], $test1, "Unpack using numeric array");
+
+        $result = Bin::unpack(['@26', '0len' => '-uint16', '@+2', 'name' => 'str[0len]'], $fileContents);
+        $this->assertSame('test2.txt', $result['name'], "Offsets and weird key names");
     }
 }

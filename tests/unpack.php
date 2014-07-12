@@ -7,6 +7,8 @@ $zip = file_get_contents('unpack.zip');
 
 //var_dump(unpack('a4',"PK"));
 
+$offset = 0;
+
 var_dump(Bin::unpack([
     'signature' => 'str[4]',
     'version' => '-uint16',
@@ -21,4 +23,6 @@ var_dump(Bin::unpack([
     'extra_field_len' => '-uint16',
     'filename' => 'str[$filename_len]',
     'extra_field' => 'str[$extra_field_len]',
-],$zip));
+],$zip,$offset));
+
+var_dump($offset);

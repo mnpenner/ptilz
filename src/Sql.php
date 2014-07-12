@@ -60,6 +60,13 @@ abstract class Sql {
         return Str::isEmpty($str) ? $str : new RawSql('0x' . bin2hex($str));
     }
 
+    /**
+     * Escape an identifier.
+     *
+     * @param string $id Identifier such as column or table name.
+     * @param bool $forbidQualified If true, identifiers containing dots will be treated as a single unqualified identifier (e.g. `table.column`). If false, the $id string will be split into a qualified identifier (e.g. `table`.`column`).
+     * @return mixed|string
+     */
     public static function escapeId($id, $forbidQualified = false) {
         if($id instanceof RawSql) return (string)$id;
         if(is_array($id)) {

@@ -3,8 +3,6 @@ namespace Ptilz\Exceptions;
 
 use Exception;
 use Ptilz\Arr;
-use Ptilz\Exceptions\ArgumentException;
-use Ptilz\Str;
 
 /**
  * Thrown when an argument is of the wrong type.

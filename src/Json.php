@@ -1,15 +1,15 @@
 <?php
 namespace Ptilz;
-use Ptilz\Exceptions\JsonException;
+use Ptilz\Exceptions\InvalidOperationException;
 use Ptilz\Internal\RawJson;
 
-class Json {
+abstract class Json {
     /**
      * JSON-encodes a value. Escaping can be prevented on a sub-element via Json::literal.
      *
      * @param mixed $var The value being encoded. Can be any type except a resource.
      * @param int $options Options passed to `json_encode`. Everything except `JSON_PRETTY_PRINT` should work.
-     * @throws JsonException
+     * @throws InvalidOperationException
      * @return string
      * @see http://us3.php.net/manual/en/json.constants.php
      */
@@ -67,13 +67,13 @@ class Json {
      * @param int $depth User specified recursion depth.
      * @param int $options Bitmask of JSON decode options.
      * @return mixed
-     * @throws Exceptions\JsonException
+     * @throws Exceptions\InvalidOperationException
      */
     public static function decode($str, $assoc = true, $depth = 512, $options = 0) {
         $result = json_decode($str, $assoc, $depth, $options);
         $error_code = json_last_error();
         if($error_code !== JSON_ERROR_NONE) {
-            throw new JsonException(Arr::get(self::$error_codes, $error_code, "Unknown error"), $error_code);
+            throw new InvalidOperationException(Arr::get(self::$error_codes, $error_code, "Unknown error"), $error_code);
         }
         return $result;
     }

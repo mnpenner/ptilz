@@ -1,6 +1,7 @@
 <?php
 namespace Ptilz;
 use Exception;
+use Ptilz\Exceptions\ArgumentEmptyException;
 
 abstract class Path {
     public static function join() {
@@ -26,7 +27,7 @@ abstract class Path {
 
     public static function isAbsolute($path) {
         // fixme: Windows paths needs improvements
-        if($path === null || $path === '') throw new Exception("Empty path");
+        if(Str::isEmpty($path)) throw new ArgumentEmptyException('path');
         return $path[0] === DIRECTORY_SEPARATOR || preg_match('~\A[A-Z]:(?![^/\\\\])~i', $path) > 0;
     }
 

@@ -9,12 +9,11 @@ use Ptilz\Exceptions\NotImplementedException;
  */
 abstract class Bin {
 
-    public static function unpack(array $formatArray, $data) {
+    public static function unpack(array $formatArray, $data, &$offset=0) {
         $packArgs = [];
+        if($offset!==0) $packArgs[] = "@$offset";
         $result = [];
-        $offset = 0;
-
-//        var_dump($format);
+        $sizeOfInt = strlen(decbin(~0))/8; // not sure if there's a better way to find this out
 
         $patt = '~
             (?|
@@ -52,11 +51,11 @@ abstract class Bin {
                     break;
                 case 'int':
                     $formatStr = 'i';
-                    // $offset += ???
+                    $offset += $sizeOfInt;
                     break;
                 case 'uint':
                     $formatStr = 'I';
-                    // $offset += ???
+                    $offset += $sizeOfInt;
                     break;
                 case 'int16':
                     $formatStr = 's';
@@ -92,11 +91,11 @@ abstract class Bin {
                     break;
                 case 'float':
                     $formatStr = 'f';
-                    // $offset += ???
+                    $offset += $sizeOfInt;
                     break;
                 case 'double':
                     $formatStr = 'd';
-                    // $offset += ???
+                    $offset += 2*$sizeOfInt;
                     break;
                 case 'str':
                     if($m['len'][0] === '$') {

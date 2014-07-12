@@ -1,19 +1,23 @@
 <?php
 namespace Ptilz;
-use Exception;
+use Ptilz\Exceptions\ArgumentOutOfRangeException;
 
 /**
  * String helper methods.
  */
 abstract class Str {
-    public static function startsWith($haystack, $needle, $case_sensitive = true) {
+    public static function startsWith($haystack, $needle, $case_insensitive = false) {
         $substr = substr($haystack, 0, strlen($needle));
-        return $case_sensitive ? $substr === $needle : mb_strtolower($substr) === mb_strtolower($needle);
+        return $case_insensitive
+            ? mb_strtolower($substr) === mb_strtolower($needle)
+            : $substr === $needle;
     }
 
-    public static function endsWith($haystack, $needle, $case_sensitive = true) {
+    public static function endsWith($haystack, $needle, $case_insensitive = false) {
         $substr = substr($haystack, -strlen($needle));
-        return $case_sensitive ? $substr === $needle : mb_strtolower($substr) === mb_strtolower($needle);
+        return $case_insensitive
+            ? mb_strtolower($substr) === mb_strtolower($needle)
+            : $substr === $needle;
     }
 
     public static function phpTemplate($__file__, $__vars__) {
@@ -38,7 +42,7 @@ abstract class Str {
      * @param $str
      * @return int
      */
-    private static function strlen($str) {
+    public static function length($str) {
         return function_exists('mb_strlen') ? mb_strlen($str) : preg_match_all("/./us", $str);
     }
 
@@ -105,10 +109,10 @@ abstract class Str {
      * @param int $len String length
      * @param string $chars Characters to choose from
      * @return string Random string
-     * @throws Exception
+     * @throws ArgumentOutOfRangeException
      */
     public static function random($len, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') {
-        if($len < 0) throw new Exception("Length must be non-negative");
+        if($len < 0) throw new ArgumentOutOfRangeException('len',"Length must be non-negative");
         $str = '';
         $randMax = strlen($chars) - 1;
 
@@ -123,11 +127,11 @@ abstract class Str {
      * Generates a cryptographically secure random string from the alphabet ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_
      *
      * @param $len String length
-     * @throws Exception
+     * @throws ArgumentOutOfRangeException
      * @return string
      */
     public static function securand($len) {
-        if($len < 0) throw new Exception("Length must be non-negative");
+        if($len < 0) throw new ArgumentOutOfRangeException('len',"Length must be non-negative");
         return strtr(substr(base64_encode(openssl_random_pseudo_bytes(ceil($len * 3 / 4))), 0, $len), '+/', '-_');
     }
 

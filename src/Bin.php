@@ -9,11 +9,11 @@ use Ptilz\Exceptions\NotImplementedException;
  */
 abstract class Bin {
 
-    public static function unpack(array $formatArray, $data, &$offset=0) {
+    public static function unpack(array $formatArray, $data, &$offset = 0) {
         $packArgs = [];
-        if($offset!==0) $packArgs[] = "@$offset";
+        if($offset !== 0) $packArgs[] = "@$offset";
         $result = [];
-        $sizeOfInt = strlen(decbin(~0))/8; // not sure if there's a better way to find this out
+        $sizeOfInt = strlen(decbin(~0)) / 8; // not sure if there's a better way to find this out
 
         $patt = '~
             (?|
@@ -31,13 +31,16 @@ abstract class Bin {
                     | float
                     | double
                 )
-                | (?<type>str) (?:\[ (?<len>\$\w+|\d+) \])
+                | (?<type>str) (?:\[ (?<len>[^\]]+) \])
             )\z
             ~Amsx';
 
+        $invalidPrefix = "\036"; // added to elements that have an invalid name
+        $stripPrefix = false;
+
         foreach($formatArray as $key => $type) {
             if(!preg_match($patt, $type, $m)) {
-                throw new ArgumentException('format',"`$key` has an unrecognized value of '$type'");
+                throw new ArgumentException('format', "`$key` has an unrecognized type '$type'");
             }
 
             switch($m['type']) {
@@ -95,20 +98,19 @@ abstract class Bin {
                     break;
                 case 'double':
                     $formatStr = 'd';
-                    $offset += 2*$sizeOfInt;
+                    $offset += 2 * $sizeOfInt;
                     break;
                 case 'str':
-                    if($m['len'][0] === '$') {
-                        $packFormatStr = implode('/',$packArgs);
-                        Arr::extend($result, unpack($packFormatStr,$data));
-                        $packArgs = ["@$offset"];
-                        $lenKey = substr($m['len'],1);
-                        if(!array_key_exists($lenKey,$result)) {
-                            throw new ArgumentException("Length value $m[len] has not been read in (yet) for `$key`");
-                        }
-                        $strlen = $result[$lenKey];
-                    } else {
+                    if(preg_match('~\d+\z~A', $m['len'])) {
                         $strlen = (int)$m['len'];
+                    } else {
+                        $packFormatStr = implode('/', $packArgs);
+                        Arr::extend($result, unpack($packFormatStr, $data));
+                        $packArgs = ["@$offset"];
+                        if(!array_key_exists($m['len'], $result)) {
+                            throw new ArgumentException("Length value '$m[len]' not found for `$key`");
+                        }
+                        $strlen = $result[$m['len']];
                     }
                     $formatStr = 'a' . $strlen;
                     $offset += $strlen;
@@ -117,17 +119,32 @@ abstract class Bin {
                     throw new NotImplementedException("Type '$m[type]' has not been implemented yet");
             }
 
-            if(is_string($key)) {
-                $formatStr .= $key;
+            if(is_int($key) || preg_match('~\d~A', $key)) {
+                $key = $invalidPrefix . $key;
+                $stripPrefix = true;
             }
 
+            $formatStr .= $key;
             $packArgs[] = $formatStr;
         }
 
-        $packFormatStr = implode('/',$packArgs);
-        Arr::extend($result, unpack($packFormatStr,$data));
+        $packFormatStr = implode('/', $packArgs);
+        Arr::extend($result, unpack($packFormatStr, $data));
 
-//        echo "PACK FORMAT: $packFormatStr\n";
+        if($stripPrefix) {
+            $result = Arr::stripKeyPrefix($result, $invalidPrefix, false);
+        }
+
         return $result;
+    }
+
+    /**
+     * Returns the length of a string in bytes. Immune to `mbstring.func_overload`.
+     *
+     * @param $bin
+     * @return int
+     */
+    public static function length($bin) {
+        return function_exists('mb_strlen') ? mb_strlen($bin, '8bit') : strlen($bin);
     }
 }

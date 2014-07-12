@@ -449,4 +449,47 @@ class Arr {
     public static function keysIntersection(array $array1) {
         return array_keys(call_user_func_array('array_intersect_key', func_get_args()));
     }
+
+    /**
+     * Applies the callback to the elements of the given arrays
+     *
+     * @param array|\Traversable $iter
+     * @param callable $callback
+     * @return array
+     */
+    public static function map($iter, callable $callback) {
+        $outArr = [];
+        foreach($iter as $key => $val) {
+            $outVal = $callback($val, $key);
+            if($outVal instanceof \Generator) {
+                foreach($outVal as $ok => $ov) {
+                    $outArr[$ok] = $ov;
+                }
+            } else {
+                $outArr[$key] = $outVal;
+            }
+        }
+        return $outArr;
+    }
+
+    /**
+     * Remove a prefix from all keys.
+     *
+     * @param array $arr
+     * @param string $prefix
+     * @param bool $unset Unset the element if it does not start with the prefix
+     * @return array
+     */
+    public static function stripKeyPrefix(array $arr, $prefix, $unset=false) {
+        $result = [];
+        $prefixLen = strlen($prefix);
+        foreach($arr as $k=>$v) {
+            if(Str::startsWith($k,$prefix)) {
+                $result[substr($k,$prefixLen)] = $v;
+            } elseif(!$unset) {
+                $result[$k] = $v;
+            }
+        }
+        return $result;
+    }
 }

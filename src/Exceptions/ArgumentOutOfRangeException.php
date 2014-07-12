@@ -5,11 +5,11 @@ namespace Ptilz\Exceptions;
 use Exception;
 
 /**
- * Thrown when one of the arguments provided to a method is not valid.
+ * Thrown when an argument is incorrectly formatted.
  */
-class ArgumentException extends Exception {
+class ArgumentOutOfRangeException extends Exception {
     public function __construct($paramName, $details=null, $code = 0, Exception $previous = null) {
-        $message = "Argument `$paramName` had an invalid value";
+        $message = "Argument `$paramName` is outside of the valid range";
         if($details) {
             $message .= ': '.$details;
         }

@@ -160,4 +160,15 @@ abstract class Bin {
     public static function length($bin) {
         return function_exists('mb_strlen') ? mb_strlen($bin, '8bit') : strlen($bin);
     }
+
+    /**
+     * Determines if an integer value contains a flag, i.e., has that bit set.
+     *
+     * @param int $val Value
+     * @param int $flag Flag
+     * @return bool
+     */
+    public static function hasFlag($val, $flag) {
+        return ($val & $flag) === $flag;
+    }
 }

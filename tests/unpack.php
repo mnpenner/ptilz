@@ -5,7 +5,8 @@ require __DIR__.'/../vendor/autoload.php';
 
 $zip = file_get_contents(__DIR__.'/unpack.zip');
 
-//var_dump(unpack('a4',"PK"));
+var_dump(unpack('a4',"PK\0\0"));
+exit;
 
 $offset = 0;
 

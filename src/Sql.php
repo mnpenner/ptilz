@@ -9,8 +9,8 @@ use Ptilz\Exceptions\UnreachableException;
 use Ptilz\Internal\RawSql;
 
 abstract class Sql {
-    /** @var PDO|mysqli Default connection used for escaping values  */
-    public static $defaultConnection = null;
+    /** @var PDO|mysqli|resource Connection used for escaping values  */
+    public static $connection = null;
 
     public static function escapeLike($str) {
         return str_replace(['%', '_'], ['\\%', '\\_'], $str);
@@ -18,11 +18,10 @@ abstract class Sql {
 
     /**
      * @param mixed $value
-     * @param PDO|mysqli $conn
      * @throws Exceptions\ArgumentTypeException
      * @return string
      */
-    public static function quote($value, $conn = null) {
+    public static function quote($value) {
         if(is_null($value)) return 'NULL';
         elseif(is_bool($value)) return $value ? '1' : '0';
         elseif(is_int($value) || is_float($value) || $value instanceof RawSql) return (string)$value;
@@ -37,13 +36,17 @@ abstract class Sql {
             }
             return '(' . implode(', ', array_map(__METHOD__, $value)) . ')';
         } elseif(is_string($value)) {
-            if($conn === null) $conn = self::$defaultConnection;
-            if($conn === null) return "'" . str_replace(["'", '\\', "\0", "\t", "\n", "\r", "\x08", "\x1a"], ["''", '\\\\', '\\0', '\\t', '\\n', '\\r', '\\b', '\\Z'], $value) . "'";
-            if($conn instanceof PDO) return $conn->quote($value, PDO::PARAM_STR);
-            if($conn instanceof mysqli) $conn->real_escape_string($value);
+            if(self::$connection === null) return "'" . str_replace(["'", '\\', "\0", "\t", "\n", "\r", "\x08", "\x1a"], ["''", '\\\\', '\\0', '\\t', '\\n', '\\r', '\\b', '\\Z'], $value) . "'";
+            if(self::$connection instanceof PDO) return self::$connection->quote($value, PDO::PARAM_STR);
+            if(self::$connection instanceof mysqli) self::$connection->real_escape_string($value);
+            if(self::isMySqlLink(self::$connection)) return "'" . mysql_real_escape_string($value, self::$connection) . "'";
             throw new ArgumentTypeException('conn', 'PDO|mysqli');
         }
         throw new ArgumentTypeException('value', 'string');
+    }
+
+    public static function isMySqlLink($resource) {
+        return is_resource($resource) && get_resource_type($resource) === 'mysql link';
     }
 
     /**

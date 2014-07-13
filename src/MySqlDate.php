@@ -1,9 +1,11 @@
 <?php
 namespace Ptilz;
 
-class Date {
-    const MYSQL_DATETIME_FORMAT = 'Y-m-d H:i:s';
-    const MYSQL_DATE_FORMAT = 'Y-m-d';
+// fixme: these date functions are all MySQL-specific and have nothing to do with the PHP DateTime object (confusing!)... delete or rename this class
+
+class MySqlDate {
+    const DATETIME_FORMAT = 'Y-m-d H:i:s';
+    const DATE_FORMAT = 'Y-m-d';
 
     /**
      * @param int $timestamp The optional timestamp parameter is an integer Unix timestamp that defaults to the current local time if a timestamp is not given. In other words, it defaults to the value of time().
@@ -12,7 +14,7 @@ class Date {
      */
     public static function unixToDateTime($timestamp = null) {
         if($timestamp === null) $timestamp = time();
-        return date(self::MYSQL_DATETIME_FORMAT, $timestamp);
+        return date(self::DATETIME_FORMAT, $timestamp);
     }
 
     /**

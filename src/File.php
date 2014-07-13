@@ -1,6 +1,10 @@
 <?php
 namespace Ptilz;
 
+use Exception;
+use Ptilz\Exceptions\ArgumentTypeException;
+use Ptilz\Exceptions\InvalidOperationException;
+
 class File {
     /**
      * Create a file with a unique random filename in the given directory and return its file handle.
@@ -8,23 +12,23 @@ class File {
      * @param string $dir Directory to create file in
      * @param string $ext Optional extension
      * @param string $chars Character set to choose filename from
-     * @throws Exception
+     * @throws Exceptions\InvalidOperationException
      * @return File
      */
-    public function unique($dir, $ext = '', $chars='0123456789abcdefghijklmnopqrstuvwxyz_-') {
+    public static function mkunique($dir, $ext = '', $chars='0123456789abcdefghijklmnopqrstuvwxyz_-') {
         for($i = 0; $i < 1000; ++$i) {
-            $path = Path::join($dir, Math::decToAnyBase(Math::hexToDec(uniqid()), null, $chars));
+            $path = Path::join($dir, Str::random(8, $chars));
             if($ext) $path .= '.' . $ext;
             $fp = @fopen($path, 'x');
             if($fp !== false) return new static($fp, $path);
         }
-        throw new Exception("Could not create unique file");
+        throw new InvalidOperationException("Could not create unique file");
     }
 
     /**
      * Creates a temporary file
      *
-     *  Creates a temporary file with a unique name in read-write (w+) mode and returns a file handle .
+     * Creates a temporary file with a unique name in read-write (w+) mode and returns a file handle.
      *
      * The file is automatically removed when closed (for example, by calling fclose(), or when there are no remaining references to the file handle returned by tmpfile()), or when the script ends.
      *
@@ -44,18 +48,21 @@ class File {
     /**
      * @param string|resource $filename Filename to open/create or an existing file pointer resource
      * @param string $mode Mode to open file with or filename for opened stream
-     * @throws Exception
+     * @throws Exceptions\ArgumentTypeException
+     * @throws Exceptions\InvalidOperationException
+     *
+     * @fixme: split this in to two static constructors
      */
     public function __construct($filename = null, $mode = null) {
         if(is_resource($filename)) {
             $this->fp = $filename;
             $this->path = $mode ?: stream_get_meta_data($filename)['uri'];
         } elseif(is_string($filename)) {
-            $this->fp = fopen($filename, $mode ? : 'c+');
-            if($this->fp === false) throw new Exception("Could open file '$filename' in mode '$mode'");
+            $this->fp = fopen($filename, $mode ?: 'c+');
+            if($this->fp === false) throw new InvalidOperationException("Could open file '$filename' in mode '$mode'");
             $this->path = Path::resolve($filename);
         } else {
-            throw new Exception("Unsupported type for first argument '".Dbg::getType($filename)."'");
+            throw new ArgumentTypeException("Unsupported type for first argument '".Dbg::getType($filename)."'");
         }
     }
 

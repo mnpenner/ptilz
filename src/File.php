@@ -15,10 +15,10 @@ class File {
      * @throws Exceptions\InvalidOperationException
      * @return File
      */
-    public static function mkunique($dir, $ext = '', $chars='0123456789abcdefghijklmnopqrstuvwxyz_-') {
+    public static function createUnique($dir, $ext = '', $chars='0123456789abcdefghijklmnopqrstuvwxyz_-') {
         for($i = 0; $i < 1000; ++$i) {
-            $path = Path::join($dir, Str::random(8, $chars));
-            if($ext) $path .= '.' . $ext;
+            $path = Path::resolve($dir, Str::random(12, $chars));
+            if(!Str::isEmpty($ext)) $path .= '.' . ltrim($ext,'.');
             $fp = @fopen($path, 'x');
             if($fp !== false) return new static($fp, $path);
         }
@@ -36,8 +36,8 @@ class File {
      *
      * @return static
      */
-    public function tmp() {
-        return new static(tmpfile());
+    public static function temporary() {
+        return self::fromResource(tmpfile());
     }
 
     /** @var resource File pointer */
@@ -45,25 +45,67 @@ class File {
     /** @var string Absolute file path */
     protected $path;
 
+    private function __construct($fp, $path) {
+        $this->fp = $fp;
+        $this->path = $path;
+    }
+
     /**
-     * @param string|resource $filename Filename to open/create or an existing file pointer resource
-     * @param string $mode Mode to open file with or filename for opened stream
-     * @throws Exceptions\ArgumentTypeException
-     * @throws Exceptions\InvalidOperationException
-     *
-     * @fixme: split this in to two static constructors
+     * @param resource $fp File pointer as returned by fopen
+     * @param string $path File path (optional)
+     * @return static
      */
-    public function __construct($filename = null, $mode = null) {
-        if(is_resource($filename)) {
-            $this->fp = $filename;
-            $this->path = $mode ?: stream_get_meta_data($filename)['uri'];
-        } elseif(is_string($filename)) {
-            $this->fp = fopen($filename, $mode ?: 'c+');
-            if($this->fp === false) throw new InvalidOperationException("Could open file '$filename' in mode '$mode'");
-            $this->path = Path::resolve($filename);
-        } else {
-            throw new ArgumentTypeException("Unsupported type for first argument '".Dbg::getType($filename)."'");
-        }
+    public static function fromResource($fp, $path = null) {
+        if(Str::isEmpty($path)) $path = stream_get_meta_data($fp)['uri'];
+        else $path = Path::resolve($path);
+        return new static($fp, $path);
+    }
+
+    public static function open($path, $mode){
+        $path = Path::resolve($path);
+        $fp = @fopen($path, $mode);
+        if($fp === false) throw new InvalidOperationException("Could open file '$path' in mode '$mode'");
+        return new static($fp, $path);
+    }
+
+    /**
+     * Open a file for reading.
+     *
+     * @param string $path
+     * @return \Ptilz\File
+     */
+    public static function openRead($path) {
+        return self::open($path, 'r');
+    }
+
+    /**
+     * Open a file for writing.
+     *
+     * @param string $path
+     * @return \Ptilz\File
+     */
+    public static function openWrite($path) {
+        return self::open($path, 'w');
+    }
+
+    /**
+     * Open a file for writing; place the file pointer at the end of the file.
+     *
+     * @param string $path
+     * @return \Ptilz\File
+     */
+    public static function openAppend($path) {
+        return self::open($path, 'a');
+    }
+
+    /**
+     * Create a new file for writing. If it already exists, throw an exception.
+     *
+     * @param string $path
+     * @return \Ptilz\File
+     */
+    public static function create($path) {
+        return self::open($path, 'x');
     }
 
     /**
@@ -123,20 +165,6 @@ class File {
      */
     public function gets($length = null) {
         return fgets($this->fp, $length);
-    }
-
-    /**
-     * Gets line from file pointer and strip HTML tags
-     *
-     * Identical to gets(), except that getss() attempts to strip any NUL bytes, HTML and PHP tags from the text it reads.
-     *
-     * @param int $length            Length of the data to be retrieved.
-     * @param string $allowable_tags Specify tags which should not be stripped.
-     * @return string Returns a string of up to length - 1 bytes read from the file pointed to by handle, with all HTML and PHP code stripped.
-     *                               If an error occurs, returns FALSE.
-     */
-    public function getss($length = null, $allowable_tags = null) {
-        return fgetss($this->fp, $length, $allowable_tags);
     }
 
     /**
@@ -200,10 +228,13 @@ class File {
      * - if the stream is read buffered and it does not represent a plain file, at most one read of up to a number of bytes equal to the chunk size (usually 8192) is made; depending on the previously buffered data, the size of the returned data may be larger than the chunk size.
      *
      * @param int $length Up to length number of bytes read.
+     * @throws Exceptions\InvalidOperationException
      * @return string Returns the read string or FALSE on failure.
      */
     public function read($length) {
-        return fread($this->fp, $length);
+        $result = fread($this->fp, $length);
+        if($result === false) throw new InvalidOperationException("Could not read $length bytes from file $this->path");
+        return $result;
     }
 
     /**
@@ -291,6 +322,24 @@ class File {
      * @return int The number of bytes written, or FALSE on error.
      */
     public function write($string, $length = null) {
-        return fwrite($this->fp, $string, $length);
+        return $length === null  // can't pass `null` as length arg, it's treated like 0
+            ? fwrite($this->fp, $string)
+            : fwrite($this->fp, $string, $length);
+    }
+
+    /**
+     * Reads a file line by line.
+     *
+     * @param int $bufferSize Maximum length of a line in bytes
+     * @throws Exceptions\InvalidOperationException
+     * @return \Generator
+     */
+    public function lines($bufferSize = 4096) {
+        while(($buffer = fgets($this->fp, $bufferSize)) !== false) {
+            yield rtrim($buffer);
+        }
+        if(!feof($this->fp)) {
+            throw new InvalidOperationException("Failed to read line");
+        }
     }
 }

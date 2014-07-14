@@ -145,34 +145,9 @@ class Arr {
 
 
     /**
-     * Regroup an array by a key. For example, given array
+     * Regroup an array by a key.
      *
-     *     $people = array(array('name'=>'Mark','role'=>'Dev'),array('name'=>'Nathan','role'=>'CSR'),array('name'=>'Jason','role'=>'CSR'),array('name'=>'Brian','role'=>'Dev'),);
-     *
-     * If you called `regroup($people,'role')`, you'd get:
-     *
-     *        array(
-     *            Dev ⇒ array(
-     *                0 ⇒ array(
-     *                    name ⇒ "Mark"
-     *                    role ⇒ "Dev"
-     *                )
-     *                1 ⇒ array(
-     *                    name ⇒ "Bryan"
-     *                    role ⇒ "Dev"
-     *                )
-     *            )
-     *            CSR ⇒ array(
-     *                0 ⇒ array(
-     *                    name ⇒ "Nathan"
-     *                    role ⇒ "CSR"
-     *                )
-     *                1 ⇒ array(
-     *                    name ⇒ "Jason"
-     *                    role ⇒ "CSR"
-     *                )
-     *            )
-     *        )
+     * See unit test ArrTest::testRegroup for examples.
      *
      * @param array $arr Array to regroup
      * @param array|int|string $keys Array key to group by
@@ -500,10 +475,10 @@ class Arr {
     /**
      * Wraps each element in a before and after string.
      *
-     * @param array       $arr
-     * @param string      $before
-     * @param string      $after
-     * @param null|string $glue
+     * @param string[]    $arr    Array of strings to wrap
+     * @param string      $before Before string
+     * @param string      $after  After string
+     * @param null|string $glue   String used to join each wrapped element, or null to return an unjoined array
      * @return string|array A string if glue is provided, otherwise an array
      */
     public static function wrap(array $arr, $before, $after, $glue = null) {

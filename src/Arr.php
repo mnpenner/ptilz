@@ -463,7 +463,11 @@ class Arr {
             $outVal = $callback($val, $key);
             if($outVal instanceof \Generator) {
                 foreach($outVal as $ok => $ov) {
-                    $outArr[$ok] = $ov;
+                    if(is_int($ok)) {
+                        $outArr[] = $ov;
+                    } else {
+                        $outArr[$ok] = $ov;
+                    }
                 }
             } else {
                 $outArr[$key] = $outVal;
@@ -480,12 +484,12 @@ class Arr {
      * @param bool $unset Unset the element if it does not start with the prefix
      * @return array
      */
-    public static function stripKeyPrefix(array $arr, $prefix, $unset=false) {
+    public static function removeKeyPrefix(array $arr, $prefix, $unset = false) {
         $result = [];
         $prefixLen = strlen($prefix);
-        foreach($arr as $k=>$v) {
-            if(Str::startsWith($k,$prefix)) {
-                $result[substr($k,$prefixLen)] = $v;
+        foreach($arr as $k => $v) {
+            if(Str::startsWith($k, $prefix)) {
+                $result[substr($k, $prefixLen)] = $v;
             } elseif(!$unset) {
                 $result[$k] = $v;
             }

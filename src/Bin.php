@@ -148,7 +148,7 @@ abstract class Bin {
 //        echo "FORMAT: $packFormatStr\n";
         $unpacked = unpack($formatStr, $binStr);
         if($doStrip) {
-            $unpacked = Arr::stripKeyPrefix($unpacked, self::$_unpackArgPrefix, false);
+            $unpacked = Arr::removeKeyPrefix($unpacked, self::$_unpackArgPrefix, false);
             $doStrip = false;
         }
         Arr::extend($result, $unpacked);

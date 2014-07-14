@@ -53,14 +53,14 @@ abstract class Str {
     /**
      * Strip HTML and PHP tags from a string.
      *
-     * @param string $html
+     * @param string $html HTML
      * @param string|array $allowable_tags Tags which should be stripped. Should be in the form of '<b><i><u>' or array('b','i','u')
      * @param bool $allow_comments Allow HTML comments
      * @return mixed|string HTML with tags stripped out
      */
-    public static function strip_tags($html, $allowable_tags, $allow_comments = false) {
+    public static function stripTags($html, $allowable_tags, $allow_comments = false) {
         if(is_array($allowable_tags)) $allowable_tags = '<' . implode('><', $allowable_tags) . '>';
-        $parts = $allow_comments ? preg_split('`(<!--.*?-->)`s', $html, -1, PREG_SPLIT_DELIM_CAPTURE) : array($html);
+        $parts = $allow_comments ? preg_split('`(<!--.*?-->)`s', $html, -1, PREG_SPLIT_DELIM_CAPTURE) : [$html];
         foreach($parts as $i => $p) {
             if(($i & 1) === 0) {
                 $parts[$i] = strip_tags($p, $allowable_tags);
@@ -99,7 +99,7 @@ abstract class Str {
      * @param string $input Input
      * @return string
      */
-    public static function replace_assoc($dict, $input) {
+    public static function replaceAssoc($dict, $input) {
         return str_replace(array_keys($dict), array_values($dict), $input);
     }
 
@@ -135,7 +135,32 @@ abstract class Str {
         return strtr(substr(base64_encode(openssl_random_pseudo_bytes(ceil($len * 3 / 4))), 0, $len), '+/', '-_');
     }
 
+    /**
+     * Checks if a string is null, empty or all whitespace.
+     *
+     * @param string $str
+     * @return bool
+     */
     public static function isEmpty($str) {
         return $str === null || trim($str) === '';
+    }
+
+    /**
+     * Checks if a string looks like an integer. Scientic notation (1e2), binary (0b1), and hexidecimal (0xf) are not allowed. Octal notation (leading zero) will be treated like a decimal number.
+     *
+     * @param  string $str String to test
+     * @param bool $allowWhitespace Allow leading and trailing whitespace
+     * @param bool $allowNeg Allow negative sign (-) immediately before the number
+     * @return bool
+     */
+    public static function isInt($str, $allowWhitespace=true, $allowNeg=true) {
+        if(is_int($str)) return true;
+        $patt = '~';
+        if($allowWhitespace) $patt .= '\s*';
+        if($allowNeg) $patt .= '-?';
+        $patt .= '\d+';
+        if($allowWhitespace) $patt .= '\s*';
+        $patt .= '\z~A';
+        return preg_match($patt, $str) === 1;
     }
 }

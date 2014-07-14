@@ -14,7 +14,7 @@ class Iter {
      */
     public static function map(Traversable $trav, callable $callback) {
         foreach($trav as $key => $val) {
-            yield $callback($val, $key);
+            yield $callback($val, $key); // fixme: i think this might be yielding generators instead of values...
         }
     }
 

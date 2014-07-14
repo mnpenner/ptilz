@@ -11,6 +11,9 @@ abstract class Bin {
     private static $_unpackArgPrefix = "\036";
 
     public static function unpack(array $formatArray, $data, &$offset = 0) {
+        // todo allow $formatArray to be a string and return a non-array (maybe return reset($result))
+        // allow / in key by sending placeholder (like 'x') to pack() instead of the actual name
+        // add repeaters * and {3} which should return an array
         $packArgs = [];
         if($offset !== 0) $packArgs[] = "@$offset";
         $result = [];

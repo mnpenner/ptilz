@@ -1,6 +1,11 @@
 <?php
 namespace Ptilz;
 
+use Exception;
+use Iterator;
+use IteratorAggregate;
+use Ptilz\Exceptions\InvalidOperationException;
+
 class CsvReader implements IteratorAggregate {
     /** @var resource */
     private $fp = null;
@@ -30,7 +35,7 @@ class CsvReader implements IteratorAggregate {
      */
     public function __construct($filename, $header = false, $skip_lines = 0, $delimiter = ',', $enclosure = '"', $escape = '\\', $max_length = 0) {
         $this->fp = fopen($filename, 'r');
-        if($this->fp === false) throw new Exception("Could not open '$filename' for reading'");
+        if($this->fp === false) throw new InvalidOperationException("Could not open '$filename' for reading'");
         if($header !== false) {
             if(is_int($header)) {
                 while($header--) {
@@ -84,7 +89,7 @@ class CsvIterator implements Iterator {
     private $line;
     private $line_nbr;
 
-    public function __construct(Ptilz\CsvReader $csv) {
+    public function __construct(CsvReader $csv) {
         $this->csv = $csv;
     }
 

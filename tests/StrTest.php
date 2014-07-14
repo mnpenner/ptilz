@@ -40,10 +40,4 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('xyqzz dog', Str::replaceAssoc(['cat' => 'dog', 'a' => 'x', 'b' => 'y', 'c' => 'z'], 'abqcc cat'));
         $this->assertSame('xyqzz zxt', Str::replaceAssoc(['a' => 'x', 'b' => 'y', 'c' => 'z', 'cat' => 'dog'], 'abqcc cat'));
     }
-
-    function testStripTags() {
-        $html = '<a>b<!-- <c> --><d>e</d><f>g</f>';
-        $this->assertSame('b<!-- <c> -->e<f>g</f>', Str::stripTags($html, ['f'], true));
-        $this->assertSame('<a>b<d>e</d>g', Str::stripTags($html, ['a', 'd'], false));
-    }
 }

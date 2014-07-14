@@ -379,4 +379,10 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         };
         $this->assertSame([1, 3, 5], Arr::map([1, 2, 3, 4, 5, 6], $isOdd), "Use map as a filter");
     }
+
+    function testWrap() {
+        $this->assertSame(['<b>', '<i>', '<u>'], Arr::wrap(['b', 'i', 'u'], '<', '>'));
+        $this->assertSame('<b><i><u>', Arr::wrap(['b', 'i', 'u'], '<', '>', ''));
+        $this->assertSame('[a],[b],[c]', Arr::wrap(['a', 'b', 'c'], '[', ']', ','));
+    }
 }

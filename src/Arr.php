@@ -496,4 +496,21 @@ class Arr {
         }
         return $result;
     }
+
+    /**
+     * Wraps each element in a before and after string.
+     *
+     * @param array       $arr
+     * @param string      $before
+     * @param string      $after
+     * @param null|string $glue
+     * @return string|array A string if glue is provided, otherwise an array
+     */
+    public static function wrap(array $arr, $before, $after, $glue = null) {
+        $result = array_map(function ($x) use ($before, $after) {
+            return "$before$x$after";
+        }, $arr);
+        if($glue !== null) return implode($glue, $result);
+        return $result;
+    }
 }

@@ -51,25 +51,6 @@ abstract class Str {
     }
 
     /**
-     * Strip HTML and PHP tags from a string.
-     *
-     * @param string $html HTML
-     * @param string|array $allowable_tags Tags which should be stripped. Should be in the form of '<b><i><u>' or array('b','i','u')
-     * @param bool $allow_comments Allow HTML comments
-     * @return mixed|string HTML with tags stripped out
-     */
-    public static function stripTags($html, $allowable_tags, $allow_comments = false) {
-        if(is_array($allowable_tags)) $allowable_tags = '<' . implode('><', $allowable_tags) . '>';
-        $parts = $allow_comments ? preg_split('`(<!--.*?-->)`s', $html, -1, PREG_SPLIT_DELIM_CAPTURE) : [$html];
-        foreach($parts as $i => $p) {
-            if(($i & 1) === 0) {
-                $parts[$i] = strip_tags($p, $allowable_tags);
-            }
-        }
-        return implode('', $parts);
-    }
-
-    /**
      * Split a string into an array using a delimiter, working from right to left, up to the specified number of elements.
      *
      * @param string $str The input string.

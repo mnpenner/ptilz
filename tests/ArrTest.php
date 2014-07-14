@@ -347,4 +347,36 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         ];
         $this->assertSame($trans, Arr::transpose($mat));
     }
+
+    function testMap() {
+        $timesTwo = function ($x) {
+            return $x * 2;
+        };
+        $this->assertSame([2, 4, 6], Arr::map([1, 2, 3], $timesTwo), "Basic usage");
+
+        $generator = function () {
+            yield 1;
+            yield 2;
+            yield 3;
+        };
+        $this->assertSame([2, 4, 6], Arr::map($generator(), $timesTwo), "Use map on a generator");
+
+        $times2and3 = function ($v, $k) {
+            yield $v * 2;
+            yield $v * 3;
+        };
+        $this->assertSame([2, 3, 4, 6, 6, 9], Arr::map([1, 2, 3], $times2and3), "Use map to generate more than one value");
+
+        $letterMap = function ($v, $k) {
+            yield chr(97 + $k) => $v;
+        };
+        $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3], Arr::map([1, 2, 3], $letterMap), "Use map to change keys");
+
+        $isOdd = function ($v) {
+            if(($v & 1) === 1) {
+                yield $v;
+            }
+        };
+        $this->assertSame([1, 3, 5], Arr::map([1, 2, 3, 4, 5, 6], $isOdd), "Use map as a filter");
+    }
 }

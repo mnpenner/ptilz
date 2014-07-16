@@ -488,4 +488,8 @@ class Arr {
         if($glue !== null) return implode($glue, $result);
         return $result;
     }
+
+    public static function repeat($val, $times) {
+        return array_fill(0, $times, $val);
+    }
 }

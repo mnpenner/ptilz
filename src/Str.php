@@ -80,7 +80,7 @@ abstract class Str {
      * @param string $input Input
      * @return string
      */
-    public static function replaceAssoc($dict, $input) {
+    public static function replace($dict, $input) {
         return str_replace(array_keys($dict), array_values($dict), $input);
     }
 
@@ -143,5 +143,19 @@ abstract class Str {
         if($allowWhitespace) $patt .= '\s*';
         $patt .= '\z~A';
         return preg_match($patt, $str) === 1;
+    }
+
+    /**
+     * @param string $format
+     * @param mixed  ...$args
+     * @return string
+     */
+    public static function format($format) {
+        $args = array_slice(func_get_args(), 1);
+        if(!$args) return $format;
+        $i = 0;
+        return preg_replace_callback('~\{([^}]*)\}~', function ($m) use ($format, $args, &$i) {
+            return $m[1] === '' ? $args[$i++] : $args[$m[1]];
+        }, $format);
     }
 }

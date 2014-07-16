@@ -2,7 +2,31 @@
 use Ptilz\Bin;
 
 class BinTest extends PHPUnit_Framework_TestCase {
+
+    function testEndian() {
+        $this->assertInternalType('bool', Bin::isLittleEndian());
+        $this->assertInternalType('bool', Bin::isBigEndian());
+        $this->assertTrue(Bin::isLittleEndian() !== Bin::isBigEndian());
+    }
+
     function testUnpack() {
+        $this->assertEquals(1<<8, Bin::unpack('-uint16', "\x00\x01"));
+        $this->assertEquals(1<<8, Bin::unpack('+uint16', "\x01\x00"));
+        $this->assertEquals(1<<24, Bin::unpack('-uint32', "\x00\x00\x00\x01"));
+        $this->assertEquals(1<<24, Bin::unpack('+uint32', "\x01\x00\x00\x00"));
+
+        if(Bin::isLittleEndian()) {
+            $this->assertEquals(1<<8, Bin::unpack('uint16', "\x00\x01"));
+//            $this->assertEquals(1<<24, Bin::unpack('uint', "\x00\x00\x00\x01"));
+        } else {
+            $this->assertEquals(1<<8, Bin::unpack('uint16', "\x01\x00"));
+//            $this->assertEquals(1<<24, Bin::unpack('uint', "\x01\x00\x00\x00"));
+        }
+
+        $this->assertEquals('HELO', Bin::unpack('str[4]', "HELO"));
+    }
+
+    function testUnpackZip() {
         $fileContents = file_get_contents(__DIR__ . '/unpack.zip');
         $offset = 0;
 
@@ -24,19 +48,43 @@ class BinTest extends PHPUnit_Framework_TestCase {
         ];
 
         $test2 = Bin::unpack($pkZipFormat, $fileContents, $offset);
+//        var_dump($test2);exit;
 
-        $this->assertSame(54, $offset);
-        $this->assertSame("PK\x03\x04", $test2['signature'], "String, fixed length");
-        $this->assertSame(10, $test2['version'], "Little endian unsigned int16");
-        $this->assertSame('test2.txt', $test2['filename'], "String, variable length");
+        $this->assertEquals(54, $offset);
+        $this->assertEquals("PK\x03\x04", $test2['signature'], "String, fixed length");
+        $this->assertEquals(10, $test2['version'], "Little endian unsigned int16");
+        $this->assertEquals('test2.txt', $test2['filename'], "String, variable length");
 
         $test3 = Bin::unpack($pkZipFormat, $fileContents, $offset);
-        $this->assertSame('the third and final test file!', $test3['compressed_data'], "Starting offset worked correctly");
+        $this->assertEquals('the third and final test file!', $test3['compressed_data'], "Starting offset worked correctly");
 
         $test1 = Bin::unpack(['str[4]', '-uint16'], $fileContents, $offset);
-        $this->assertSame(["PK\x03\x04", 10], $test1, "Unpack using numeric array");
+        $this->assertEquals(["PK\x03\x04", 10], $test1, "Unpack using numeric array");
 
         $result = Bin::unpack(['@26', '0len' => '-uint16', '@+2', 'name' => 'str[0len]'], $fileContents);
-        $this->assertSame('test2.txt', $result['name'], "Offsets and weird key names");
+        $this->assertEquals('test2.txt', $result['name'], "Offsets and weird key names");
+    }
+
+    function testPack() {
+        $fileContents = file_get_contents(__DIR__ . '/unpack.zip');
+        $test2 = substr($fileContents, 0, 54);
+
+        $pkZipFormat = ['str', '-uint16{5}', '-uint32{3}', '-uint16{2}', 'str', 'str', 'str'];
+        $this->assertEquals($test2, Bin::pack($pkZipFormat, [
+            "PK\x03\x04",
+            10,
+            0,
+            0,
+            27023,
+            17644,
+            4228488003,
+            15,
+            15,
+            9,
+            0,
+            'test2.txt',
+            '',
+            'a 2nd test file'
+        ]));
     }
 }

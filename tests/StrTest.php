@@ -37,7 +37,14 @@ class StrTest extends PHPUnit_Framework_TestCase {
     }
 
     function testReplaceAssoc() {
-        $this->assertSame('xyqzz dog', Str::replaceAssoc(['cat' => 'dog', 'a' => 'x', 'b' => 'y', 'c' => 'z'], 'abqcc cat'));
-        $this->assertSame('xyqzz zxt', Str::replaceAssoc(['a' => 'x', 'b' => 'y', 'c' => 'z', 'cat' => 'dog'], 'abqcc cat'));
+        $this->assertSame('xyqzz dog', Str::replace(['cat' => 'dog', 'a' => 'x', 'b' => 'y', 'c' => 'z'], 'abqcc cat'));
+        $this->assertSame('xyqzz zxt', Str::replace(['a' => 'x', 'b' => 'y', 'c' => 'z', 'cat' => 'dog'], 'abqcc cat'));
+    }
+
+    function testFormat() {
+        $this->assertSame('abc', Str::format('abc'));
+        $this->assertSame('abcd', Str::format('a{}c{}', 'b', 'd'));
+        $this->assertSame('abcb', Str::format('a{0}c{0}', 'b'));
+        $this->assertSame('adcb', Str::format('a{1}c{0}', 'b', 'd'));
     }
 }

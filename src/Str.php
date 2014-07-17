@@ -38,12 +38,14 @@ abstract class Str {
     }
 
     /**
-     * Returns the length of a string. Works on multi-byte strings.
-     * @param $str
+     * Gets the length of a string. Works on multi-byte characters.
+     *
+     * @param string $str The string being checked for length
+     * @param string $encoding Character encoding
      * @return int
      */
-    public static function length($str) {
-        return function_exists('mb_strlen') ? mb_strlen($str) : preg_match_all("/./us", $str);
+    public static function length($str, $encoding='UTF-8') {
+        return function_exists('mb_strlen') ? mb_strlen($str,$encoding) : preg_match_all('/./us', $str);
     }
 
     public static function cEscapeStr($str) {

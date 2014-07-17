@@ -69,8 +69,9 @@ abstract class Bin {
                 )
                 | (?<type>str) (?:\[ (?<len>[^\]]+) \])
                 | (?<type>@) (?<len>[-+]?\d+)
-            )\z
-            ~Amsx';
+            )
+            (?: \{(?<repeat>\d+)\} )?
+            \z~Amsx';
 
 
         // swap machine-dependent sizes/encodings for fixed types
@@ -80,60 +81,78 @@ abstract class Bin {
             }
 
             $type = self::getFixedType($m['type']);
+            $repeat = (int)Arr::get($m, 'repeat', '1');
 
             // unpack the data
             switch($type) {
                 case 'char':
-                    $out[$key] = unpack("@$offset/c",$data)[1];
-                    ++$offset;
+                    $out[$key] = self::_unpack($offset,'c',$repeat,$data);
+                    $offset += $repeat;
                     break;
                 case 'byte':
-                    $out[$key] = unpack("@$offset/C",$data)[1];
-                    ++$offset;
+                    $out[$key] = self::_unpack($offset,'C',$repeat,$data);
+                    $offset += $repeat;
                     break;
                 case '+uint16':
-                    $out[$key] = unpack("@$offset/n",$data)[1];
-                    $offset += 2;
+                    $out[$key] = self::_unpack($offset,'n',$repeat,$data);
+                    $offset += 2*$repeat;
                     break;
                 case '-uint16':
-                    $out[$key] = unpack("@$offset/v",$data)[1];
-                    $offset += 2;
+                    $out[$key] = self::_unpack($offset,'v',$repeat,$data);
+                    $offset += 2*$repeat;
                     break;
                 case '+uint32':
-                    $out[$key] = unpack("@$offset/N",$data)[1];
-                    $offset += 4;
+                    $out[$key] = self::_unpack($offset,'N',$repeat,$data);
+                    $offset += 4*$repeat;
                     break;
                 case '-uint32':
-                    $out[$key] = unpack("@$offset/V",$data)[1];
-                    $offset += 4;
+                    $out[$key] = self::_unpack($offset,'V',$repeat,$data);
+                    $offset += 4*$repeat;
                     break;
                 case 'float32':
-                    $out[$key] = unpack("@$offset/f",$data)[1];
-                    $offset += 4;
+                    $out[$key] = self::_unpack($offset,'f',$repeat,$data);
+                    $offset += 4*$repeat;
                     break;
                 case 'float64':
-                    $out[$key] = unpack("@$offset/d",$data)[1];
-                    $offset += 8;
+                    $out[$key] = self::_unpack($offset,'d',$repeat,$data);
+                    $offset += 8*$repeat;
                     break;
                 case '-uint64':
-                    $ints = unpack("@$offset/Vlo/Vhi", $data);
-                    $out[$key] = Math::add($ints['lo'], Math::mul($ints['hi'], '4294967296'));
+                    if($repeat === 1) $out[$key] = [];
+                    for($i = 0; $i < $repeat; ++$i) {
+                        $ints = unpack("@$offset/Vlo/Vhi", $data);
+                        $sum = Math::add($ints['lo'], Math::mul($ints['hi'], '4294967296'));
+                        if($repeat === 1) $out[$key] = $sum;
+                        else $out[$key][] = $sum;
+                        $offset += 8;
+                    }
                     break;
                 case '+uint64':
-                    $ints = unpack("@$offset/Nhi/Nlo", $data);
-                    $out[$key] = Math::add($ints['lo'], Math::mul($ints['hi'], '4294967296'));
+                    if($repeat === 1) $out[$key] = [];
+                    for($i = 0; $i < $repeat; ++$i) {
+                        $ints = unpack("@$offset/Nhi/Nlo", $data);
+                        $sum = Math::add($ints['lo'], Math::mul($ints['hi'], '4294967296'));
+                        if($repeat === 1) $out[$key] = $sum;
+                        else $out[$key][] = $sum;
+                        $offset += 8;
+                    }
                     break;
                 case 'str':
-                    if(preg_match('~\d+\z~A', $m['len'])) {
-                        $strlen = (int)$m['len'];
-                    } else {
-                        if(!array_key_exists($m['len'], $out)) {
-                            throw new ArgumentException("Length value '$m[len]' not found for `$key`");
+                    if($repeat === 1) $out[$key] = [];
+                    for($i=0; $i<$repeat; ++$i) {
+                        if(preg_match('~\d+\z~A', $m['len'])) {
+                            $strlen = (int)$m['len'];
+                        } else {
+                            if(!array_key_exists($m['len'], $out)) {
+                                throw new ArgumentException("Length value '$m[len]' not found for `$key`");
+                            }
+                            $strlen = $out[$m['len']];
                         }
-                        $strlen = $out[$m['len']];
+                        $str = unpack("@$offset/a$strlen", $data)[1];
+                        if($repeat === 1) $out[$key] = $str;
+                        else $out[$key][] = $str;
+                        $offset += $strlen;
                     }
-                    $out[$key] = unpack("@$offset/a$strlen",$data)[1];
-                    $offset += $strlen;
                     break;
                 case '@':
                     if($m['len'][0] === '-' || $m['len'][0] === '+') {
@@ -146,8 +165,12 @@ abstract class Bin {
                     throw new NotImplementedException("Type '$type' has not been implemented yet");
             }
         }
-
         return $singleValue ? reset($out) : $out;
+    }
+
+    private static function _unpack($offset, $format, $repeat, $data) {
+        $result = unpack("@$offset/$format$repeat", $data);
+        return $repeat == 1 ? $result[1] : array_values($result);
     }
 
     private static function getFixedType($type) {
@@ -175,7 +198,12 @@ abstract class Bin {
     }
 
 
-    public static function pack(array $format, array $args) {
+    public static function pack($format, $args) {
+        if(is_string($format)) {
+            $format = [$format];
+        } elseif(!is_array($format)) {
+            throw new ArgumentTypeException('format', 'string|array');
+        }
 
         $patt = '~
             (?|
@@ -190,79 +218,73 @@ abstract class Bin {
                 | (?<type>@) (?<len>[-+]?\d+)
             )
             (?: \{(?<repeat>\d+)\} )?
-            \z
-            ~Amsx';
+            \z~Amsx';
 
         $out = '';
-        $args = Arr::flatten($args);
+
+        if(is_array($args)) {
+            $args = Arr::flatten($args);
+        } else {
+            $args = [$args];
+        }
         $idx = 0;
-        $formatStr = '';
         foreach($format as $key => $fullType) {
             if(!preg_match($patt, $fullType, $m)) {
                 throw new ArgumentException('format', "`$key` has an unrecognized type '$fullType'");
             }
 
             $type = self::getFixedType($m['type']);
+            $repeat = (int)Arr::get($m, 'repeat', '1');
 
-            switch($type) {
-                case 'char':
-                    $out .= pack('c',$args[$idx]);
-                    break;
-                case 'byte':
-                    $out .= pack('C',$args[$idx]);
-                    break;
-                case '+uint16':
-                    $out .= pack('n',$args[$idx]);
-                    break;
-                case '-uint16':
-                    $out .= pack('v',$args[$idx]);
-                    break;
-                case '+uint32':
-                    $out .= pack('N',$args[$idx]);
-                    break;
-                case '-uint32':
-                    $out .= pack('V',$args[$idx]);
-                    break;
-                case '+uint64':
-                    throw new NotImplementedException();
-                    break;
-                case '-uint64':
-                    throw new NotImplementedException();
-                    break;
-                case 'float32':
-                    $out .= pack('f',$args[$idx]);
-                    break;
-                case 'float64':
-                    $out .= pack('d',$args[$idx]);
-                    break;
-                case 'str':
-                    $out .= pack('a',$args[$idx]);
-                    $lenStr = Arr::get($m, 'len', '');
-                    if($lenStr !== '') {
-                        $out .= $lenStr;
-                    } else {
-                        $out .= strlen($args[$idx]);
-                    }
-                    break;
-                default:
-                    throw new NotImplementedException("Type '$m[type]' has not been implemented yet");
+            for($_=0; $_<$repeat; ++$_) {
+                switch($type) {
+                    case 'char':
+                        $out .= pack('c', $args[$idx]);
+                        break;
+                    case 'byte':
+                        $out .= pack('C', $args[$idx]);
+                        break;
+                    case '+uint16':
+                        $out .= pack('n', $args[$idx]);
+                        break;
+                    case '-uint16':
+                        $out .= pack('v', $args[$idx]);
+                        break;
+                    case '+uint32':
+                        $out .= pack('N', $args[$idx]);
+                        break;
+                    case '-uint32':
+                        $out .= pack('V', $args[$idx]);
+                        break;
+                    case '+uint64':
+                        $out .= pack('NN', (int)bcdiv($args[$idx],'4294967296'), (int)bcmod($args[$idx],'4294967296'));
+                        break;
+                    case '-uint64':
+                        $out .= pack('VV', (int)bcmod($args[$idx],'4294967296'), (int)bcdiv($args[$idx],'4294967296'));
+                        break;
+                    case 'float32':
+                        $out .= pack('f', $args[$idx]);
+                        break;
+                    case 'float64':
+                        $out .= pack('d', $args[$idx]);
+                        break;
+                    case 'str':
+                        $formatStr = 'a';
+                        $lenStr = Arr::get($m, 'len', '');
+                        if($lenStr !== '') {
+                            $formatStr .= $lenStr;
+                        } else {
+                            $formatStr .= strlen($args[$idx]);
+                        }
+                        $out .= pack($formatStr, $args[$idx]);
+                        break;
+                    default:
+                        throw new NotImplementedException("Type '$m[type]' has not been implemented yet");
+                }
+                ++$idx;
             }
-
-//            $repeatStr = Arr::get($m, 'repeat', '');
-//            if($repeatStr !== '') {
-//                $repeatVal = (int)$repeatStr;
-//                // fixme: strings need special attention...
-//                if($m['type'] === 'str') throw new NotImplementedException("Cannot repeat strings; use multiple array args");
-//                $formatStr .= $repeatVal;
-//                $idx += $repeatVal;
-//            } else {
-//                ++$idx;
-//            }
         }
 
-//        array_unshift($args, $formatStr);
-//        var_dump($args);exit;
-//        return call_user_func_array('pack', $args);
         return $out;
     }
 

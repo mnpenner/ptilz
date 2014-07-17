@@ -51,4 +51,16 @@ class MathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(PHP_INT_MAX, Math::toInt(PHP_INT_MAX));
         $this->assertInternalType('string', Math::toInt(bcadd(PHP_INT_MAX, 1)));
     }
+
+    function testAdd() {
+        $this->assertSame(3, Math::add(1, 2));
+        $this->assertSame(3, Math::add('1', '2'));
+        $this->assertSame(-1, Math::add(1, '-2'));
+        $this->assertEquals('9223372036854775808', Math::add('9223372036854775807', '1'));
+    }
+
+    function testMul() {
+        $this->assertSame(6, Math::mul('2', '3'));
+        $this->assertEquals('9223372037000250000', Math::mul('3037000500', '3037000500'));
+    }
 }

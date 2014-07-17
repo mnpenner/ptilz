@@ -47,4 +47,8 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('abcb', Str::format('a{0}c{0}', 'b'));
         $this->assertSame('adcb', Str::format('a{1}c{0}', 'b', 'd'));
     }
+
+    function testLength() {
+        $this->assertSame(22, Str::length('Cién cañones por banda'));
+    }
 }

@@ -10,8 +10,6 @@ use Ptilz\Exceptions\NotImplementedException;
  * Functions for working with binary data
  */
 abstract class Bin {
-    /** @var string */
-    private static $_unpackArgPrefix = "\036";
     /** @var bool */
     private static $_isLittleEndian = null;
 
@@ -58,27 +56,10 @@ abstract class Bin {
 
         $out = [];
 
-        $patt = '~
-            (?|
-                (?<type>
-                      char
-                    | byte
-                    | u?int
-                    | [-+]?u?int(?:16|32|64)
-                    | float(?:32|64)
-                )
-                | (?<type>str) (?:\[ (?<len>[^\]]+) \])
-                | (?<type>@) (?<len>[-+]?\d+)
-            )
-            (?: \{(?<repeat>\d+)\} )?
-            \z~Amsx';
-
-
         // swap machine-dependent sizes/encodings for fixed types
         foreach($format as $key => $fullType) {
-            if(!preg_match($patt, $fullType, $m)) {
-                throw new ArgumentException('format', "`$key` has an unrecognized type '$fullType'");
-            }
+            $m = self::matchType($fullType);
+            if($m === false) throw new ArgumentException('format', "`$key` has an unrecognized type '$fullType'");
 
             $type = self::getFixedType($m['type']);
             $repeat = (int)Arr::get($m, 'repeat', '1');
@@ -197,14 +178,11 @@ abstract class Bin {
         }
     }
 
-
-    public static function pack($format, $args) {
-        if(is_string($format)) {
-            $format = [$format];
-        } elseif(!is_array($format)) {
-            throw new ArgumentTypeException('format', 'string|array');
-        }
-
+    /**
+     * @param string $type
+     * @return bool|array
+     */
+    private static function matchType($type) {
         $patt = '~
             (?|
                 (?<type>
@@ -220,6 +198,17 @@ abstract class Bin {
             (?: \{(?<repeat>\d+)\} )?
             \z~Amsx';
 
+        return preg_match($patt, $type, $matches) ? $matches : false;
+    }
+
+
+    public static function pack($format, $args) {
+        if(is_string($format)) {
+            $format = [$format];
+        } elseif(!is_array($format)) {
+            throw new ArgumentTypeException('format', 'string|array');
+        }
+
         $out = '';
 
         if(is_array($args)) {
@@ -229,9 +218,8 @@ abstract class Bin {
         }
         $idx = 0;
         foreach($format as $key => $fullType) {
-            if(!preg_match($patt, $fullType, $m)) {
-                throw new ArgumentException('format', "`$key` has an unrecognized type '$fullType'");
-            }
+            $m = self::matchType($fullType);
+            if($m === false) throw new ArgumentException('format', "`$key` has an unrecognized type '$fullType'");;
 
             $type = self::getFixedType($m['type']);
             $repeat = (int)Arr::get($m, 'repeat', '1');

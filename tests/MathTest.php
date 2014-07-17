@@ -44,4 +44,11 @@ class MathTest extends PHPUnit_Framework_TestCase {
     function testChangeBase() {
         $this->assertSame('3E8', Math::changeBase('1750', 8, 16, '0123456789ABCDEF'));
     }
+
+    function testToInt() {
+        $this->assertInternalType('int', Math::toInt(PHP_INT_MIN));
+        $this->assertInternalType('int', Math::toInt(0));
+        $this->assertSame(PHP_INT_MAX, Math::toInt(PHP_INT_MAX));
+        $this->assertInternalType('string', Math::toInt(bcadd(PHP_INT_MAX, 1)));
+    }
 }

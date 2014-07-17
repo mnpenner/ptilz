@@ -1,5 +1,6 @@
 <?php
 use Ptilz\Bin;
+use Ptilz\Math;
 
 class BinTest extends PHPUnit_Framework_TestCase {
 
@@ -24,6 +25,8 @@ class BinTest extends PHPUnit_Framework_TestCase {
         }
 
         $this->assertEquals('HELO', Bin::unpack('str[4]', "HELO"));
+        $this->assertEquals('11170778902352744348', Bin::unpack('-uint64', "\x9C\xCF\x29\xF3\x39\x94\x06\x9B"));
+        $this->assertEquals('11170778902352744348', Bin::unpack('+uint64', "\x9B\x06\x94\x39\xF3\x29\xCF\x9C"));
     }
 
     function testUnpackZip() {

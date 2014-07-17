@@ -42,7 +42,39 @@ abstract class Math {
         for($i = 0; $i < $len; ++$i) {
             $val = bcadd($val, bcmul($arr[$str[$i]], bcpow($base, $len - $i - 1)));
         }
-        return bccomp($val, PHP_INT_MIN) < 0 || bccomp($val, PHP_INT_MAX) > 0 ? (string)$val : (int)$val;
+        return self::toInt($val);
+    }
+
+    /**
+     * Add two arbitrary precision numbers
+     *
+     * @param int|string $left The left operand, as a string.
+     * @param int|string $right The right operand, as a string.
+     * @return int|string
+     */
+    public static function add($left, $right) {
+        return self::toInt(bcadd($left, $right));
+    }
+
+    /**
+     * Multiply two arbitrary precision numbers
+     *
+     * @param int|string $left The left operand, as a string.
+     * @param int|string $right The right operand, as a string.
+     * @return int|string
+     */
+    public static function mul($left, $right) {
+        return self::toInt(bcmul($left, $right));
+    }
+
+    /**
+     * Converts a string integer to a native integer if it's within PHP's valid range of integers
+     *
+     * @param string $val
+     * @return int|string
+     */
+    public static function toInt($val) {
+        return self::between($val, PHP_INT_MIN, PHP_INT_MAX) ? (int)$val : (string)$val;
     }
 
     /**

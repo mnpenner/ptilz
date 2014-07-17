@@ -18,15 +18,18 @@ class BinTest extends PHPUnit_Framework_TestCase {
 
         if(Bin::isLittleEndian()) {
             $this->assertEquals(1<<8, Bin::unpack('uint16', "\x00\x01"));
-//            $this->assertEquals(1<<24, Bin::unpack('uint', "\x00\x00\x00\x01"));
         } else {
             $this->assertEquals(1<<8, Bin::unpack('uint16', "\x01\x00"));
-//            $this->assertEquals(1<<24, Bin::unpack('uint', "\x01\x00\x00\x00"));
         }
 
         $this->assertEquals('HELO', Bin::unpack('str[4]', "HELO"));
-        $this->assertEquals('11170778902352744348', Bin::unpack('-uint64', "\x9C\xCF\x29\xF3\x39\x94\x06\x9B"));
-        $this->assertEquals('11170778902352744348', Bin::unpack('+uint64', "\x9B\x06\x94\x39\xF3\x29\xCF\x9C"));
+        $this->assertEquals(['11170778902352744348', '11170778902352744348'], Bin::unpack(['-uint64', '+uint64'], "\x9C\xCF\x29\xF3\x39\x94\x06\x9B\x9B\x06\x94\x39\xF3\x29\xCF\x9C"));
+
+        $this->assertEquals([1,2,3], Bin::unpack('byte{3}', "\x01\x02\x03"));
+        $this->assertEquals([
+            'strings' => ['aa', 'bb', 'cc'],
+            'ints' => [1, 2, 3],
+        ], Bin::unpack(['strings' => 'str[2]{3}', 'ints' => '-uint16{3}'], "aabbcc\x01\x00\x02\x00\x03\x00"));
     }
 
     function testUnpackZip() {
@@ -72,22 +75,25 @@ class BinTest extends PHPUnit_Framework_TestCase {
         $fileContents = file_get_contents(__DIR__ . '/unpack.zip');
         $test2 = substr($fileContents, 0, 54);
 
-        $pkZipFormat = ['str', '-uint16{5}', '-uint32{3}', '-uint16{2}', 'str', 'str', 'str'];
-        $this->assertEquals($test2, Bin::pack($pkZipFormat, [
+        $pkZipFormat = ['str', '-uint16{5}', '-uint32{3}', '-uint16{2}', 'str{3}'];
+        $this->assertSame($test2, Bin::pack($pkZipFormat, [
             "PK\x03\x04",
-            10,
-            0,
-            0,
-            27023,
-            17644,
-            4228488003,
-            15,
-            15,
-            9,
-            0,
-            'test2.txt',
-            '',
-            'a 2nd test file'
-        ]));
+            [10,0,0,27023,17644],
+            [4228488003,[15,15]],
+            9,0,
+            'test2.txt','','a 2nd test file'
+        ]), "Repeat and flatten");
+
+        $this->assertSame("\x9C\xCF\x29\xF3\x39\x94\x06\x9B", Bin::pack('-uint64', '11170778902352744348'), "MS-FSSHTTPB request signature");
+        $this->assertSame("\x9B\x06\x94\x39\xF3\x29\xCF\x9C", Bin::pack('+uint64', '11170778902352744348'), "Big endian unsigned int64");
+        $this->assertSame("\xBC\x0A\x00\x00\x00\x00\x00\x00", Bin::pack('-uint64', 0xABC));
+        $this->assertSame("\x00\x00\x00\x00\x00\x00\x0A\xBC", Bin::pack('+uint64', 0xABC));
+        $this->assertSame("\xCA\xFE\xBA\xBE\xDE\xAD\xBE\xEF", Bin::pack(['-uint32', '+uint32'], ['3199925962', '3735928559']));
+    }
+
+    function testLength() {
+        $this->assertSame(0, Bin::length(''));
+        $this->assertSame(36, Bin::length('thequickbrownfoxjumpedoverthelazydog'));
+        $this->assertSame(24, Bin::length('Cién cañones por banda'));
     }
 }

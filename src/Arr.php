@@ -1,7 +1,10 @@
 <?php
 namespace Ptilz;
 
-class Arr {
+/**
+ * Array helper methods
+ */
+abstract class Arr {
     /**
      * Retrieve a value from an array by key, otherwise a default value.
      *

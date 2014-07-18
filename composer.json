@@ -1,7 +1,6 @@
 {
     "name": "mnbayazit/ptilz",
     "description": "PHP utilities",
-    "minimum-stability": "dev",
     "license": "MIT",
     "authors": [
         {
@@ -9,8 +8,13 @@
             "email": "mnbayazit@gmail.com"
         }
     ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=5.5",
+        "ext-bcmath": "*"
+    },
     "require-dev": {
-        "raveren/kint": "dev-master"
     },
     "autoload": {
         "psr-4": {

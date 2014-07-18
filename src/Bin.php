@@ -3,7 +3,6 @@ namespace Ptilz;
 
 use Ptilz\Exceptions\ArgumentException;
 use Ptilz\Exceptions\ArgumentTypeException;
-use Ptilz\Exceptions\InvalidOperationException;
 use Ptilz\Exceptions\NotImplementedException;
 
 /**
@@ -42,9 +41,6 @@ abstract class Bin {
      * @throws Exceptions\NotImplementedException
      */
     public static function unpack($format, $data, &$offset = 0) {
-        // TODO:
-        // add repeaters * and {3} which should return an array
-
         if(is_string($format)) {
             $format = [$format];
             $singleValue = true;

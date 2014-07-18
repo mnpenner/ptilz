@@ -1,5 +1,6 @@
 <?php
 namespace Ptilz;
+use JsonSerializable;
 use Ptilz\Exceptions\InvalidOperationException;
 use Ptilz\Internal\RawJson;
 

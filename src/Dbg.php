@@ -1,7 +1,7 @@
 <?php
 namespace Ptilz;
 
-class Dbg {
+abstract class Dbg {
     public static function dumpHtml($var) {
         echo '<pre>';
         print_r($var);

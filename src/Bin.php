@@ -129,7 +129,7 @@ abstract class Bin {
                             }
                             $strlen = $out[$m['len']];
                         }
-                        $str = unpack("@$offset/a$strlen", $data)[1];
+                        $str = substr($data, $offset, $strlen);
                         if($repeat === 1) $out[$key] = $str;
                         else $out[$key][] = $str;
                         $offset += $strlen;

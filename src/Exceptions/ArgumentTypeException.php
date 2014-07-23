@@ -20,6 +20,6 @@ class ArgumentTypeException extends ArgumentException {
                     return "`" . trim($t) . "`";
                 }, $types), ' or ');
         }
-        parent::__construct($message, $code, $previous);
+        Exception::__construct($message, $code, $previous);
     }
 }

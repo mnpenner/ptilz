@@ -13,6 +13,6 @@ class ArgumentFormatException extends Exception {
         if($details) {
             $message .= ': '.$details;
         }
-        parent::__construct($message, $code, $previous);
+        Exception::__construct($message, $code, $previous);
     }
 }

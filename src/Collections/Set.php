@@ -3,6 +3,7 @@ namespace Ptilz\Collections;
 
 use ArrayIterator;
 use IteratorAggregate;
+use Ptilz\Dbg;
 use Ptilz\Exceptions\ArgumentTypeException;
 use Traversable;
 
@@ -21,15 +22,11 @@ class Set implements IteratorAggregate {
                     $this->set[$i] = true;
                 }
             } else {
-                throw new ArgumentTypeException(__CLASS__ . ' must be initialized with an array or iterable; ' . self::getType($iter) . ' provided');
+                throw new ArgumentTypeException(__CLASS__ . ' must be initialized with an array or iterable; ' . Dbg::getType($iter) . ' provided');
             }
         } else {
             $this->set = array();
         }
-    }
-
-    private static function getType($var) {
-        return is_object($var) ? get_class($var) : gettype($var);
     }
 
     public function contains($x) {
@@ -75,7 +72,7 @@ class Set implements IteratorAggregate {
         } elseif(is_array($x)) {
             return new Set(array_keys(array_intersect_key($this->set, self::flip($x))));
         }
-        throw new ArgumentTypeException('Cannot intersect set with object of type ' . self::getType($x));
+        throw new ArgumentTypeException('Cannot intersect set with object of type ' . Dbg::getType($x));
     }
 
     public function union($x) {
@@ -84,7 +81,7 @@ class Set implements IteratorAggregate {
         } elseif(is_array($x)) {
             return new Set(array_keys(self::merge($this->set, self::flip($x))));
         }
-        throw new ArgumentTypeException('Cannot union set with object of type ' . self::getType($x));
+        throw new ArgumentTypeException('Cannot union set with object of type ' . Dbg::getType($x));
     }
 
     public function count() {

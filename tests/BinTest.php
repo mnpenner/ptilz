@@ -1,6 +1,5 @@
 <?php
 use Ptilz\Bin;
-use Ptilz\Math;
 
 class BinTest extends PHPUnit_Framework_TestCase {
 
@@ -95,5 +94,12 @@ class BinTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(0, Bin::length(''));
         $this->assertSame(36, Bin::length('thequickbrownfoxjumpedoverthelazydog'));
         $this->assertSame(24, Bin::length('Cién cañones por banda'));
+    }
+
+    function testHasFlag() {
+        $this->assertTrue(Bin::hasFlag(0b111, 0b010));
+        $this->assertFalse(Bin::hasFlag(0b101, 0b010));
+        $this->assertTrue(Bin::hasFlag(0b111, 0b110));
+        $this->assertFalse(Bin::hasFlag(0b101, 0b110));
     }
 }

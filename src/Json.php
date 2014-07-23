@@ -1,5 +1,6 @@
 <?php
 namespace Ptilz;
+
 use JsonSerializable;
 use Ptilz\Exceptions\InvalidOperationException;
 use Ptilz\Internal\RawJson;
@@ -16,7 +17,7 @@ abstract class Json {
      */
     public static function encode($var, $options = 0) {
         if(is_array($var)) {
-            if(($options & JSON_FORCE_OBJECT) === JSON_FORCE_OBJECT || Arr::isAssoc($var)) {
+            if(Bin::hasFlag($options, JSON_FORCE_OBJECT) || Arr::isAssoc($var)) {
                 $bits = [];
                 foreach($var as $k => $v) {
                     $bits[] = json_encode((string)$k, $options) . ':' . self::encode($v, $options);

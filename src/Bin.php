@@ -260,6 +260,7 @@ abstract class Bin {
                         $formatStr = 'a';
                         $lenStr = Arr::get($m, 'len', '');
                         if($lenStr !== '') {
+                            if(!Str::isInt($lenStr)) throw new ArgumentException("Length must be an integer or omitted for format argument $idx (got '$lenStr')");
                             $formatStr .= $lenStr;
                         } else {
                             $formatStr .= strlen($args[$idx]);

@@ -8,6 +8,6 @@ use Exception;
  */
 class ArgumentEmptyException extends ArgumentException {
     public function __construct($paramName, $code = 0, Exception $previous = null) {
-        parent::__construct("Argument `$paramName` cannot be empty", $code, $previous);
+        Exception::__construct("Argument `$paramName` cannot be empty", $code, $previous);
     }
 }

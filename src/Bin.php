@@ -125,7 +125,7 @@ abstract class Bin {
                             }
                             $strlen = $out[$m['len']];
                         }
-                        $str = unpack("@$offset/a$strlen", $data)[1];
+                        $str = substr($data, $offset, $strlen);
                         if($repeat === 1) $out[$key] = $str;
                         else $out[$key][] = $str;
                         $offset += $strlen;
@@ -256,6 +256,7 @@ abstract class Bin {
                         $formatStr = 'a';
                         $lenStr = Arr::get($m, 'len', '');
                         if($lenStr !== '') {
+                            if(!Str::isInt($lenStr)) throw new ArgumentException("Length must be an integer or omitted for format argument $idx (got '$lenStr')");
                             $formatStr .= $lenStr;
                         } else {
                             $formatStr .= strlen($args[$idx]);

@@ -110,6 +110,15 @@ abstract class Path {
         self::$_isWin = (bool)$flag;
         self::$_sep = self::$_isWin ? '\\' : '/';
     }
+
+    /**
+     * Get the user's home directory.
+     * @return string
+     */
+    public static function home(){
+        // todo: needs testing on windows
+        return getenv('HOME');
+    }
 }
 
 Path::__initStatic();

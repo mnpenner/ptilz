@@ -1,5 +1,6 @@
 <?php
 namespace Ptilz;
+use Ptilz\Exceptions\InvalidOperationException;
 
 /**
  * Mathematical functions
@@ -136,4 +137,62 @@ abstract class Math {
         return self::decToAnyBase($dec, 16, $uppercase ? '0123456789ABCDEF' : '0123456789abcdef');
     }
 
+    public static function max($a, $b) {
+        return bccomp($a, $b) > 0 ? $a : $b;
+    }
+
+    public static function min($a, $b) {
+        return bccomp($a, $b) < 0 ? $a : $b;
+    }
+
+    public static function randInt($min, $max) {
+        $randMax = mt_getrandmax();
+        $diff = bcsub($max, $min);
+        if(bccomp($diff, $randMax) > 0) {
+            trigger_error("Spread is greater than precision of mt_rand(); numbers will be skipped", E_USER_WARNING);
+        }
+        return self::toInt(bcadd(
+            $min,
+            bcmul(
+                bcdiv(mt_rand(), bcadd($randMax, '1'), 10),
+                bcadd($diff, '1')
+            )
+        ));
+    }
+
+    /**
+     * Computes the natural logarithm of a number.
+     *
+     * @param int|string|float $n
+     * @param int        $scale This optional parameter is used to set the number of digits after the decimal place in the result.
+     * @return string
+     */
+    public static function ln($n, $scale=10) {
+        $iscale = $scale+3;
+        $result = '0.0';
+        $i = 0;
+
+        do {
+            $pow = (1 + (2 * $i++));
+            $mul = bcdiv('1', $pow, $iscale);
+            $fraction = bcmul($mul, bcpow(bcsub($n, '1', $iscale) / bcadd($n, '1', $iscale), $pow, $iscale), $iscale);
+            $lastResult = $result;
+            $result = bcadd($fraction, $result, $iscale);
+        } while($result !== $lastResult);
+//        echo "$i iterations\n";
+
+        return bcmul('2', $result, $scale);
+    }
+
+    /**
+     * Computes the logarithm of a number.
+     *
+     * @param int|string|float $n
+     * @param int $base
+     * @param int $scale This optional parameter is used to set the number of digits after the decimal place in the result.
+     * @return string
+     */
+    public static function log($n, $base = 10, $scale=10) {
+        return bcdiv(self::ln($n, $scale), self::ln($base, $scale), $scale);
+    }
 }

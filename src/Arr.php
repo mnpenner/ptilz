@@ -9,12 +9,22 @@ abstract class Arr {
      * Retrieve a value from an array by key, otherwise a default value.
      *
      * @param array $arr Array
-     * @param int|string $key Key
+     * @param int|string|array $key Key(s)
      * @param mixed $default Default value if key is not found
      *
      * @return mixed
      */
     public static function get(array $arr, $key, $default = null) {
+        if(is_array($key)) {
+            foreach($key as $k) {
+                if(array_key_exists($k, $arr)) {
+                    $arr = $arr[$k];
+                } else {
+                    return $default;
+                }
+            }
+            return $arr;
+        }
         return array_key_exists($key, $arr) ? $arr[$key] : $default;
     }
 
@@ -248,7 +258,7 @@ abstract class Arr {
     public static function filter(array $input, callable $callback = null) {
         if($input === []) return [];
         if($callback === null) {
-            $callback = ['Ptilz\Obj','isTruthy'];
+            $callback = ['Ptilz\V','isTruthy'];
         }
         $assoc = self::isAssoc($input);
         $ret = [];

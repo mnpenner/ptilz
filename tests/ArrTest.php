@@ -9,6 +9,7 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('b', Arr::get($arr, 2, 'x'));
         $this->assertSame('x', Arr::get($arr, 3, 'x'));
         $this->assertSame(null, Arr::get($arr, 'c'));
+        $this->assertSame(4, Arr::get(['a'=>['b'=>['c'=>4]]], ['a','b','c']));
     }
 
     function testIsNumeric() {

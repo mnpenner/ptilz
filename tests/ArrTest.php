@@ -386,4 +386,12 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('<b><i><u>', Arr::wrap(['b', 'i', 'u'], '<', '>', ''));
         $this->assertSame('[a],[b],[c]', Arr::wrap(['a', 'b', 'c'], '[', ']', ','));
     }
+
+    function testInc() {
+        $arr = ['a' => 1];
+        Arr::inc($arr, 'a');
+        $this->assertSame(['a' => 2], $arr);
+        Arr::inc($arr, 'b', 2);
+        $this->assertSame(['a' => 2, 'b' => 2], $arr);
+    }
 }

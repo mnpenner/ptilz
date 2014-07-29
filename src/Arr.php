@@ -32,7 +32,7 @@ abstract class Arr {
      * Increment an array element by some amount. Will not throw a warning if the key is not yet defined.
      *
      * @param array $array
-     * @param int|string $key
+     * @param int|string|array $key
      * @param int $amount
      */
     public static function inc(array &$array, $key, $amount = 1) {

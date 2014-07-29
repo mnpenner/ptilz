@@ -36,6 +36,17 @@ abstract class Arr {
      * @param int $amount
      */
     public static function inc(array &$array, $key, $amount = 1) {
+        if(is_array($key)) {
+            while(count($key) >= 2) {
+                $k = array_shift($key);
+                if(!array_key_exists($k,$array)) {
+                    $array[$k] = [];
+                }
+                $array = &$array[$k];
+            }
+            $key = reset($key);
+        }
+
         if(array_key_exists($key, $array)) {
             $array[$key] += $amount;
         } else {

@@ -29,6 +29,21 @@ abstract class Arr {
     }
 
     /**
+     * Increment an array element by some amount. Will not throw a warning if the key is not yet defined.
+     *
+     * @param array $array
+     * @param int|string $key
+     * @param int $amount
+     */
+    public static function inc(array &$array, $key, $amount = 1) {
+        if(array_key_exists($key, $array)) {
+            $array[$key] += $amount;
+        } else {
+            $array[$key] = $amount;
+        }
+    }
+
+    /**
      * Rekey an array with a column of your choice
      *
      * @param array $arr Array to rekey

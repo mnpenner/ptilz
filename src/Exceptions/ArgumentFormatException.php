@@ -6,6 +6,7 @@ use Exception;
 
 /**
  * Thrown when an argument is incorrectly formatted.
+ * @seealso http://php.net/manual/en/class.domainexception.php
  */
 class ArgumentFormatException extends Exception {
     public function __construct($paramName, $details=null, $code = 0, Exception $previous = null) {

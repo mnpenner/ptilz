@@ -20,10 +20,13 @@ abstract class Dbg {
         } elseif(is_resource($var)) {
             echo strval($var);
         } elseif(is_string($var)) {
+            // todo: add binary string detection and display as hex
+            // if it's a long piece of binary (> 16 bytes?) then split w/ spaces and line breaks
             echo '"' . addcslashes($var, "\0..\37\42\177..\377") . '"';
         } elseif(is_bool($var)) {
             echo $var ? 'true' : 'false';
         } elseif(is_int($var) || is_float($var)) {
+            // todo: detect unix timestamp? (+/- 5 years)
             echo $var;
         } elseif(is_array($var)) {
             echo 'array(';

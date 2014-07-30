@@ -25,14 +25,14 @@ abstract class Sys {
         foreach($cmd as $k => $v) {
             if(is_int($k)) {
                 $cmdArr[] = escapeshellarg($v);
-            } else {
+            } elseif($v !== false) {
                 // there's no standard, so who knows what format we should use?
                 if(strlen($k) === 1) {
                     $cmdArr[] = '-' . escapeshellarg($k);
                 } else {
                     $cmdArr[] = '--' . escapeshellarg($k);
                 }
-                if(!Str::isEmpty($v)) {
+                if(is_string($v) && $v !== '') {
                     $cmdArr[] = escapeshellarg($v);
                 }
             }

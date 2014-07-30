@@ -32,7 +32,7 @@ abstract class Sys {
                 } else {
                     $cmdArr[] = '--' . escapeshellarg($k);
                 }
-                if(is_string($v) && $v !== '') {
+                if(!in_array($v, [true, '', null], true)) {
                     $cmdArr[] = escapeshellarg($v);
                 }
             }

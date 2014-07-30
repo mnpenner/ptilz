@@ -6,6 +6,7 @@ use Ptilz\Arr;
 
 /**
  * Thrown when an argument is of the wrong type.
+ * @seealso http://php.net/manual/en/class.logicexception.php
  */
 class ArgumentTypeException extends ArgumentException {
     public function __construct($paramName, $expectedType = null, $code = 0, Exception $previous = null) {

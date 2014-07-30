@@ -50,4 +50,15 @@ abstract class Sys {
         passthru(self::escape($cmd), $return_var);
         return $return_var;
     }
+
+    /**
+     * Execute command via shell and return the complete output as a string
+     *
+     * @param string|array $cmd
+     * @return string The output from the executed command. Trailing newlines are stripped.
+     * @throws Exceptions\ArgumentTypeException
+     */
+    public static function exec($cmd) {
+        return rtrim(shell_exec(self::escape($cmd)), "\n\r");
+    }
 }

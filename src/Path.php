@@ -119,6 +119,11 @@ abstract class Path {
         // todo: needs testing on windows
         return getenv('HOME');
     }
+
+    public static function parentDirectory($path = null) {
+        if($path === null) $path = getcwd();
+        return self::join($path, '..');
+    }
 }
 
 Path::__initStatic();

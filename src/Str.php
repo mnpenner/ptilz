@@ -1,6 +1,7 @@
 <?php
 namespace Ptilz;
 use Ptilz\Exceptions\ArgumentOutOfRangeException;
+use Ptilz\Exceptions\NotImplementedException;
 
 /**
  * String helper methods.
@@ -159,5 +160,9 @@ abstract class Str {
         return preg_replace_callback('~\{([^}]*)\}~', function ($m) use ($format, $args, &$i) {
             return $m[1] === '' ? $args[$i++] : $args[$m[1]];
         }, $format);
+    }
+
+    public static function wordWrap($sentence, $width) {
+        throw new NotImplementedException;
     }
 }

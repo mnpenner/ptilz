@@ -82,11 +82,20 @@ class PathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('/foo/bar', Path::normalize('/foo/bar/baz/..'));
         $this->assertSame('/foo/bar/baz', Path::normalize('/foo/bar/baz/.'));
         $this->assertSame('foo/bar', Path::normalize('foo//bar/'));
+        $this->assertSame('.', Path::normalize('foo/bar/../..'));
+        $this->assertSame('..', Path::normalize('foo/bar/../../..'));
+        $this->assertSame('../..', Path::normalize('foo/bar/../../../..'));
+        $this->assertSame('/', Path::normalize('/foo/bar/../../..'));
 
         Path::setWindows(true);
         $this->assertSame('c:\\baz', Path::normalize('c:/foo/bar/../../baz'));
         $this->assertSame('\\foo\\bar', Path::normalize('\\foo\\bar/baz/..'));
         $this->assertSame('\\foo\\bar\\baz', Path::normalize('/foo/bar/baz/.'));
         $this->assertSame('foo\\bar', Path::normalize('foo//bar/'));
+        $this->assertSame('.', Path::normalize('foo/bar/../..'));
+        $this->assertSame('..', Path::normalize('foo/bar/../../..'));
+        $this->assertSame('..\\..', Path::normalize('foo/bar/../../../..'));
+        $this->assertSame('C:', Path::normalize('C:/foo/bar/../../..'));
+
     }
 }

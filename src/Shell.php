@@ -31,7 +31,7 @@ abstract class Shell {
                     } else {
                         $cmdArr[] = '--' . escapeshellarg($k);
                     }
-                    if(!in_array($v, [true, '', null], true)) {
+                    if(!in_array($v, [true, null], true)) {
                         $cmdArr[] = escapeshellarg($v);
                     }
                 }
@@ -91,7 +91,7 @@ abstract class Shell {
      */
     public static function bg($cmd, $args = []) {
         $cmdStr = self::escape($cmd, $args);
-        if(substr(php_uname(), 0, 7) === 'Windows') {
+        if(Env::isWindows()) {
             pclose(popen('start /B ' . $cmdStr, 'r'));
         } else {
             exec($cmdStr . ' > /dev/null &');

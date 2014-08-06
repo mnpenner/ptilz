@@ -97,7 +97,7 @@ abstract class Path {
     }
 
     public static function __initStatic() {
-        self::$_isWin = DIRECTORY_SEPARATOR === '/';
+        self::$_isWin = Env::isWindows();
         self::$_sep = DIRECTORY_SEPARATOR;
     }
 

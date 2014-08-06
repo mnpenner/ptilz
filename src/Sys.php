@@ -61,4 +61,16 @@ abstract class Sys {
     public static function exec($cmd) {
         return rtrim(shell_exec(self::escape($cmd)), "\n\r");
     }
+
+    /**
+     * Execute an external program and return its exit code.
+     * @param string|array $cmd
+     * @param array $output If the output argument is present, then the specified array will be filled with every line of output from the command. Trailing whitespace, such as \n, is not included in this array. Note that if the array already contains some elements, exec() will append to the end of the array. If you do not want the function to append elements, call unset() on the array before passing it to status().
+     * @throws Exceptions\ArgumentTypeException
+     * @return
+     */
+    public static function status($cmd, &$output=null) {
+        exec(self::escape($cmd), $output, $return);
+        return $return;
+    }
 }

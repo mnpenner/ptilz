@@ -4,6 +4,8 @@ namespace Ptilz;
 use Ptilz\Exceptions\ArgumentException;
 use Ptilz\Exceptions\ArgumentTypeException;
 use Ptilz\Exceptions\NotImplementedException;
+use Ptilz\Exceptions\NotSupportedException;
+use SebastianBergmann\Exporter\Exception;
 
 /**
  * Functions for working with binary data
@@ -94,6 +96,10 @@ abstract class Bin {
                     $out[$key] = self::_unpack($offset,'d',$repeat,$data);
                     $offset += 8*$repeat;
                     break;
+                case '+uint48':
+                    throw new NotImplementedException($type);
+                case '-uint48':
+                    throw new NotImplementedException($type);
                 case '-uint64':
                     if($repeat === 1) $out[$key] = [];
                     for($i = 0; $i < $repeat; ++$i) {
@@ -165,6 +171,10 @@ abstract class Bin {
                 return self::isLittleEndian() ? '-int32' : '+int32';
             case 'uint32':
                 return self::isLittleEndian() ? '-uint32' : '+uint32';
+            case 'int48':
+                return self::isLittleEndian() ? '-int48' : '+int48';
+            case 'uint48':
+                return self::isLittleEndian() ? '-uint48' : '+uint48';
             case 'int64':
                 return self::isLittleEndian() ? '-int64' : '+int64';
             case 'uint64':
@@ -185,7 +195,7 @@ abstract class Bin {
                       char
                     | byte
                     | u?int
-                    | [-+]?u?int(?:16|32|64)
+                    | [-+]?u?int(?:16|32|48|64)
                     | float(?:32|64)
                 )
                 | (?<type>str) (?:\[ (?<len>[^\]]+) \])?
@@ -240,6 +250,10 @@ abstract class Bin {
                     case '-uint32':
                         $out .= pack('V', $args[$idx]);
                         break;
+                    case '+uint48':
+                        throw new NotImplementedException($type);
+                    case '-uint48':
+                        throw new NotImplementedException($type);
                     case '+uint64':
                         $out .= pack('NN', (int)bcdiv($args[$idx],'4294967296'), (int)bcmod($args[$idx],'4294967296'));
                         break;
@@ -292,5 +306,23 @@ abstract class Bin {
      */
     public static function hasFlag($val, $flag) {
         return ($val & $flag) === $flag;
+    }
+
+    /**
+     * Generate a pseudo-random string of bytes
+     *
+     * @param int $length
+     * @return string The generated string of bytes
+     * @throws Exceptions\NotSupportedException
+     */
+    public static function random($length) {
+        if(function_exists('openssl_random_pseudo_bytes')) {
+            return openssl_random_pseudo_bytes($length);
+        }
+        $data = @file_get_contents('/dev/urandom', null, null, 0, $length);
+        if($data !== false) {
+            return $data;
+        }
+        throw new NotSupportedException("Your system does does not support any sources of randomness");
     }
 }

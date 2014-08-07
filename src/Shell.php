@@ -21,7 +21,7 @@ abstract class Shell {
             if(!Iter::isIterable($args)) {
                 throw new ArgumentTypeException('args', 'array|Traversable');
             }
-            foreach($cmd as $k => $v) {
+            foreach($args as $k => $v) {
                 if(is_int($k)) {
                     $cmdArr[] = escapeshellarg($v);
                 } elseif($v !== false) {

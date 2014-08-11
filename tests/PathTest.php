@@ -4,7 +4,7 @@ use Ptilz\Path;
 class PathTest extends PHPUnit_Framework_TestCase {
 
     function testIsAbsolute() {
-        Path::setWindows(false);
+        Path::setWindowsMode(false);
 
         $this->assertTrue(Path::isAbsolute('/'));
         $this->assertTrue(Path::isAbsolute('/foo'));
@@ -17,7 +17,7 @@ class PathTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse(Path::isAbsolute('foo/bar'));
         $this->assertFalse(Path::isAbsolute('./baz'));
 
-        Path::setWindows(true);
+        Path::setWindowsMode(true);
 
 //        $this->assertTrue(Path::isAbsolute('c:'));
 //        $this->assertTrue(Path::isAbsolute('D:'));
@@ -36,12 +36,12 @@ class PathTest extends PHPUnit_Framework_TestCase {
     }
 
     function testRelative() {
-        Path::setWindows(false);
+        Path::setWindowsMode(false);
         $this->assertEquals('../../impl/bbb', Path::relative('/data/orandea/test/aaa', '/data/orandea/impl/bbb'));
         $this->assertEquals('../../../bbb/ccc/ddd', Path::relative('/aaa/bbb/ccc', '/bbb/ccc/ddd'));
         $this->assertEquals('baz/file.js', Path::relative('/foo/bar', '/foo/bar/baz/file.js'));
 
-        Path::setWindows(true);
+        Path::setWindowsMode(true);
         $this->assertEquals('..\\..\\impl\\bbb', Path::relative('C:\\orandea\\test\\aaa', 'C:\\orandea\\impl\\bbb'));
         $this->assertEquals('baz\\file.js', Path::relative('c:/foo/bar', 'c:/foo/bar/baz/file.js'));
         $this->assertEquals('baz\\file.js', Path::relative('c:\\foo\\bar', 'c:\\foo\\bar\\baz\\file.js'));
@@ -49,13 +49,13 @@ class PathTest extends PHPUnit_Framework_TestCase {
     }
 
     function testJoin() {
-        Path::setWindows(false);
+        Path::setWindowsMode(false);
         $this->assertSame("a/b", Path::join('a', 'b'));
         $this->assertSame("a/b", Path::join('a', '/b'));
         $this->assertSame("a/b", Path::join('a/', '/b\\'));
         $this->assertSame("foo/bar/baz", Path::join('foo', 'bar\\baz'));
 
-        Path::setWindows(true);
+        Path::setWindowsMode(true);
         $this->assertSame("a\\b", Path::join('a', 'b'));
         $this->assertSame("a\\b", Path::join('a', '\\b'));
         $this->assertSame("a\\b", Path::join('a/', '/b\\'));
@@ -63,13 +63,13 @@ class PathTest extends PHPUnit_Framework_TestCase {
     }
 
     function testResolve() {
-        Path::setWindows(false);
+        Path::setWindowsMode(false);
         $this->assertSame('/foo/bar/baz', Path::resolve('/foo/bar', 'baz'));
         $this->assertSame('/foo/bar/baz', Path::resolve(__DIR__, '/foo/bar', 'baz'));
         $this->assertSame('/foo/bar/baz/img.jpg', Path::resolve('/foo/bar', 'baz', 'img.jpg'));
         $this->assertSame('/foo/bar/c:/baz/img.jpg', Path::resolve('/foo/bar', 'c:/baz', 'img.jpg'));
 
-        Path::setWindows(true);
+        Path::setWindowsMode(true);
         $this->assertSame('\\foo\\bar\\baz', Path::resolve('/foo/bar', 'baz'));
         $this->assertSame('\\foo\\bar\\baz', Path::resolve(__DIR__, '/foo/bar', 'baz'));
         $this->assertSame('\\foo\\bar\\baz\\img.jpg', Path::resolve('/foo/bar', 'baz', 'img.jpg'));
@@ -77,9 +77,10 @@ class PathTest extends PHPUnit_Framework_TestCase {
     }
 
     function testNormalize() {
-        Path::setWindows(false);
+        Path::setWindowsMode(false);
         $this->assertSame('/baz', Path::normalize('/foo/bar/../../baz'));
         $this->assertSame('/foo/bar', Path::normalize('/foo/bar/baz/..'));
+        $this->assertSame('\\foo\\bar', Path::normalize('/foo/bar/baz/..', '\\'));
         $this->assertSame('/foo/bar/baz', Path::normalize('/foo/bar/baz/.'));
         $this->assertSame('foo/bar', Path::normalize('foo//bar/'));
         $this->assertSame('.', Path::normalize('foo/bar/../..'));
@@ -87,15 +88,15 @@ class PathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('../..', Path::normalize('foo/bar/../../../..'));
         $this->assertSame('/', Path::normalize('/foo/bar/../../..'));
 
-        Path::setWindows(true);
+        Path::setWindowsMode(true);
         $this->assertSame('c:\\baz', Path::normalize('c:/foo/bar/../../baz'));
         $this->assertSame('\\foo\\bar', Path::normalize('\\foo\\bar/baz/..'));
+        $this->assertSame('/foo/bar', Path::normalize('\\foo\\bar/baz/..','/'));
         $this->assertSame('\\foo\\bar\\baz', Path::normalize('/foo/bar/baz/.'));
         $this->assertSame('foo\\bar', Path::normalize('foo//bar/'));
         $this->assertSame('.', Path::normalize('foo/bar/../..'));
         $this->assertSame('..', Path::normalize('foo/bar/../../..'));
         $this->assertSame('..\\..', Path::normalize('foo/bar/../../../..'));
         $this->assertSame('C:', Path::normalize('C:/foo/bar/../../..'));
-
     }
 }

@@ -60,19 +60,35 @@ abstract class Path {
      * Normalize a string path, taking care of '..' and '.' parts.
      *
      * @param string $path
+     * @param string $sep Path separator
      * @return string
      * @see http://nodejs.org/api/path.html#path_path_normalize_p
      */
-    public static function normalize($path) {
-        $path = preg_replace('~[/\\\\]+~', self::$_sep, $path);
-        if($path === self::$_sep) return $path;
+    public static function normalize($path, $sep=null) {
+        if($sep === null) $sep = self::$_sep;
+        $path = preg_replace('~[/\\\\]+~', $sep, $path);
+        if($path === $sep) return $path;
         $out = [];
-        foreach(explode(self::$_sep, rtrim($path, self::$_sep)) as $p) {
+        $dirs = explode($sep, rtrim($path, $sep));
+        $isEmpty = !$dirs;
+        $isAbs = self::isAbsolute($path);
+        foreach($dirs as $p) {
             if($p === '.') continue;
-            if($p === '..') array_pop($out);
+            if($p === '..') {
+                if($isEmpty) {
+                    if(!$isAbs) $out[] = '..';
+                } else {
+                    array_pop($out);
+                    if(!$out) $isEmpty = true;
+                }
+            }
             else $out[] = $p;
         }
-        return implode(self::$_sep, $out);
+        if(!$out) {
+            if($isAbs) return $sep; // todo: need to return Windows drive letter if $_isWin
+            return '.';
+        }
+        return implode($sep, $out);
     }
 
 
@@ -106,7 +122,7 @@ abstract class Path {
      *
      * @param bool $flag True for Windows, false for any other OS
      */
-    public static function setWindows($flag) {
+    public static function setWindowsMode($flag) {
         self::$_isWin = (bool)$flag;
         self::$_sep = self::$_isWin ? '\\' : '/';
     }

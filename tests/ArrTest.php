@@ -347,6 +347,9 @@ class ArrTest extends PHPUnit_Framework_TestCase {
             3 => ['a' => 'a3', 'b' => 'b3', 'c' => 'c3'],
         ];
         $this->assertSame($trans, Arr::transpose($mat));
+
+
+        $this->assertSame(['a'=>[1,3],'b'=>[2,4]], Arr::transpose([['a' => 1,'b'=>2],['a'=>3,'b'=>4]]));
     }
 
     function testMap() {

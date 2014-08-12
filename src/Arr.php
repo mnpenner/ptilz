@@ -430,18 +430,13 @@ abstract class Arr {
      * @return array|mixed
      */
     public static function transpose(array $mat) {
-        if(self::isNumeric($mat)) {
-            array_unshift($mat, null);
-            return call_user_func_array('array_map', $mat);
-        } else {
-            $T = [];
-            foreach($mat as $m => $row) {
-                foreach($row as $n => $val) {
-                    $T[$n][$m] = $val;
-                }
+        $T = [];
+        foreach($mat as $m => $row) {
+            foreach($row as $n => $val) {
+                $T[$n][$m] = $val;
             }
-            return $T;
         }
+        return $T;
     }
 
     /**

@@ -161,8 +161,4 @@ abstract class Str {
             return $m[1] === '' ? $args[$i++] : $args[$m[1]];
         }, $format);
     }
-
-    public static function wordWrap($sentence, $width) {
-        throw new NotImplementedException;
-    }
 }

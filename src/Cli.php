@@ -22,8 +22,7 @@ abstract class Cli {
      * @param int $maxWidth Maximum width, in chars
      */
     public static function printColumns($items, $maxWidth=null) {
-        if($maxWidth === null) $maxWidth = (int)`tput cols`; // fixme: make this Windows compatible
-        if(!$maxWidth) $maxWidth = 100;
+        if($maxWidth === null) $maxWidth = self::width(80);
 
         $colPadding = '  ';
         $paddingWidth = strlen(strip_tags($colPadding));
@@ -53,7 +52,25 @@ abstract class Cli {
         }
     }
 
-    public function wordWrap($string, $width=null) {
-        echo Str::wordWrap($string, $width ?: `tput cols`);
+    /**
+     * Gets the width of the terminal window
+     *
+     * @param mixed $default What to return if the native commands fail
+     * @return int|null
+     */
+    public static function width($default = null) {
+        if(Env::isWindows()) {
+            if(preg_match('/---+(\n[^|]+?){2}(?<cols>\d+)/', `mode`, $matches)) {
+                return (int)$matches['cols'];
+            }
+        } else {
+            return (int)`tput cols`;
+        }
+        return $default;
+    }
+
+    public static function wordWrap($string, $width=null) {
+        if($width === null) $width = self::width(80);
+        echo wordwrap($string, $width);
     }
 }

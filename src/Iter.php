@@ -40,4 +40,38 @@ class Iter {
         }
         return $result;
     }
+
+    /**
+     * Returns true if every value passes the callback
+     *
+     * @param array|Traversable $trav
+     * @param callable $callback Defaults to V::isTruthy
+     * @return bool
+     */
+    public static function all($trav, callable $callback=null) {
+        if($callback === null) $callback = ['Ptilz\V','isTruthy'];
+        foreach($trav as $v) {
+            if(!$callback($v)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns true if any value passes the callback
+     *
+     * @param array|Traversable $trav
+     * @param callable $callback Defaults to V::isTruthy
+     * @return bool
+     */
+    public static function any($trav, callable $callback=null) {
+        if($callback === null) $callback = ['Ptilz\V','isTruthy'];
+        foreach($trav as $v) {
+            if($callback($v)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -60,7 +60,8 @@ abstract class Cli {
      */
     public static function width($default = null) {
         if(Env::isWindows()) {
-            if(preg_match('/---+(\n[^|]+?){2}(?<cols>\d+)/', `mode`, $matches)) {
+            // fixme: this only works if your locale is English
+            if(preg_match('~\bColumns:\s*(?<cols>\d+)~', `mode`, $matches)) {
                 return (int)$matches['cols'];
             }
         } else {

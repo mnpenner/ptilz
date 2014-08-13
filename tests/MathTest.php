@@ -63,4 +63,11 @@ class MathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(6, Math::mul('2', '3'));
         $this->assertEquals('9223372037000250000', Math::mul('3037000500', '3037000500'));
     }
+
+    function testTruncatedMean() {
+        $this->assertEquals(2.5,Math::truncatedMean([1,2,3,4],.25));
+        $this->assertEquals(2.5,Math::truncatedMean([1,2,3,4],.4999));
+        $this->assertEquals(4.5,Math::truncatedMean([1,4,2,8,7,6,3,5],.125));
+        $this->assertEquals(42,Math::truncatedMean([100,0,41,43],.25));
+    }
 }

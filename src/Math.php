@@ -1,5 +1,7 @@
 <?php
 namespace Ptilz;
+use Ptilz\Exceptions\ArgumentEmptyException;
+use Ptilz\Exceptions\ArgumentOutOfRangeException;
 use Ptilz\Exceptions\InvalidOperationException;
 
 /**
@@ -194,5 +196,30 @@ abstract class Math {
      */
     public static function log($n, $base = 10, $scale=10) {
         return bcdiv(self::ln($n, $scale), self::ln($base, $scale), $scale);
+    }
+
+    /**
+     * Discard the lowest and highest X% of values then take the average.
+     *
+     * @param array $values
+     * @param $percent
+     * @throws Exceptions\ArgumentEmptyException
+     * @throws Exceptions\ArgumentOutOfRangeException
+     * @return float
+     */
+    public static function truncatedMean(array $values, $percent) {
+        if(!$values) throw new ArgumentEmptyException('values');
+        if($percent < 0 || $percent >= 0.5) throw new ArgumentOutOfRangeException('percent',"must be at greater than or equal to 0 and less than 0.5");
+        sort($values);
+        $len = count($values);
+        $trim = round($len * $percent);
+        $newLen = $len - ($trim * 2);
+        if($newLen <= 0) {
+            // truncated too much, round the other way
+            $trim -= 1;
+            $newLen += 2;
+        }
+        $arr2 = array_slice($values, $trim, $newLen);
+        return array_sum($arr2) / $newLen;
     }
 }

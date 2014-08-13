@@ -201,7 +201,7 @@ abstract class Math {
     /**
      * Discard the lowest and highest X% of values then take the average.
      *
-     * @param array $values
+     * @param int[]|float[] $values
      * @param $percent
      * @throws Exceptions\ArgumentEmptyException
      * @throws Exceptions\ArgumentOutOfRangeException
@@ -219,7 +219,18 @@ abstract class Math {
             $trim -= 1;
             $newLen += 2;
         }
-        $arr2 = array_slice($values, $trim, $newLen);
-        return array_sum($arr2) / $newLen;
+        return self::mean(array_slice($values, $trim, $newLen));
+    }
+
+    /**
+     * Returns the average of some numbers.
+     *
+     * @param int[]|float[] $values
+     * @throws Exceptions\ArgumentEmptyException
+     * @return float
+     */
+    public static function mean(array $values) {
+        if(!$values) throw new ArgumentEmptyException('values');
+        return array_sum($values)/count($values);
     }
 }

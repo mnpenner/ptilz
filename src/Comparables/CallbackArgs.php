@@ -5,6 +5,10 @@ class CallbackArgs {
     private $callback;
     private $args;
 
+    /**
+     * @param callable $callable Callable function
+     * @param mixed ...$arg Arguments to pass to callable
+     */
     function __construct() {
         $args = func_get_args();
         $this->callback = array_shift($args);

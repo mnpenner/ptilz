@@ -2,9 +2,9 @@
 namespace Ptilz\Comparables;
 
 abstract class Comparable {
-    abstract function Compare($a, $b);
+    abstract public function Compare($a, $b);
 
-    function __invoke($a, $b) {
+    public function __invoke($a, $b) {
         return $this->Compare($a, $b);
     }
 }

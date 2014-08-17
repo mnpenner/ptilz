@@ -10,7 +10,7 @@ class ArrayCallbackComparable extends Comparable {
         $this->func = $func;
     }
 
-    function Compare($a, $b) {
+    public function Compare($a, $b) {
         return call_user_func($this->func, $a[$this->key], $b[$this->key]);
     }
 }

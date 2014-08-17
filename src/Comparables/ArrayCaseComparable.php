@@ -2,7 +2,7 @@
 namespace Ptilz\Comparables;
 
 class ArrayCaseComparable extends ArrayComparable {
-    function Compare($a, $b) {
+    public function Compare($a, $b) {
         return strcasecmp($a[$this->key], $b[$this->key]);
     }
 }

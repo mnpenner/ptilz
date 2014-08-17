@@ -76,17 +76,12 @@ abstract class Dbg {
         }
     }
 
+    /**
+     * @param $var
+     * @return string
+     * @deprecated Moved to V::
+     */
     public static function getType($var) {
         return is_object($var) ? get_class($var) : gettype($var);
-    }
-
-    /**
-     * @param string $format
-     * @param mixed  ...$args
-     * @return string
-     */
-    public static function format($format) {
-        // todo: add format option for getting the type of an object; maybe [[xxx]] or <xxx>.. quote/stringify all things
-        throw new NotImplementedException();
     }
 }

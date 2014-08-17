@@ -2,7 +2,7 @@
 namespace Ptilz\Comparables;
 
 class ArrayNatComparable extends ArrayComparable {
-    function Compare($a, $b) {
+    public function Compare($a, $b) {
         return strnatcmp($a[$this->key], $b[$this->key]);
     }
 }

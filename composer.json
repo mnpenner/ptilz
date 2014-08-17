@@ -18,7 +18,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Ptilz\\": "src/"
+            "Ptilz\\": ["src/", "src/Static/"]
         },
         "files": ["src/bootstrap.php"]
     }

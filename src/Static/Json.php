@@ -5,12 +5,15 @@ use JsonSerializable;
 use Ptilz\Exceptions\InvalidOperationException;
 use Ptilz\Internal\RawJson;
 
+define('JSON_FORCE_UTF8', 1073741824);
+define('JSON_ESCAPE_SCRIPTS', 536870976);
+
 abstract class Json {
     /**
      * JSON-encodes a value. Escaping can be prevented on a sub-element via Json::literal.
      *
      * @param mixed $var The value being encoded. Can be any type except a resource.
-     * @param int $options Options passed to `json_encode`. Everything except `JSON_PRETTY_PRINT` should work.
+     * @param int $options Options passed to `json_encode`. Everything except `JSON_PRETTY_PRINT` should work. There is a new option JSON_FORCE_UTF8 which will convert invalid UTF-8 byte sequences into UTF-8; for example chr(200) will be converted to "\u00c8" (È) instead of erroring. JSON_ESCAPE_SCRIPTS will enable JSON_UNESCAPED_SLASHES but still escape </script> tags which makes it safe for outputting inside of a HTML <script> element.
      * @throws InvalidOperationException
      * @return string
      * @see http://us3.php.net/manual/en/json.constants.php
@@ -35,15 +38,24 @@ abstract class Json {
                 return self::encode($var->jsonSerialize(), $options);
             }
         }
-        if(is_string($var)) {
+        if(is_string($var) && Bin::hasFlag($options, JSON_FORCE_UTF8)) {
             $var = self::_utf8($var);
         }
 
         $result = json_encode($var, $options);
         $error_code = json_last_error();
         if($error_code !== JSON_ERROR_NONE) {
-            throw new InvalidOperationException(json_last_error_msg(), $error_code);
+            $message = json_last_error_msg();
+            if($error_code === JSON_ERROR_UTF8) {
+                $message .= " Consider using flag JSON_FORCE_UTF8.";
+            }
+            throw new InvalidOperationException($message, $error_code);
         }
+
+        if(is_string($var) && Bin::hasFlag($options, JSON_ESCAPE_SCRIPTS)) {
+            return str_replace('</script>', '<\/script>', $result);
+        }
+
         return $result;
     }
 

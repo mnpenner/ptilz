@@ -49,7 +49,7 @@ abstract class Json {
 
     private static function _utf8($str) {
         if(!mb_check_encoding($str, 'UTF-8')) {
-            return utf8_encode($str, 'UTF-8');
+            return utf8_encode($str);
         }
         return $str;
     }

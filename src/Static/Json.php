@@ -5,12 +5,15 @@ use JsonSerializable;
 use Ptilz\Exceptions\InvalidOperationException;
 use Ptilz\Internal\RawJson;
 
+define('JSON_FORCE_UTF8', 1073741824);
+define('JSON_ESCAPE_SCRIPTS', 536870976);
+
 abstract class Json {
     /**
      * JSON-encodes a value. Escaping can be prevented on a sub-element via Json::literal.
      *
      * @param mixed $var The value being encoded. Can be any type except a resource.
-     * @param int $options Options passed to `json_encode`. Everything except `JSON_PRETTY_PRINT` should work.
+     * @param int $options Options passed to `json_encode`. Everything except `JSON_PRETTY_PRINT` should work. There is a new option JSON_FORCE_UTF8 which will convert invalid UTF-8 byte sequences into UTF-8; for example chr(200) will be converted to "\u00c8" (È) instead of erroring. JSON_ESCAPE_SCRIPTS will enable JSON_UNESCAPED_SLASHES but still escape </script> tags which makes it safe for outputting inside of a HTML <script> element.
      * @throws InvalidOperationException
      * @return string
      * @see http://us3.php.net/manual/en/json.constants.php
@@ -20,7 +23,7 @@ abstract class Json {
             if(Bin::hasFlag($options, JSON_FORCE_OBJECT) || Arr::isAssoc($var)) {
                 $bits = [];
                 foreach($var as $k => $v) {
-                    $bits[] = json_encode((string)$k, $options) . ':' . self::encode($v, $options);
+                    $bits[] = self::encode((string)$k, $options) . ':' . self::encode($v, $options);
                 }
                 return '{' . implode(',', $bits) . '}';
             } else {
@@ -35,7 +38,32 @@ abstract class Json {
                 return self::encode($var->jsonSerialize(), $options);
             }
         }
-        return json_encode($var, $options);
+        if(is_string($var) && Bin::hasFlag($options, JSON_FORCE_UTF8)) {
+            $var = self::_utf8($var);
+        }
+
+        $result = json_encode($var, $options);
+        $error_code = json_last_error();
+        if($error_code !== JSON_ERROR_NONE) {
+            $message = json_last_error_msg();
+            if($error_code === JSON_ERROR_UTF8) {
+                $message .= " Consider using flag JSON_FORCE_UTF8.";
+            }
+            throw new InvalidOperationException($message, $error_code);
+        }
+
+        if(is_string($var) && Bin::hasFlag($options, JSON_ESCAPE_SCRIPTS)) {
+            return str_replace('</script>', '<\/script>', $result);
+        }
+
+        return $result;
+    }
+
+    private static function _utf8($str) {
+        if(!mb_check_encoding($str, 'UTF-8')) {
+            return utf8_encode($str);
+        }
+        return $str;
     }
 
     /**
@@ -47,19 +75,6 @@ abstract class Json {
     public static function raw($str) {
         return new RawJson($str);
     }
-
-    private static $error_codes = [
-        JSON_ERROR_NONE => "No error has occurred",
-        JSON_ERROR_DEPTH => "The maximum stack depth has been exceeded",
-        JSON_ERROR_STATE_MISMATCH => "Invalid or malformed JSON",
-        JSON_ERROR_CTRL_CHAR => "Control character error, possibly incorrectly encoded",
-        JSON_ERROR_SYNTAX => "Syntax error",
-        JSON_ERROR_UTF8 => "Malformed UTF-8 characters, possibly incorrectly encoded",
-        JSON_ERROR_RECURSION => "One or more recursive references in the value to be encoded",
-        JSON_ERROR_INF_OR_NAN => "One or more NAN or INF values in the value to be encoded",
-        JSON_ERROR_UNSUPPORTED_TYPE => "A value of a type that cannot be encoded was given",
-
-    ];
 
     /**
      * Decodes a JSON string. Throws an exception on error.
@@ -75,7 +90,7 @@ abstract class Json {
         $result = json_decode($str, $assoc, $depth, $options);
         $error_code = json_last_error();
         if($error_code !== JSON_ERROR_NONE) {
-            throw new InvalidOperationException(Arr::get(self::$error_codes, $error_code, "Unknown error"), $error_code);
+            throw new InvalidOperationException(json_last_error_msg(), $error_code);
         }
         return $result;
     }

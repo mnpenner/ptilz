@@ -460,10 +460,14 @@ abstract class Arr {
     }
 
     /**
-     * Applies the callback to the elements of the given arrays
+     * Applies a callback to the elements of the given array
+     *
+     * If the callback is a generator, each yielded value will be merged
+     * into the resulting array. This allows you to re-key the array
+     * or omit elements completely.
      *
      * @param array|\Traversable $iter
-     * @param callable $callback
+     * @param callable $callback function($value, $key)
      * @return array
      */
     public static function map($iter, callable $callback) {
@@ -523,7 +527,65 @@ abstract class Arr {
         return $result;
     }
 
+    /**
+     * Returns an array with the same value repeated the specified number of times.
+     *
+     * @param mixed $val Value to repeat
+     * @param int $times Number of times to repeat; resulting array length
+     * @return array
+     */
     public static function repeat($val, $times) {
         return array_fill(0, $times, $val);
+    }
+
+
+    /**
+     * Shuffle an array, maintaining keys.
+     *
+     * @param array $array
+     * @return array
+     */
+    public static function shuffle(array $array) {
+        $keys = array_keys($array);
+        shuffle($keys);
+        $result = [];
+        foreach($keys as $k) {
+            $result[$k] = $array[$k];
+        }
+        return $result;
+    }
+
+    /**
+     * Return a random key from an array
+     *
+     * @param array $array
+     * @return int|string
+     */
+    public static function randomKey(array $array) {
+        $keys = array_keys($array);
+        $idx = mt_rand(0, count($keys) - 1);
+        return $keys[$idx];
+    }
+
+    /**
+     * Return a random value from an array.
+     *
+     * @param array $array
+     * @return mixed
+     */
+    public static function randomValue(array $array) {
+        return $array[self::randomKey($array)];
+    }
+
+    /**
+     * Returns random elements from an array
+     *
+     * @param array $array
+     * @param int $count Number of elements to return
+     * @return array
+     */
+    public static function randomSubset(array $array, $count) {
+        $shuf = self::shuffle($array);
+        return array_slice($shuf, 0, $count);
     }
 }

@@ -12,6 +12,14 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(4, Arr::get(['a'=>['b'=>['c'=>4]]], ['a','b','c']));
     }
 
+    function testGetDeep() {
+        $arr = ['a' => 1, 2 => ['b' => 'c'], 'd' => ['e' => ['f' => [3, 4]]]];
+        $this->assertSame('c', Arr::getDeep($arr, '2[b]'));
+        $this->assertSame([3, 4], Arr::getDeep($arr, 'd[e][f]'));
+        $this->assertSame(null, Arr::getDeep($arr, 'd[g][f]'));
+        $this->assertSame('x', Arr::getDeep($arr, 'd[e][g]', 'x'));
+    }
+
     function testIsNumeric() {
         $this->assertTrue(Arr::isNumeric(['a', 'b']));
         $this->assertTrue(Arr::isNumeric([0 => 'a', 1 => 'b']));

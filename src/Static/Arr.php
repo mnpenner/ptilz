@@ -29,6 +29,30 @@ abstract class Arr {
     }
 
     /**
+     * Retrieve a value from an array by key, allowing PHP's square[bracket][notation].
+     *
+     * @param array $arr Array
+     * @param string $key Key to fetch. May use PHP's square[bracket][notation].
+     * @param mixed $default Default value if key is not found
+     *
+     * @return mixed
+     */
+    public static function getDeep(array $arr, $key, $default = null) {
+        $name = strtok($key, '[');
+        if(!isset($arr[$name])) return $default;
+        $ret = &$arr[$name];
+        $rem = strtok(null);
+        if($rem) {
+            $rem = explode('[', str_replace(']', '', $rem));
+            while(($k = array_shift($rem)) !== null) {
+                if(!isset($ret[$k])) return $default;
+                $ret = &$ret[$k];
+            }
+        }
+        return $ret;
+    }
+
+    /**
      * Increment an array element by some amount. Will not throw a warning if the key is not yet defined.
      *
      * @param array $array

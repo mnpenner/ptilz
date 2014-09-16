@@ -76,6 +76,7 @@ abstract class Shell {
      * @return int
      */
     public static function status($cmd, $args=[], &$stdout=null, &$stderr=null) {
+        // TODO: change remaining args to ...$pipes
         $proc = proc_open(self::escape($cmd, $args),[
             1 => ['pipe','w'],
             2 => ['pipe','w'],
@@ -84,8 +85,7 @@ abstract class Shell {
         fclose($pipes[1]);
         $stderr = stream_get_contents($pipes[2]);
         fclose($pipes[2]);
-        $exitCode = proc_close($proc);
-        return $exitCode;
+        return proc_close($proc);
     }
 
     /**

@@ -69,18 +69,23 @@ abstract class Shell {
      * Execute an external program and return its exit code.
      *
      * @param string|array $cmd
-     * @param $args
-     * @param string $output Output from command without trailing whitespace.
-     * @throws Exceptions\ArgumentTypeException
-     * @return
+     * @param array $args
+     * @param string $stdout
+     * @param string $stderr
+     * @throws ArgumentTypeException
+     * @return int
      */
-    public static function status($cmd, $args=[], &$output=null) {
-        $output = [];
-        exec(self::escape($cmd, $args), $output, $return);
-        if(func_num_args() >= 3) {
-            $output = implode(PHP_EOL, $output);
-        }
-        return $return;
+    public static function status($cmd, $args=[], &$stdout=null, &$stderr=null) {
+        $proc = proc_open(self::escape($cmd, $args),[
+            1 => ['pipe','w'],
+            2 => ['pipe','w'],
+        ],$pipes);
+        $stdout = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+        $exitCode = proc_close($proc);
+        return $exitCode;
     }
 
     /**

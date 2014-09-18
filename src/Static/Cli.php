@@ -60,7 +60,7 @@ abstract class Cli {
      */
     public static function width($default = null) {
         if(Env::isWindows()) {
-            if(preg_match('/CON.*:(\n[^|]+?){3}(?<cols>\d+)/', `mode`, $matches)) {
+            if(preg_match('~\bCON:\n(?:.*\n){2}.*?(?<cols>\d+)$~m', `mode`, $matches)) {
                 return (int)$matches['cols'];
             }
         } else {

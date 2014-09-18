@@ -60,12 +60,14 @@ abstract class Cli {
      */
     public static function width($default = null) {
         if(Env::isWindows()) {
-            // fixme: this only works if your locale is English
-            if(preg_match('~\bColumns:\s*(?<cols>\d+)~', `mode`, $matches)) {
+            if(preg_match('/CON.*:(\n[^|]+?){3}(?<cols>\d+)/', `mode`, $matches)) {
                 return (int)$matches['cols'];
             }
         } else {
-            return (int)`tput cols`;
+            $cols = @`tput cols`;
+            if($cols !== null) {
+                return (int)$cols;
+            }
         }
         return $default;
     }

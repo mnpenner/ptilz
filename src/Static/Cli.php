@@ -19,10 +19,9 @@ abstract class Cli {
      * Prints an array of strings in columns in order to fit nicely within a terminal window.
      *
      * @param string[] $items
-     * @param int $maxWidth Maximum width, in chars
      */
-    public static function printColumns($items, $maxWidth=null) {
-        if($maxWidth === null) $maxWidth = self::width(80);
+    public static function printColumns($items) {
+        $maxWidth = self::width(80);
 
         $colPadding = '  ';
         $paddingWidth = strlen(strip_tags($colPadding));
@@ -58,7 +57,7 @@ abstract class Cli {
      * @param mixed $default What to return if the native commands fail
      * @return int|null
      */
-    public static function width($default = null) {
+    public static function width($default) {
         if(Env::isWindows()) {
             if(preg_match('~\bCON:\n(?:.*\n){2}.*?(?<cols>\d+)$~m', `mode`, $matches)) {
                 return (int)$matches['cols'];
@@ -72,8 +71,7 @@ abstract class Cli {
         return $default;
     }
 
-    public static function wordWrap($string, $width=null) {
-        if($width === null) $width = self::width(80);
-        echo wordwrap($string, $width);
+    public static function wordWrap($string) {
+        echo wordwrap($string, self::width(80));
     }
 }

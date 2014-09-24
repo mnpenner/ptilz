@@ -3,28 +3,16 @@
 use Ptilz\Cli;
 require __DIR__ . '/../vendor/autoload.php';
 
-//case 'reset': $codes[] = 0; break;
-//case 'normal': $codes[] = 0; break;
-//case 'default': $codes[] = 0; break;
-//case 'b': $codes[] = 1; break;
-//case 'bold': $codes[] = 1; break;
-//case 'bright': $codes[] = 1; break;
-//case 'dim': $codes[] = 2; break;
-//case 'italic': $codes[] = 3; break;
-//case 'underline': $codes[] = 4; break;
-//case 'blink-slow': $codes[] = 5; break;
-//case 'blink-rapid': $codes[] = 6; break;
-//case 'inverse': $codes[] = 7; break;
-//case 'negative': $codes[] = 7; break;
-//case 'reverse': $codes[] = 7; break;
-//case 'hidden': $codes[] = 8; break;
-//case 'conceal': $codes[] = 8; break;
-//case 'strike': $codes[] = 9; break;
-//case 'primary': $codes[] = 10; break;
-//case 'fraktur': $codes[] = 10; break;
-//case 'framed': $codes[] = 51; break;
-//case 'encircled': $codes[] = 52; break;
-//case 'overlined': $codes[] = 53; break;
+
+for($i=0; $i<32;) {
+    for($j=0; $j<32;) {
+        Cli::write("<fg:$i;bg:$j>".str_pad("$i;$j",9,' ',STR_PAD_BOTH));
+        if(++$j%8===0) Cli::writeLine('<default>');
+    }
+    ++$i;
+}
+
+Cli::writeLine('<default>');
 
 Cli::writeLine("text <b>b</b> text");
 Cli::writeLine("text <bold>bold</bold> text");
@@ -47,17 +35,48 @@ Cli::writeLine("text <encircled>encircled</encircled> text");
 Cli::writeLine("text <overlined>overlined</overlined> text");
 Cli::writeLine('<default>');
 
+//case 'black': $colorNumber += 0; break;
+//case 'red': $colorNumber += 1; break;
+//case 'green': $colorNumber += 2; break;
+//case 'yellow': $colorNumber += 3; break;
+//case 'blue': $colorNumber += 4; break;
+//case 'magenta': $colorNumber += 5; break;
+//case 'cyan': $colorNumber += 6; break;
+//case 'grey':
+//case 'gray':
+//case 'light-grey':
+//case 'light-gray': $colorNumber += 7; break;
+//case 'dark-grey':
+//case 'default': $colorNumber += 9; break;
+//case 'dark-gray': $colorNumber += 60; break;
+//case 'light-red': $colorNumber += 61; break;
+//case 'light-green': $colorNumber += 62; break;
+//case 'light-yellow': $colorNumber += 63; break;
+//case 'light-blue': $colorNumber += 64; break;
+//case 'light-magenta': $colorNumber += 65; break;
+//case 'light-cyan': $colorNumber += 66; break;
+//case 'white': $colorNumber += 67; break;
 
-//echo "\033[0;31mA\033[1;31mA\033[0mA\033[91myyy\033[0mzzz\n";
-//echo "\033[91mxxx\033[0m\n";
-//echo "\033[1;31mxxx\033[0m\n";
+$colors = [
+    'black','red','green','yellow','blue','magenta','cyan','grey',
+    'dark-grey','bright-red','bright-green','bright-yellow','bright-blue','bright-magenta','bright-cyan','white'];
 
-for($i=0; $i<32;) {
-    for($j=0; $j<32;) {
-        Cli::write("<fg:$i;bg:$j>".str_pad("$i;$j",9,' ',STR_PAD_BOTH));
-        if(++$j%8===0) Cli::writeLine('<default>');
-    }
-    ++$i;
+foreach($colors as $c) {
+    Cli::write("<fg:$c;dim>$c</fg;dim>|");
 }
+Cli::writeLine('<default>');
 
+foreach($colors as $c) {
+    Cli::write("<fg:$c>$c</fg>|");
+}
+Cli::writeLine('<default>');
+
+foreach($colors as $c) {
+    Cli::write("<fg:$c;b>$c</fg;b>|");
+}
+Cli::writeLine('<default>');
+
+foreach($colors as $c) {
+    Cli::write("<bg:$c>$c</bg>|");
+}
 Cli::writeLine('<default>');

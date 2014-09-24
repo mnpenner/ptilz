@@ -38,8 +38,9 @@ abstract class Json {
                 return self::encode($var->jsonSerialize(), $options);
             }
         }
+
         if(is_string($var) && Bin::hasFlag($options, JSON_FORCE_UTF8)) {
-            $var = self::_utf8($var);
+            $var = Str::forceUtf8($var);
         }
 
         $result = json_encode($var, $options);
@@ -57,13 +58,6 @@ abstract class Json {
         }
 
         return $result;
-    }
-
-    private static function _utf8($str) {
-        if(!mb_check_encoding($str, 'UTF-8')) {
-            return utf8_encode($str);
-        }
-        return $str;
     }
 
     /**

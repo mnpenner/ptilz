@@ -27,24 +27,34 @@ abstract class Cli { // fixme: rename to Console:: ?
      */
     public static function colorize($str) {
         // see http://misc.flogisoft.com/bash/tip_colors_and_formatting
+        // http://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
         $replaceMatch = function($m) {
             if($m[0] === '/') {
                 switch(substr($m,1)) {
-                    case 'fg': return '39';
-                    case 'bg': return '49';
-                    case 'all': return '0';
-                    case 'b':
-                    case 'strong':
-                    case 'bright':
-                    case 'bold': return '2';  // '21' should work, but it doesn't...?
-                    case 'd':
-                    case 'dim': return '22';
-                    case 'u':
-                    case 'underscore':
-                    case 'underline': return '24';
-                    case 'blink': return '25';
-                    case 'hidden':
-                    case 'conceal': return '28';
+                    case 'fg': return 39;
+                    case 'bg': return 49;
+                    case 'all': return 0;
+                    case 'b': return 22;
+                    case 'bright': return 22;
+                    case 'bold': return 22;
+                    case 'dim': return 22;
+                    case 'i': return 23;
+                    case 'italic': return 23;
+                    case 'fraktur': return 23;
+                    case 'u': return 24;
+                    case 'underline': return 24;
+                    case 'blink': return 25;
+                    case 'blink-slow': return 25;
+                    case 'blink-rapid': return 25;
+                    case 'inverse': return 27;
+                    case 'negative': return 27;
+                    case 'reverse': return 27;
+                    case 'hidden': return 28;
+                    case 'conceal': return 28;
+                    case 'strike': return 29;
+                    case 'framed': return 54;
+                    case 'encircled': return 54;
+                    case 'overlined': return 55;
                     default: return null;
                 }
             } else {
@@ -55,17 +65,16 @@ abstract class Cli { // fixme: rename to Console:: ?
                         list($ground, $colorName) = explode(':',$attr,2);
                         if(preg_match('~\d+\z~A',$colorName)) {
                             switch($ground) {
-                                case 'fg': $codes[] = '38'; break;
-                                case 'bg': $codes[] = '48'; break;
+                                case 'fg': $codes[] = 38; break;
+                                case 'bg': $codes[] = 48; break;
                                 default: return null;
                             }
-                            $codes[] = '5';
+                            $codes[] = 5;
                             $codes[] = $colorName;
                         } else {
-                            $colorNumber = 0;
                             switch($ground) {
-                                case 'fg': $colorNumber += 30; break;
-                                case 'bg': $colorNumber += 40; break;
+                                case 'fg': $colorNumber = 30; break;
+                                case 'bg': $colorNumber = 40; break;
                                 default: return null;
                             }
                             switch($colorName) {
@@ -76,6 +85,8 @@ abstract class Cli { // fixme: rename to Console:: ?
                                 case 'blue': $colorNumber += 4; break;
                                 case 'magenta': $colorNumber += 5; break;
                                 case 'cyan': $colorNumber += 6; break;
+                                case 'grey':
+                                case 'gray':
                                 case 'light-grey':
                                 case 'light-gray': $colorNumber += 7; break;
                                 case 'dark-grey':
@@ -94,23 +105,30 @@ abstract class Cli { // fixme: rename to Console:: ?
                         }
                     } else {
                         switch($attr) {
-                            case 'reset':
-                            case 'clear':
-                            case 'default': $codes[] = '0'; break;
-                            case 'b':
-                            case 'bold':
-                            case 'strong':
-                            case 'bright': $codes[] = '1'; break;
-                            case 'd':
-                            case 'dim': $codes[] = '2'; break;
-                            case 'u':
-                            case 'underline':
-                            case 'underscore': $codes[] = '4'; break;
-                            case 'blink': $codes[] = '5'; break;
-                            case 'inverse':
-                            case 'reverse': $codes[] = '7'; break;
-                            case 'hidden':
-                            case 'conceal': $codes[] = '8'; break;
+                            case 'reset': $codes[] = 0; break;
+                            case 'normal': $codes[] = 0; break;
+                            case 'default': $codes[] = 0; break;
+                            case 'b': $codes[] = 1; break;
+                            case 'bold': $codes[] = 1; break;
+                            case 'bright': $codes[] = 1; break;
+                            case 'dim': $codes[] = 2; break;
+                            case 'i': $codes[] = 3; break;
+                            case 'italic': $codes[] = 3; break;
+                            case 'u': $codes[] = 4; break;
+                            case 'underline': $codes[] = 4; break;
+                            case 'blink-slow': $codes[] = 5; break;
+                            case 'blink-rapid': $codes[] = 6; break;
+                            case 'inverse': $codes[] = 7; break;
+                            case 'negative': $codes[] = 7; break;
+                            case 'reverse': $codes[] = 7; break;
+                            case 'hidden': $codes[] = 8; break;
+                            case 'conceal': $codes[] = 8; break;
+                            case 'strike': $codes[] = 9; break;
+                            case 'primary': $codes[] = 10; break;
+                            case 'fraktur': $codes[] = 20; break;
+                            case 'framed': $codes[] = 51; break;
+                            case 'encircled': $codes[] = 52; break;
+                            case 'overlined': $codes[] = 53; break;
                             default: return null;
                         }
                     }

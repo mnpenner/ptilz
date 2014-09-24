@@ -181,6 +181,8 @@ abstract class Str {
      * @return string
      */
     public static function formatArgs($format, array $args) {
+        // fixme: make more like C# String.Format? http://msdn.microsoft.com/en-us/library/system.string.format%28v=vs.110%29.aspx
+        // use NumberFormatter? http://php.net/manual/en/class.numberformatter.php
         if(!$args) return $format;
         $i = 0;
         $patt = <<<'REGEX'
@@ -310,5 +312,21 @@ REGEX;
      */
     public static function export($str) {
         return '"'.self::addSlashes($str,'"\\$').'"';
+    }
+
+    /**
+     * Checks if string is valid UTF-8. If yes, returns string as is, otherwise assumes string is ISO-8859-1 and converts to UTF-8.
+     *
+     * Avoid this method if possible. It's only useful to prevent encoding errors when you don't know where your strings are coming from.
+     * Mixed strings will become garbled.
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function forceUtf8($str) {
+        if(!mb_check_encoding($str, 'UTF-8')) {
+            return utf8_encode($str);
+        }
+        return $str;
     }
 }

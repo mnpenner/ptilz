@@ -5,100 +5,124 @@ use Ptilz\Exceptions\NotImplementedException;
 /**
  * Command-line methods
  */
-abstract class Cli {
+abstract class Cli { // fixme: rename to Console:: ?
 
     public static function write($format) {
-        echo self::colorize(call_user_func_array(['\Ptilz\Str', 'format'], func_get_args()));
+        $args = func_get_args();
+        $args[0] = self::colorize($args[0]);
+        echo call_user_func_array(['\Ptilz\Str', 'format'], $args);
     }
 
     public static function writeLine($format) {
-        echo self::colorize(call_user_func_array(['\Ptilz\Str', 'format'], func_get_args())) . PHP_EOL;
+        $args = func_get_args();
+        $args[0] = self::colorize($args[0]);
+        echo call_user_func_array(['\Ptilz\Str', 'format'], $args) . PHP_EOL;
     }
 
+    /**
+     * Converts HTML-like tags into ANSI/VT100 control sequences and decodes HTML entities.
+     *
+     * @param string $str
+     * @return mixed
+     */
     public static function colorize($str) {
-        return Str::replace([
-            '<b>' => "\033[1m",
-            '<bold>' => "\033[1m",
-            '<bright>' => "\033[1m",
-            '<strong>' => "\033[1m",
-            '</b>' => "\033[2m", // '21' should work, but it doesn't...?
-            '</bold>' => "\033[2m",
-            '</bright>' => "\033[2m",
-            '</strong>' => "\033[2m",
+        // see http://misc.flogisoft.com/bash/tip_colors_and_formatting
+        $replaceMatch = function($m) {
+            if($m[0] === '/') {
+                switch(substr($m,1)) {
+                    case 'fg': return '39';
+                    case 'bg': return '49';
+                    case 'all': return '0';
+                    case 'b':
+                    case 'strong':
+                    case 'bright':
+                    case 'bold': return '2';  // '21' should work, but it doesn't...?
+                    case 'd':
+                    case 'dim': return '22';
+                    case 'u':
+                    case 'underscore':
+                    case 'underline': return '24';
+                    case 'blink': return '25';
+                    case 'hidden':
+                    case 'conceal': return '28';
+                    default: return null;
+                }
+            } else {
+                $attrs = explode(';',$m);
+                $codes = [];
+                foreach($attrs as $attr) {
+                    if(strpos($attr,':') !== false) {
+                        list($ground, $colorName) = explode(':',$attr,2);
+                        if(preg_match('~\d+\z~A',$colorName)) {
+                            switch($ground) {
+                                case 'fg': $codes[] = '38'; break;
+                                case 'bg': $codes[] = '48'; break;
+                                default: return null;
+                            }
+                            $codes[] = '5';
+                            $codes[] = $colorName;
+                        } else {
+                            $colorNumber = 0;
+                            switch($ground) {
+                                case 'fg': $colorNumber += 30; break;
+                                case 'bg': $colorNumber += 40; break;
+                                default: return null;
+                            }
+                            switch($colorName) {
+                                case 'black': $colorNumber += 0; break;
+                                case 'red': $colorNumber += 1; break;
+                                case 'green': $colorNumber += 2; break;
+                                case 'yellow': $colorNumber += 3; break;
+                                case 'blue': $colorNumber += 4; break;
+                                case 'magenta': $colorNumber += 5; break;
+                                case 'cyan': $colorNumber += 6; break;
+                                case 'light-grey':
+                                case 'light-gray': $colorNumber += 7; break;
+                                case 'dark-grey':
+                                case 'default': $colorNumber += 9; break;
+                                case 'dark-gray': $colorNumber += 60; break;
+                                case 'light-red': $colorNumber += 61; break;
+                                case 'light-green': $colorNumber += 62; break;
+                                case 'light-yellow': $colorNumber += 63; break;
+                                case 'light-blue': $colorNumber += 64; break;
+                                case 'light-magenta': $colorNumber += 65; break;
+                                case 'light-cyan': $colorNumber += 66; break;
+                                case 'white': $colorNumber += 67; break;
+                                default: return null;
+                            }
+                            $codes[] = $colorNumber;
+                        }
+                    } else {
+                        switch($attr) {
+                            case 'reset':
+                            case 'clear':
+                            case 'default': $codes[] = '0'; break;
+                            case 'b':
+                            case 'bold':
+                            case 'strong':
+                            case 'bright': $codes[] = '1'; break;
+                            case 'd':
+                            case 'dim': $codes[] = '2'; break;
+                            case 'u':
+                            case 'underline':
+                            case 'underscore': $codes[] = '4'; break;
+                            case 'blink': $codes[] = '5'; break;
+                            case 'inverse':
+                            case 'reverse': $codes[] = '7'; break;
+                            case 'hidden':
+                            case 'conceal': $codes[] = '8'; break;
+                            default: return null;
+                        }
+                    }
+                }
+                return implode(';',$codes);
+            }
+        };
 
-            '<d>' => "\033[2m",
-            '<dim>' => "\033[2m",
-            '</d>' => "\033[22m",
-            '</dim>' => "\033[22m",
-
-            '<u>' => "\033[4m",
-            '<underline>' => "\033[4m",
-            '<underscore>' => "\033[4m",
-            '</u>' => "\033[24m",
-            '</underline>' => "\033[24m",
-            '</underscore>' => "\033[24m",
-
-            '<blink>' => "\033[5m",
-            '</blink>' => "\033[25m",
-
-            '<i>' => "\033[7m",
-            '<inverse>' => "\033[7m",
-            '<reverse>' => "\033[7m",
-            '</i>' => "\033[27m",
-            '</inverse>' => "\033[27m",
-            '</reverse>' => "\033[27m",
-
-            '<hidden>' => "\033[8m",
-            '</hidden>' => "\033[28m",
-            '<conceal>' => "\033[8m",
-            '</conceal>' => "\033[28m",
-
-            '<fg:black>' => "\033[30m",
-            '<fg:red>' => "\033[31m",
-            '<fg:green>' => "\033[32m",
-            '<fg:yellow>' => "\033[33m",
-            '<fg:blue>' => "\033[34m",
-            '<fg:magenta>' => "\033[35m",
-            '<fg:cyan>' => "\033[36m",
-            '<fg:lgray>' => "\033[37m",
-            '<fg:lgrey>' => "\033[37m",
-            '<fg:dgray>' => "\033[90m",
-            '<fg:dgrey>' => "\033[90m",
-            '<fg:lred>' => "\033[91m",
-            '<fg:lgreen>' => "\033[92m",
-            '<fg:lyellow>' => "\033[93m",
-            '<fg:lblue>' => "\033[94m",
-            '<fg:lmagenta>' => "\033[95m",
-            '<fg:lcyan>' => "\033[96m",
-            '<fg:white>' => "\033[97m",
-            '<fg:default>' => "\033[39m",
-            '</fg>' => "\033[39m",
-
-            '<reset>' => "\033[0m",
-            '<clear>' => "\033[0m",
-            '<default>' => "\033[0m",
-
-            '</bg>' => "\033[49m",
-            '<bg:default>' => "\033[49m",
-            '<bg:black>' => "\033[40m",
-            '<bg:red>' => "\033[41m",
-            '<bg:green>' => "\033[42m",
-            '<bg:yellow>' => "\033[43m",
-            '<bg:blue>' => "\033[44m",
-            '<bg:magenta>' => "\033[45m",
-            '<bg:cyan>' => "\033[46m",
-            '<bg:lgray>' => "\033[47m",
-            '<bg:lgrey>' => "\033[47m",
-            '<bg:dgray>' => "\033[100m",
-            '<bg:dgrey>' => "\033[100m",
-            '<bg:lred>' => "\033[101m",
-            '<bg:lgreen>' => "\033[102m",
-            '<bg:lyellow>' => "\033[103m",
-            '<bg:lblue>' => "\033[104m",
-            '<bg:lmagenta>' => "\033[105m",
-            '<bg:lcyan>' => "\033[106m",
-            '<bg:white>' => "\033[107m",
-        ],$str);
+        return htmlspecialchars_decode(preg_replace_callback('~<(?<tag>[^>]+)>~', function ($m) use ($replaceMatch) {
+            $code = $replaceMatch($m[1]);
+            return $code === null ? $m[0] : "\033[{$code}m";
+        }, $str), ENT_QUOTES|ENT_HTML5);
     }
 
     /**

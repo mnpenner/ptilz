@@ -51,6 +51,7 @@ abstract class Cli { // fixme: rename to Console:: ?
                         case 'blink-rapid': $codes[] = 25; break;
                         case 'inverse': $codes[] = 27; break;
                         case 'negative': $codes[] = 27; break;
+                        case 'highlight': $codes[] = 27; break;
                         case 'reverse': $codes[] = 27; break;
                         case 'hidden': $codes[] = 28; break;
                         case 'conceal': $codes[] = 28; break;
@@ -131,6 +132,7 @@ abstract class Cli { // fixme: rename to Console:: ?
                             case 'inverse': $codes[] = 7; break;
                             case 'negative': $codes[] = 7; break;
                             case 'reverse': $codes[] = 7; break;
+                            case 'highlight': $codes[] = 7; break;
                             case 'hidden': $codes[] = 8; break;
                             case 'conceal': $codes[] = 8; break;
                             case 'strike': $codes[] = 9; break;

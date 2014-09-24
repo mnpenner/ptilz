@@ -77,6 +77,11 @@ foreach($colors as $c) {
 Cli::writeLine('<default>');
 
 foreach($colors as $c) {
+    Cli::write("<fg:$c;highlight>$c</fg;highlight>|");
+}
+Cli::writeLine('<default>');
+
+foreach($colors as $c) {
     Cli::write("<bg:$c>$c</bg>|");
 }
 Cli::writeLine('<default>');

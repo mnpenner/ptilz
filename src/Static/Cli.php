@@ -10,13 +10,13 @@ abstract class Cli { // fixme: rename to Console:: ?
     public static function write($format) {
         $args = func_get_args();
         $args[0] = self::colorize($args[0]);
-        echo call_user_func_array(['\Ptilz\Str', 'format'], $args);
+        echo call_user_func_array([Str::class, 'format'], $args);
     }
 
     public static function writeLine($format) {
         $args = func_get_args();
         $args[0] = self::colorize($args[0]);
-        echo call_user_func_array(['\Ptilz\Str', 'format'], $args) . PHP_EOL;
+        echo call_user_func_array([Str::class, 'format'], $args) . PHP_EOL;
     }
 
     /**

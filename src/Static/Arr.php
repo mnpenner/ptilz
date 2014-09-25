@@ -308,7 +308,7 @@ abstract class Arr {
     public static function filter(array $input, callable $callback = null) {
         if($input === []) return [];
         if($callback === null) {
-            $callback = ['Ptilz\V','isTruthy'];
+            $callback = [V::class,'isTruthy'];
         }
         $assoc = self::isAssoc($input);
         $ret = [];

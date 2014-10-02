@@ -102,4 +102,20 @@ abstract class Shell {
             exec($cmdStr . ' > /dev/null &');
         }
     }
+
+    /**
+     * Silently execute a command
+     *
+     * @param string $cmd
+     * @return bool True if the command returns exit code 0, false otherwise
+     */
+    public static function tryExec($cmd) {
+        $devNull = Path::devNull();
+        $proc = proc_open($cmd, [
+            1 => ['file', $devNull, 'w'], // suppress output to STDOUT
+            2 => ['file', $devNull, 'w'], // suppress output to STDERR
+        ], $pipes);
+        foreach($pipes as $p) fclose($p); // "If you have open pipes to that process, you should fclose() them prior to calling [proc_close] in order to avoid a deadlock - the child process may not be able to exit while the pipes are open."
+        return proc_close($proc) === 0;
+    }
 }

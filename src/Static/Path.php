@@ -136,9 +136,22 @@ abstract class Path {
         return getenv('HOME');
     }
 
+    /**
+     * Gets the directory one level up from the given directory
+     * @param string|null $path Defaults to current working directory
+     * @return string
+     */
     public static function parentDirectory($path = null) {
         if($path === null) $path = getcwd();
         return self::join($path, '..');
+    }
+
+    /**
+     * The file path of the null device
+     * @return string "nul" on Windows, "/dev/null" everywhere else
+     */
+    public static function devNull() {
+        return self::$_isWin ? 'nul' : '/dev/null';
     }
 }
 

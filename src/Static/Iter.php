@@ -49,7 +49,7 @@ class Iter {
      * @return bool
      */
     public static function all($trav, callable $callback=null) {
-        if($callback === null) $callback = ['Ptilz\V','isTruthy'];
+        if($callback === null) $callback = [V::class,'isTruthy'];
         foreach($trav as $v) {
             if(!$callback($v)) {
                 return false;
@@ -66,7 +66,7 @@ class Iter {
      * @return bool
      */
     public static function any($trav, callable $callback=null) {
-        if($callback === null) $callback = ['Ptilz\V','isTruthy'];
+        if($callback === null) $callback = [V::class,'isTruthy'];
         foreach($trav as $v) {
             if($callback($v)) {
                 return true;

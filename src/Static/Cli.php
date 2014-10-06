@@ -10,13 +10,13 @@ abstract class Cli { // fixme: rename to Console:: ?
     public static function write($format) {
         $args = func_get_args();
         $args[0] = self::colorize($args[0]);
-        echo call_user_func_array(['\Ptilz\Str', 'format'], $args);
+        echo call_user_func_array([Str::class, 'format'], $args);
     }
 
     public static function writeLine($format) {
         $args = func_get_args();
         $args[0] = self::colorize($args[0]);
-        echo call_user_func_array(['\Ptilz\Str', 'format'], $args) . PHP_EOL;
+        echo call_user_func_array([Str::class, 'format'], $args) . PHP_EOL;
     }
 
     /**
@@ -27,45 +27,58 @@ abstract class Cli { // fixme: rename to Console:: ?
      */
     public static function colorize($str) {
         // see http://misc.flogisoft.com/bash/tip_colors_and_formatting
+        // http://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
         $replaceMatch = function($m) {
+            $codes = [];
             if($m[0] === '/') {
-                switch(substr($m,1)) {
-                    case 'fg': return '39';
-                    case 'bg': return '49';
-                    case 'all': return '0';
-                    case 'b':
-                    case 'strong':
-                    case 'bright':
-                    case 'bold': return '2';  // '21' should work, but it doesn't...?
-                    case 'd':
-                    case 'dim': return '22';
-                    case 'u':
-                    case 'underscore':
-                    case 'underline': return '24';
-                    case 'blink': return '25';
-                    case 'hidden':
-                    case 'conceal': return '28';
-                    default: return null;
+                $attrs = explode(';',substr($m,1));
+                foreach($attrs as $attr) {
+                    switch($attr) {
+                        case 'fg': $codes[] = 39; break;
+                        case 'bg': $codes[] = 49; break;
+                        case 'all': $codes[] = 0; break;
+                        case 'b': $codes[] = 22; break;
+                        case 'bright': $codes[] = 22; break;
+                        case 'bold': $codes[] = 22; break;
+                        case 'dim': $codes[] = 22; break;
+                        case 'i': $codes[] = 23; break;
+                        case 'italic': $codes[] = 23; break;
+                        case 'fraktur': $codes[] = 23; break;
+                        case 'u': $codes[] = 24; break;
+                        case 'underline': $codes[] = 24; break;
+                        case 'blink': $codes[] = 25; break;
+                        case 'blink-slow': $codes[] = 25; break;
+                        case 'blink-rapid': $codes[] = 25; break;
+                        case 'inverse': $codes[] = 27; break;
+                        case 'negative': $codes[] = 27; break;
+                        case 'highlight': $codes[] = 27; break;
+                        case 'reverse': $codes[] = 27; break;
+                        case 'hidden': $codes[] = 28; break;
+                        case 'conceal': $codes[] = 28; break;
+                        case 'strike': $codes[] = 29; break;
+                        case 'framed': $codes[] = 54; break;
+                        case 'encircled': $codes[] = 54; break;
+                        case 'overlined': $codes[] = 55; break;
+                        default: return null;
+                    }
                 }
             } else {
                 $attrs = explode(';',$m);
-                $codes = [];
                 foreach($attrs as $attr) {
                     if(strpos($attr,':') !== false) {
                         list($ground, $colorName) = explode(':',$attr,2);
                         if(preg_match('~\d+\z~A',$colorName)) {
                             switch($ground) {
-                                case 'fg': $codes[] = '38'; break;
-                                case 'bg': $codes[] = '48'; break;
+                                case 'fg': $codes[] = 38; break;
+                                case 'bg': $codes[] = 48; break;
                                 default: return null;
                             }
-                            $codes[] = '5';
+                            $codes[] = 5;
                             $codes[] = $colorName;
                         } else {
-                            $colorNumber = 0;
                             switch($ground) {
-                                case 'fg': $colorNumber += 30; break;
-                                case 'bg': $colorNumber += 40; break;
+                                case 'fg': $colorNumber = 30; break;
+                                case 'bg': $colorNumber = 40; break;
                                 default: return null;
                             }
                             switch($colorName) {
@@ -76,16 +89,25 @@ abstract class Cli { // fixme: rename to Console:: ?
                                 case 'blue': $colorNumber += 4; break;
                                 case 'magenta': $colorNumber += 5; break;
                                 case 'cyan': $colorNumber += 6; break;
-                                case 'light-grey':
+                                case 'gray' :$colorNumber += 7; break;
+                                case 'grey': $colorNumber += 7; break;
+                                case 'bright-grey': $colorNumber += 7; break;
+                                case 'light-grey': $colorNumber += 7; break;
                                 case 'light-gray': $colorNumber += 7; break;
-                                case 'dark-grey':
                                 case 'default': $colorNumber += 9; break;
+                                case 'dark-grey': $colorNumber += 60; break;
                                 case 'dark-gray': $colorNumber += 60; break;
+                                case 'bright-red': $colorNumber += 61; break;
                                 case 'light-red': $colorNumber += 61; break;
+                                case 'bright-green': $colorNumber += 62; break;
                                 case 'light-green': $colorNumber += 62; break;
+                                case 'bright-yellow': $colorNumber += 63; break;
                                 case 'light-yellow': $colorNumber += 63; break;
+                                case 'bright-blue': $colorNumber += 64; break;
                                 case 'light-blue': $colorNumber += 64; break;
+                                case 'bright-magenta': $colorNumber += 65; break;
                                 case 'light-magenta': $colorNumber += 65; break;
+                                case 'bright-cyan': $colorNumber += 66; break;
                                 case 'light-cyan': $colorNumber += 66; break;
                                 case 'white': $colorNumber += 67; break;
                                 default: return null;
@@ -94,29 +116,37 @@ abstract class Cli { // fixme: rename to Console:: ?
                         }
                     } else {
                         switch($attr) {
-                            case 'reset':
-                            case 'clear':
-                            case 'default': $codes[] = '0'; break;
-                            case 'b':
-                            case 'bold':
-                            case 'strong':
-                            case 'bright': $codes[] = '1'; break;
-                            case 'd':
-                            case 'dim': $codes[] = '2'; break;
-                            case 'u':
-                            case 'underline':
-                            case 'underscore': $codes[] = '4'; break;
-                            case 'blink': $codes[] = '5'; break;
-                            case 'inverse':
-                            case 'reverse': $codes[] = '7'; break;
-                            case 'hidden':
-                            case 'conceal': $codes[] = '8'; break;
+                            case 'reset': $codes[] = 0; break;
+                            case 'normal': $codes[] = 0; break;
+                            case 'default': $codes[] = 0; break;
+                            case 'b': $codes[] = 1; break;
+                            case 'bold': $codes[] = 1; break;
+                            case 'bright': $codes[] = 1; break;
+                            case 'dim': $codes[] = 2; break;
+                            case 'i': $codes[] = 3; break;
+                            case 'italic': $codes[] = 3; break;
+                            case 'u': $codes[] = 4; break;
+                            case 'underline': $codes[] = 4; break;
+                            case 'blink-slow': $codes[] = 5; break;
+                            case 'blink-rapid': $codes[] = 6; break;
+                            case 'inverse': $codes[] = 7; break;
+                            case 'negative': $codes[] = 7; break;
+                            case 'reverse': $codes[] = 7; break;
+                            case 'highlight': $codes[] = 7; break;
+                            case 'hidden': $codes[] = 8; break;
+                            case 'conceal': $codes[] = 8; break;
+                            case 'strike': $codes[] = 9; break;
+                            case 'primary': $codes[] = 10; break;
+                            case 'fraktur': $codes[] = 20; break;
+                            case 'framed': $codes[] = 51; break;
+                            case 'encircled': $codes[] = 52; break;
+                            case 'overlined': $codes[] = 53; break;
                             default: return null;
                         }
                     }
                 }
-                return implode(';',$codes);
             }
+            return implode(';',$codes);
         };
 
         return htmlspecialchars_decode(preg_replace_callback('~<(?<tag>[^>]+)>~', function ($m) use ($replaceMatch) {

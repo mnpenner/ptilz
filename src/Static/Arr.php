@@ -280,6 +280,7 @@ abstract class Arr {
      */
     public static function mergeRecursive(array $arr1, array $arr2) {
         // fixme: should this replace either merge or extend?
+        // todo: allow many arrays. check against $merged instead of $arr1
         $merged = $arr1;
         foreach($arr2 as $k=>$v) {
             if(!isset($arr1[$k]) || !is_array($arr1[$k]) || !is_array($v)) {

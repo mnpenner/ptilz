@@ -515,12 +515,13 @@ abstract class Arr {
      *
      * @param array|\Traversable $iter
      * @param callable $callback function($value, $key)
+     * @param bool $exclude_key Don't pass the array key as the 2nd param to the callback function
      * @return array
      */
-    public static function map($iter, callable $callback) {
+    public static function map($iter, callable $callback, $exclude_key=false) {
         $outArr = [];
         foreach($iter as $key => $val) {
-            $outVal = $callback($val, $key);
+            $outVal = $exclude_key ? $callback($val) : $callback($val, $key);
             if($outVal instanceof \Generator) {
                 foreach($outVal as $ok => $ov) {
                     if(is_int($ok)) {

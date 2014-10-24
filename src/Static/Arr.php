@@ -272,6 +272,29 @@ abstract class Arr {
     }
 
     /**
+     * Merges the first level of the arrays associatively. Deep numeric arrays will be concatenated.
+     *
+     * @param array $arr1
+     * @param array $arr2
+     * @return array
+     */
+    public static function mergeRecursive(array $arr1, array $arr2) {
+        // fixme: should this replace either merge or extend?
+        // todo: allow many arrays. check against $merged instead of $arr1
+        $merged = $arr1;
+        foreach($arr2 as $k=>$v) {
+            if(!isset($arr1[$k]) || !is_array($arr1[$k]) || !is_array($v)) {
+                $merged[$k] = $v;
+            } elseif(self::isNumeric($v) && self::isNumeric($arr1[$k])) {
+                $merged[$k] = array_merge($arr1[$k], $v);
+            } else {
+                $merged[$k] = self::mergeRecursive($arr1[$k], $v);
+            }
+        }
+        return $merged;
+    }
+
+    /**
      * Merges one or more arrays into the first one. The first array will be modified in-place and returned for convenience.
      *
      * @param $array

@@ -200,6 +200,15 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame([3, 4, 5, 'z'], Arr::merge([1, 2, 3, 'z'], [3, 4, 5]));
     }
 
+    function testMergeRecursive() {
+        $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3, 0 => 3, 1 => 4, 2 => 5], Arr::mergeRecursive(['a' => 1, 'b' => 2, 'c' => 3], [3, 4, 5]));
+        $this->assertSame([3, 4, 5, 'z'], Arr::mergeRecursive([1, 2, 3, 'z'], [3, 4, 5]));
+        $this->assertSame(['a'=>[1,2,3,4],'b'=>'z','c'=>'y','d'=>'w'], Arr::mergeRecursive(['a'=>[1,2],'b'=>'x','c'=>'y'], ['a'=>[3,4],'b'=>'z','d'=>'w']));
+        $this->assertSame(['a'=>[3,4,3=>5]], Arr::mergeRecursive(['a'=>[1,2]], ['a'=>[3,4,3=>5]]));
+        $this->assertSame(['a'=>[1,2,3=>5]], Arr::mergeRecursive(['a'=>[3,4,3=>5]], ['a'=>[1,2]]));
+        $this->assertSame(['a'=>['b'=>[1,2,3,4]]], Arr::mergeRecursive(['a'=>['b'=>[1,2]]], ['a'=>['b'=>[3,4]]]));
+    }
+
     function testExtend() {
         $arr = [1, 2, 3];
         $this->assertSame([1, 2, 3, 3, 4, 5], Arr::extend($arr, [3, 4, 5]));

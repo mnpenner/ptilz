@@ -1,5 +1,6 @@
 <?php
 namespace Ptilz;
+use Ptilz\BigMath;
 use Ptilz\Exceptions\ArgumentEmptyException;
 use Ptilz\Exceptions\ArgumentOutOfRangeException;
 use Ptilz\Exceptions\InvalidOperationException;
@@ -45,40 +46,9 @@ abstract class Math {
         for($i = 0; $i < $len; ++$i) {
             $val = bcadd($val, bcmul($arr[$str[$i]], bcpow($base, $len - $i - 1)));
         }
-        return self::toInt($val);
+        return BigMath::toInt($val);
     }
 
-    /**
-     * Add two arbitrary precision numbers
-     *
-     * @param int|string $left The left operand, as a string.
-     * @param int|string $right The right operand, as a string.
-     * @return int|string
-     */
-    public static function add($left, $right) {
-        return self::toInt(bcadd($left, $right));
-    }
-
-    /**
-     * Multiply two arbitrary precision numbers
-     *
-     * @param int|string $left The left operand, as a string.
-     * @param int|string $right The right operand, as a string.
-     * @return int|string
-     */
-    public static function mul($left, $right) {
-        return self::toInt(bcmul($left, $right));
-    }
-
-    /**
-     * Converts a string integer to a native integer if it's within PHP's valid range of integers
-     *
-     * @param string $val
-     * @return int|string
-     */
-    public static function toInt($val) {
-        return self::between($val, PHP_INT_MIN, PHP_INT_MAX) ? (int)$val : (string)$val;
-    }
 
     /**
      * Converts from one base to another.
@@ -105,20 +75,6 @@ abstract class Math {
         return min(max($val, $min), $max);
     }
 
-    /**
-     * Determines if a number is between two other numbers (inclusive). Supports arbitrary precision.
-     *
-     * @param int|string $n           Number to check
-     * @param int|string $lower_bound Lower bound
-     * @param int|string $upper_bound Upper bound
-     * @param bool       $inclusive   If true, use >= and <=, else use > and <
-     * @return bool $x is between $lower_bound and $upper_bound
-     */
-    public static function between($n, $lower_bound, $upper_bound, $inclusive = true) {
-        return $inclusive
-            ? bccomp($n, $lower_bound) >= 0 && bccomp($n, $upper_bound) <= 0
-            : bccomp($n, $lower_bound) > 0 && bccomp($n, $upper_bound) < 0;
-    }
 
     /**
      * Converts large hexidecimal numbers into decimal strings.
@@ -137,65 +93,6 @@ abstract class Math {
      */
     public static function decToHex($dec, $uppercase=false) {
         return self::decToAnyBase($dec, 16, $uppercase ? '0123456789ABCDEF' : '0123456789abcdef');
-    }
-
-    public static function max($a, $b) {
-        return bccomp($a, $b) > 0 ? $a : $b;
-    }
-
-    public static function min($a, $b) {
-        return bccomp($a, $b) < 0 ? $a : $b;
-    }
-
-    public static function randInt($min, $max) {
-        $randMax = mt_getrandmax();
-        $diff = bcsub($max, $min);
-        if(bccomp($diff, $randMax) > 0) {
-            trigger_error("Spread is greater than precision of mt_rand(); numbers will be skipped", E_USER_WARNING);
-        }
-        return self::toInt(bcadd(
-            $min,
-            bcmul(
-                bcdiv(mt_rand(), bcadd($randMax, '1'), 10),
-                bcadd($diff, '1')
-            )
-        ));
-    }
-
-    /**
-     * Computes the natural logarithm of a number.
-     *
-     * @param int|string|float $n
-     * @param int        $scale This optional parameter is used to set the number of digits after the decimal place in the result.
-     * @return string
-     */
-    public static function ln($n, $scale=10) {
-        $iscale = $scale+3;
-        $result = '0.0';
-        $i = 0;
-
-        do {
-            $pow = (1 + (2 * $i++));
-            $mul = bcdiv('1', $pow, $iscale);
-            $fraction = bcmul($mul, bcpow(bcsub($n, '1', $iscale) / bcadd($n, '1', $iscale), $pow, $iscale), $iscale);
-            $lastResult = $result;
-            $result = bcadd($fraction, $result, $iscale);
-        } while($result !== $lastResult);
-//        echo "$i iterations\n";
-
-        return bcmul('2', $result, $scale);
-    }
-
-    /**
-     * Computes the logarithm of a number.
-     *
-     * @param int|string|float $n
-     * @param int $base
-     * @param int $scale This optional parameter is used to set the number of digits after the decimal place in the result.
-     * @return string
-     */
-    public static function log($n, $base = 10, $scale=10) {
-        return bcdiv(self::ln($n, $scale), self::ln($base, $scale), $scale);
     }
 
     /**
@@ -232,5 +129,17 @@ abstract class Math {
     public static function mean(array $values) {
         if(!$values) throw new ArgumentEmptyException('values');
         return array_sum($values)/count($values);
+    }
+
+    /**
+     * Generates a random number within a specified range.
+     *
+     * @param int|float $min Minimum value (inclusive)
+     * @param int|float $max Maximum value (inclusive)
+     * @return float A pseudo-random float value
+     */
+    public static function randFloat($min = 0, $max = 1) {
+        if($min === 0 && $max === 1) return lcg_value();
+        return $min + lcg_value() * abs($max - $min);
     }
 }

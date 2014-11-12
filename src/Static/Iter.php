@@ -10,11 +10,12 @@ class Iter {
      *
      * @param array|Traversable $trav
      * @param callable $callback
+     * @param bool $exclude_key Don't pass the array key as the 2nd param to the callback function
      * @return Generator
      */
-    public static function map($trav, callable $callback) {
+    public static function map($trav, callable $callback, $exclude_key=false) {
         foreach($trav as $k1 => $v1) {
-            yield $callback($v1, $k1);
+            yield $exclude_key ? $callback($v1) : $callback($v1, $k1);
         }
     }
 

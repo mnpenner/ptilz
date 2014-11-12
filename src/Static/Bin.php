@@ -1,6 +1,7 @@
 <?php
 namespace Ptilz;
 
+use Ptilz\BigMath;
 use Ptilz\Exceptions\ArgumentException;
 use Ptilz\Exceptions\ArgumentTypeException;
 use Ptilz\Exceptions\NotImplementedException;
@@ -104,7 +105,7 @@ abstract class Bin {
                     if($repeat === 1) $out[$key] = [];
                     for($i = 0; $i < $repeat; ++$i) {
                         $ints = unpack("@$offset/Vlo/Vhi", $data);
-                        $sum = Math::add($ints['lo'], Math::mul($ints['hi'], '4294967296'));
+                        $sum = BigMath::add($ints['lo'], BigMath::mul($ints['hi'], '4294967296'));
                         if($repeat === 1) $out[$key] = $sum;
                         else $out[$key][] = $sum;
                         $offset += 8;
@@ -114,7 +115,7 @@ abstract class Bin {
                     if($repeat === 1) $out[$key] = [];
                     for($i = 0; $i < $repeat; ++$i) {
                         $ints = unpack("@$offset/Nhi/Nlo", $data);
-                        $sum = Math::add($ints['lo'], Math::mul($ints['hi'], '4294967296'));
+                        $sum = BigMath::add($ints['lo'], BigMath::mul($ints['hi'], '4294967296'));
                         if($repeat === 1) $out[$key] = $sum;
                         else $out[$key][] = $sum;
                         $offset += 8;

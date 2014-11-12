@@ -1,7 +1,7 @@
 <?php
 namespace Ptilz;
 
-class BigMath {
+abstract class BigMath {
 
     /**
      * Add two arbitrary precision numbers

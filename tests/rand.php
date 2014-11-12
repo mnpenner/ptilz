@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 
+use Ptilz\BigMath;
 use Ptilz\Math;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -18,7 +19,7 @@ $runs = $buckets*1000;
 $res = array_fill($lo,$buckets,0);
 
 for($i=0; $i<$runs; ++$i) {
-    $x = Math::randInt($lo,$hi);
+    $x = BigMath::randInt($lo, $hi);
     ++$res[$x];
 }
 

@@ -1,4 +1,5 @@
 <?php
+use Ptilz\BigMath;
 use Ptilz\Math;
 
 class MathTest extends PHPUnit_Framework_TestCase {
@@ -35,10 +36,10 @@ class MathTest extends PHPUnit_Framework_TestCase {
     }
 
     function testBetween() {
-        $this->assertTrue(Math::between(0, PHP_INT_MIN, PHP_INT_MAX));
-        $this->assertTrue(Math::between(0, 0, 1));
-        $this->assertFalse(Math::between(0, 0, 1, false));
-        $this->assertFalse(Math::between('9223372036854775808', PHP_INT_MIN, PHP_INT_MAX));
+        $this->assertTrue(BigMath::between(0, PHP_INT_MIN, PHP_INT_MAX));
+        $this->assertTrue(BigMath::between(0, 0, 1));
+        $this->assertFalse(BigMath::between(0, 0, 1, false));
+        $this->assertFalse(BigMath::between('9223372036854775808', PHP_INT_MIN, PHP_INT_MAX));
     }
 
     function testChangeBase() {
@@ -46,22 +47,22 @@ class MathTest extends PHPUnit_Framework_TestCase {
     }
 
     function testToInt() {
-        $this->assertInternalType('int', Math::toInt(PHP_INT_MIN));
-        $this->assertInternalType('int', Math::toInt(0));
-        $this->assertSame(PHP_INT_MAX, Math::toInt(PHP_INT_MAX));
-        $this->assertInternalType('string', Math::toInt(bcadd(PHP_INT_MAX, 1)));
+        $this->assertInternalType('int', BigMath::toInt(PHP_INT_MIN));
+        $this->assertInternalType('int', BigMath::toInt(0));
+        $this->assertSame(PHP_INT_MAX, BigMath::toInt(PHP_INT_MAX));
+        $this->assertInternalType('string', BigMath::toInt(bcadd(PHP_INT_MAX, 1)));
     }
 
     function testAdd() {
-        $this->assertSame(3, Math::add(1, 2));
-        $this->assertSame(3, Math::add('1', '2'));
-        $this->assertSame(-1, Math::add(1, '-2'));
-        $this->assertEquals('9223372036854775808', Math::add('9223372036854775807', '1'));
+        $this->assertSame(3, BigMath::add(1, 2));
+        $this->assertSame(3, BigMath::add('1', '2'));
+        $this->assertSame(-1, BigMath::add(1, '-2'));
+        $this->assertEquals('9223372036854775808', BigMath::add('9223372036854775807', '1'));
     }
 
     function testMul() {
-        $this->assertSame(6, Math::mul('2', '3'));
-        $this->assertEquals('9223372037000250000', Math::mul('3037000500', '3037000500'));
+        $this->assertSame(6, BigMath::mul('2', '3'));
+        $this->assertEquals('9223372037000250000', BigMath::mul('3037000500', '3037000500'));
     }
 
     function testMean() {

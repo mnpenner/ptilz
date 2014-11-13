@@ -44,7 +44,7 @@ abstract class Path {
      */
     public static function isAbsolute($path) {
         // translated from https://github.com/filearts/node-absolute-path/blob/184265b630bac9ff034a22c9dfcad5a0a68f332a/index.js#L3-L18
-        if(Str::isEmpty($path)) throw new ArgumentEmptyException('path');
+        if(Str::isBlank($path)) throw new ArgumentEmptyException('path');
         if(!self::$_isWin) {
             return $path[0] === '/';
         }

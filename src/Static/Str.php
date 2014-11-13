@@ -409,7 +409,7 @@ REGEX;
     }
 
     /**
-     * Transform text into a URL slug. De-accents characters and replaces whitespaces with dashes.
+     * Transform text into a URL slug. Removes accents and replaces whitespaces with dashes.
      *
      * @param string $str
      * @return string

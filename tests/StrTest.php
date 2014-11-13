@@ -3,11 +3,20 @@ use Ptilz\Str;
 
 class StrTest extends PHPUnit_Framework_TestCase {
 
+    function testIsBlank() {
+        $this->assertTrue(Str::isBlank(''));
+        $this->assertTrue(Str::isBlank(null));
+        $this->assertTrue(Str::isBlank('  '));
+        $this->assertTrue(Str::isBlank("\t"));
+        $this->assertFalse(Str::isBlank('a'));
+        $this->assertFalse(Str::isBlank('0'));
+    }
+
     function testIsEmpty() {
         $this->assertTrue(Str::isEmpty(''));
         $this->assertTrue(Str::isEmpty(null));
-        $this->assertTrue(Str::isEmpty('  '));
-        $this->assertTrue(Str::isEmpty("\t"));
+        $this->assertFalse(Str::isEmpty('  '));
+        $this->assertFalse(Str::isEmpty("\t"));
         $this->assertFalse(Str::isEmpty('a'));
         $this->assertFalse(Str::isEmpty('0'));
     }

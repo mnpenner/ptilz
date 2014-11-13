@@ -60,7 +60,7 @@ abstract class Sql {
     }
 
     public static function bin($str) {
-        return Str::isEmpty($str) ? $str : new RawSql('0x' . bin2hex($str));
+        return Str::isBlank($str) ? $str : new RawSql('0x' . bin2hex($str));
     }
 
     /**

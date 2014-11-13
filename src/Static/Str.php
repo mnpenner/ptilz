@@ -126,8 +126,18 @@ abstract class Str {
      * @param string $str
      * @return bool
      */
-    public static function isEmpty($str) {
+    public static function isBlank($str) {
         return $str === null || trim($str) === '';
+    }
+
+    /**
+     * Checks if a string is null or empty ("")
+     *
+     * @param string $str
+     * @return bool
+     */
+    public static function isEmpty($str) {
+        return $str === null || $str === '';
     }
 
     /**

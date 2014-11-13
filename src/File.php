@@ -18,7 +18,7 @@ class File {
     public static function createUnique($dir, $ext = '', $chars='0123456789abcdefghijklmnopqrstuvwxyz_-') {
         for($i = 0; $i < 1000; ++$i) {
             $path = Path::resolve($dir, Str::random(12, $chars));
-            if(!Str::isEmpty($ext)) $path .= '.' . ltrim($ext,'.');
+            if(!Str::isBlank($ext)) $path .= '.' . ltrim($ext,'.');
             $fp = @fopen($path, 'x');
             if($fp !== false) return new static($fp, $path);
         }
@@ -56,7 +56,7 @@ class File {
      * @return static
      */
     public static function fromResource($fp, $path = null) {
-        if(Str::isEmpty($path)) $path = stream_get_meta_data($fp)['uri'];
+        if(Str::isBlank($path)) $path = stream_get_meta_data($fp)['uri'];
         else $path = Path::resolve($path);
         return new static($fp, $path);
     }

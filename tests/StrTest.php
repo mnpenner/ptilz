@@ -88,4 +88,32 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse(Str::isBinary("The quick brown fox jumped over the lazy dog.\n"));
         $this->assertTrue(Str::isBinary("msword\nwacz\0"));
     }
+
+    function testClassify() {
+        $this->assertSame('SomeClassName', Str::classify("some_class_name"));
+    }
+
+    function testUnderscored() {
+        $this->assertSame('moz_transform', Str::underscored("MozTransform"));
+    }
+
+    function testDasherize() {
+        $this->assertSame('-moz-transform', Str::dasherized("MozTransform"));
+    }
+
+    function testHumanize() {
+        $this->assertSame('Capitalize dash camel case underscore trim', Str::humanize('  capitalize dash-CamelCase_underscore trim  '));
+    }
+
+    function testSlugify() {
+        $this->assertSame('un-elephant-a-loree-du-bois', Str::slugify("Un éléphant à l'orée du bois"));
+    }
+
+    function testTruncateWords() {
+        $this->assertSame('Hello...', Str::truncateWords('Hello, world',5));
+        $this->assertSame('Hello...', Str::truncateWords('Hello, world',8));
+        $this->assertSame('Hello, world', Str::truncateWords('Hello, world',5,' (read a lot more)'),'Adding "(read a lot more)" would be longer than the original string');
+        $this->assertSame('Hello, cruel...', Str::truncateWords('Hello, cruel world',15));
+        $this->assertSame('Hello', Str::truncateWords('Hello',10));
+    }
 }

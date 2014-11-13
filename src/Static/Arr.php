@@ -568,6 +568,7 @@ abstract class Arr {
      * @return string|array A string if glue is provided, otherwise an array
      */
     public static function wrap(array $arr, $before, $after, $glue = null) {
+        // fixme: rename to "surround" like in _.string?
         $result = array_map(function ($x) use ($before, $after) {
             return "$before$x$after";
         }, $arr);

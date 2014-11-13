@@ -409,14 +409,13 @@ REGEX;
     }
 
     /**
-     * Transform text into a URL slug. Deaccents characters and replaces whitespaces with dashes.
+     * Transform text into a URL slug. De-accents characters and replaces whitespaces with dashes.
      *
      * @param string $str
-     * @throws NotImplementedException
      * @return string
      */
     public static function slugify($str) {
-        throw new NotImplementedException;
+        return trim(preg_replace('~[^a-z0-9]+~','-',strtolower(str_replace("'",'',iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $str)))),'-');
     }
 
     /**

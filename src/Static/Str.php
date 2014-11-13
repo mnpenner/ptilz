@@ -339,4 +339,129 @@ REGEX;
         }
         return $str;
     }
+
+    /**
+     * Converts underscored or dasherized string to a camelized one. Begins with a lower case letter unless it starts with an underscore or string
+     *
+     * @param string $str
+     * @throws NotImplementedException
+     * @return string
+     */
+    public static function camelize($str) {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * Converts string to camelized class name. First letter is always upper case
+     *
+     * @param string $str
+     * @throws NotImplementedException
+     * @return string
+     */
+    public static function classify($str) {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * Converts a camelized or dasherized string into an underscored one
+     *
+     * @param string $str
+     * @throws NotImplementedException
+     * @return string
+     */
+    public static function underscored($str) {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * Converts a underscored or camelized string into an dasherized one
+     *
+     * @param string $str
+     * @throws NotImplementedException
+     * @return string
+     */
+    public static function dasherized($str) {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * Converts an underscored, camelized, or dasherized string into a humanized one. Also removes beginning and ending whitespace, and removes the postfix '_id'.
+     *
+     * @param string $str
+     * @throws NotImplementedException
+     * @return string
+     */
+    public static function humanize($str) {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * Truncates a string to the specified length. Adds an ellipsis if the string is too long.
+     *
+     * @param string $str
+     * @param int $len
+     * @param string $trail
+     * @throws NotImplementedException
+     * @return string
+     */
+    public static function truncateWords($str, $len, $trail='...') {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * Transform text into a URL slug. Deaccents characters and replaces whitespaces with dashes.
+     *
+     * @param string $str
+     * @throws NotImplementedException
+     * @return string
+     */
+    public static function slugify($str) {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * Join an array into a human readable sentence.
+     *
+     * @param string[] $array
+     * @param string $delimiter
+     * @param string $lastDelimiter
+     * @return string
+     */
+    public static function toSentence($array, $delimiter = ', ', $lastDelimiter = ' and ') {
+        if(count($array) <= 2) return implode($lastDelimiter, $array);
+        $lastElement = array_pop($array);
+        return implode($delimiter, $array) . $lastDelimiter . $lastElement;
+    }
+
+    /**
+     * The same as toSentence, but adjusts delimeters to use Serial comma.
+     *
+     * @param string[] $array
+     * @param string $delimiter
+     * @param string $lastDelimiter
+     * @throws NotImplementedException
+     * @see http://en.wikipedia.org/wiki/Serial_comma
+     */
+    public static function toSentenceSerial($array, $delimiter=', ', $lastDelimiter=' and ') {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * Takes a string and converts it to a bool. If the string doesn't look true nor false, it returns null.
+     *
+     * @param mixed $val        The string to convert
+     * @param null $default
+     * @return bool             true if $val is in (1,t,true,y,yes,on), false if $str is in (0,f,false,n,no,false), otherwise $default
+     */
+    public static function toBoolean($val, $default=null) {
+        if(is_string($val)) {
+            $str = strtolower(trim($val));
+            if(in_array($str,['1','t','true','y','yes','on'])) return true;
+            if(in_array($str,['0','f','false','n','no','off'])) return false;
+        }
+        elseif(is_bool($val)) return $val;
+        elseif(is_int($val)) return $val !== 0;
+        elseif(is_array($val)) return $val !== [];
+        return $default;
+    }
 }

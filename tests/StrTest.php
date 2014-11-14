@@ -2,7 +2,6 @@
 use Ptilz\Str;
 
 class StrTest extends PHPUnit_Framework_TestCase {
-
     function testIsBlank() {
         $this->assertTrue(Str::isBlank(''));
         $this->assertTrue(Str::isBlank(null));
@@ -113,11 +112,26 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('', Str::slugify(''));
     }
 
-    function testTruncateWords() {
-        $this->assertSame('Hello...', Str::truncateWords('Hello, world',5));
-        $this->assertSame('Hello...', Str::truncateWords('Hello, world',8));
-        $this->assertSame('Hello, world', Str::truncateWords('Hello, world',5,' (read a lot more)'),'Adding "(read a lot more)" would be longer than the original string');
-        $this->assertSame('Hello, cruel...', Str::truncateWords('Hello, cruel world',15));
-        $this->assertSame('Hello', Str::truncateWords('Hello',10));
+    function testTruncate() {
+        $this->assertSame('Hello...', Str::truncate('Hello world',6,'...',false));
+        $this->assertSame('Hello world', Str::truncate('Hello world',6,'read more',false));
+        $this->assertSame('Hello read more', Str::truncate('Hello, cruel world',6,' read more',true));
+        $this->assertSame('Hello, world', Str::truncate('Hello, world',5,'read a lot more',true));
+        $this->assertSame('Hello...', Str::truncate('Hello, world',5,'...',true));
+        $this->assertSame('Hello, cruel...', Str::truncate('Hello, cruel world',15,'...',true));
+        $this->assertSame('Hello world', Str::truncate('Hello world',22,'...',true));
+        $this->assertSame('Un éléphant à...', Str::truncate('Un éléphant à l\'orée du bois',13,'...',true));
+        $this->assertSame('Привет read more', Str::truncate('Привет, жестокий мир', 6,' read more',true));
+        $this->assertSame('Привет, мир', Str::truncate('Привет, мир', 6,' read a lot more',true));
+        $this->assertSame('Привет...', Str::truncate('Привет, мир', 6,'...',true));
+        $this->assertSame('Привет...', Str::truncate('Привет, мир', 8,'...',true));
+        $this->assertSame('Привет, жестокий...', Str::truncate('Привет, жестокий мир', 16,'...',true));
+        $this->assertSame('Привет, мир', Str::truncate('Привет, мир', 22,'...',true));
+        $this->assertSame('alksjd!!!!!!....', Str::truncate('alksjd!!!!!!....', 100,'',true));
+    }
+
+    function testReverse() {
+        $this->assertSame('cba',Str::reverse('abc'));
+        $this->assertSame('sevlaçnoG',Str::reverse('Gonçalves'));
     }
 }

@@ -637,4 +637,20 @@ abstract class Arr {
         $shuf = self::shuffle($array);
         return array_slice($shuf, 0, $count);
     }
+
+
+    /**
+     * Join an array into a human readable sentence.
+     *
+     * @param string[] $array
+     * @param string $delimiter
+     * @param string $lastDelimiter
+     * @return string
+     */
+    public static function toSentence($array, $delimiter = ', ', $lastDelimiter = ' and ', $serial_comma=false) {
+        if(count($array) <= 2) return implode($lastDelimiter, $array);
+        $lastElement = array_pop($array);
+        return implode($delimiter, $array) . $lastDelimiter . $lastElement;
+    }
+
 }

@@ -325,6 +325,29 @@ REGEX;
     }
 
     /**
+     * Adds quotes around a string.
+     *
+     * @param string $string
+     * @param string $quoteChar
+     * @return string
+     */
+    public static function quote($string, $quoteChar = '"') {
+        return $quoteChar.$string.$quoteChar;
+    }
+
+    /**
+     * @param string $string
+     * @param null|string $quoteChar
+     * @return string
+     */
+    public static function unquote($string, $quoteChar = '"') {
+        if(strlen($string) >= 2 && $string[0] === $quoteChar && $string[strlen($string) - 1] === $quoteChar) {
+            return substr($string, 1, -1);
+        }
+        return $string;
+    }
+
+    /**
      * Checks if string is valid UTF-8. If yes, returns string as is, otherwise assumes string is ISO-8859-1 and converts to UTF-8.
      *
      * Avoid this method if possible. It's only useful to prevent encoding errors when you don't know where your strings are coming from.
@@ -396,17 +419,56 @@ REGEX;
     }
 
     /**
-     * Truncates a string to the specified length. Adds an ellipsis if the string is too long.
+     * Title-cases a phrase
      *
      * @param string $str
-     * @param int $len
-     * @param string $trail
      * @throws NotImplementedException
      * @return string
      */
-    public static function truncateWords($str, $len, $trail='...') {
+    public static function titleize($str) {
         throw new NotImplementedException;
     }
+
+    /**
+     * Truncates a string to the specified length. Adds an ellipsis if the string is too long.
+     *
+     * @param string $str String to truncate
+     * @param int $len Maximum character length
+     * @param string $end
+     * @param bool $avoid_word_cut
+     * @param string $encoding
+     * @return string
+     */
+    public static function truncate($str, $len, $end='…', $avoid_word_cut=true, $encoding=null) {
+        if($encoding===null) $encoding = mb_detect_encoding($str);
+        $strlen = mb_strlen($str, $encoding);
+        if($avoid_word_cut && $strlen > $len) {
+            $pos = mb_strrpos($str,' ',$len-$strlen, $encoding);
+            if($pos !== false) {
+                $len = $pos;
+            }
+        }
+        if($strlen <= $len + mb_strlen($end, $encoding)) {
+            return $str;
+        }
+        return preg_replace('~\W\z~u','',mb_substr($str, 0, $len, $encoding)) . $end;
+    }
+
+//    public static function rePos($subject, $pattern, $offset=0) {
+//        if(preg_match($pattern,$subject,$m,PREG_OFFSET_CAPTURE,$offset)) {
+//            return $m[0][1];
+//        }
+//        return false;
+//    }
+//
+//    public static function rePosRev($subject, $pattern, $offset=null) {
+//        if($offset === null) $offset = strlen($subject);
+//        $search_str = strrev(substr($subject, 0, $offset));
+//        if(preg_match($pattern, $search_str, $m, PREG_OFFSET_CAPTURE)) {
+//            return $offset - $m[0][1];
+//        }
+//        return false;
+//    }
 
     /**
      * Transform text into a URL slug. Removes accents and replaces whitespaces with dashes.
@@ -416,33 +478,6 @@ REGEX;
      */
     public static function slugify($str) {
         return trim(preg_replace('~[^a-z0-9]+~','-',strtolower(str_replace("'",'',iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $str)))),'-');
-    }
-
-    /**
-     * Join an array into a human readable sentence.
-     *
-     * @param string[] $array
-     * @param string $delimiter
-     * @param string $lastDelimiter
-     * @return string
-     */
-    public static function toSentence($array, $delimiter = ', ', $lastDelimiter = ' and ') {
-        if(count($array) <= 2) return implode($lastDelimiter, $array);
-        $lastElement = array_pop($array);
-        return implode($delimiter, $array) . $lastDelimiter . $lastElement;
-    }
-
-    /**
-     * The same as toSentence, but adjusts delimeters to use Serial comma.
-     *
-     * @param string[] $array
-     * @param string $delimiter
-     * @param string $lastDelimiter
-     * @throws NotImplementedException
-     * @see http://en.wikipedia.org/wiki/Serial_comma
-     */
-    public static function toSentenceSerial($array, $delimiter=', ', $lastDelimiter=' and ') {
-        throw new NotImplementedException;
     }
 
     /**
@@ -462,5 +497,86 @@ REGEX;
         elseif(is_int($val)) return $val !== 0;
         elseif(is_array($val)) return $val !== [];
         return $default;
+    }
+
+    /**
+     * Compress some whitespaces to one.
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function compressWhitespace($str) {
+        return trim(preg_replace('~\s+~',' ',$str));
+    }
+
+    /**
+     * Tests if a string contains a substring.
+     * @param string $str String to search
+     * @param string $needle Substring to search for
+     * @param bool $case_sensitive Perform case sensitive search
+     * @return bool
+     */
+    public static function contains($str, $needle, $case_sensitive=true) {
+        return $case_sensitive
+            ? strpos($str, $needle) !== false
+            : stripos($str, $needle) !== false;
+    }
+
+    /**
+     * Split a string into lines.
+     *
+     * @param string $str
+     * @return array
+     */
+    public static function lines($str) {
+        return preg_split('~\R~',$str);
+    }
+
+    /**
+     * Reverse a string.
+     *
+     * @param string $string
+     * @param null|string $encoding
+     * @return string
+     * @credit http://kvz.io/blog/2012/10/09/reverse-a-multibyte-string-in-php/
+     */
+    public static function reverse($string, $encoding = null) {
+        if($encoding === null) {
+            $encoding = mb_detect_encoding($string);
+        }
+
+        $length = mb_strlen($string, $encoding);
+        $reversed = '';
+        while($length-- > 0) {
+            $reversed .= mb_substr($string, $length, 1, $encoding);
+        }
+
+        return $reversed;
+    }
+
+    public static function splice($string, $index, $howmany, $substring) {
+        return substr($string,0,$index).$substring.substr($string,$index+$howmany);
+    }
+
+    /**
+     * Split a string into words.
+     *
+     * @param $str
+     * @return array
+     */
+    public static function words($str) {
+        return preg_split('~\s+~',trim($str));
+    }
+
+    /**
+     * Repeat a string.
+     *
+     * @param string $string
+     * @param int $count
+     * @param string $separator
+     * @return string
+     */
+    public static function repeat($string, $count, $separator='') {
+        return str_repeat($string.$separator, $count-1).$string;
     }
 }

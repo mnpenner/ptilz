@@ -140,6 +140,34 @@ abstract class Math {
      */
     public static function randFloat($min = 0, $max = 1) {
         if($min === 0 && $max === 1) return lcg_value();
-        return $min + lcg_value() * abs($max - $min);
+        return $min + lcg_value() * ($max - $min);
+    }
+
+    /**
+     * Generate a random number within the specified range and the given step size.
+     *
+     * @param int|float $min
+     * @param int|float $max
+     * @param int|float $step
+     * @param bool $max_inclusive True to generate a number in the range [$min,$max], false for [$min,$max)
+     * @return float
+     */
+    public static function rand($min = 0, $max = PHP_INT_MAX, $step = 1, $max_inclusive=true) {
+        // lcg_value() theoretically picks a value in [0,1] inclusive
+        // we subtract DBL_EPSILON (http://opensource.apple.com/source/gcc/gcc-937.2/float.h) from 1 to avoid generating a number greater than $max
+        $offset = $max_inclusive ? 0.99999999999999977795539507496869 : -0.00000000000000022204460492503131;
+        return floor(lcg_value() * (($max - $min) / $step + $offset)) * $step + $min;
+    }
+
+    /**
+     * Rounds a float to the nearest step.
+     *
+     * @param float $val
+     * @param int $step
+     * @param int $mode
+     * @return float
+     */
+    public static function round($val, $step = 1, $mode = PHP_ROUND_HALF_UP) {
+        return round($val / $step, 0, $mode) * $step;
     }
 }

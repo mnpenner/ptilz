@@ -442,13 +442,6 @@ REGEX;
     public static function truncate($str, $len, $end='…', $avoid_word_cut=true, $encoding=null) {
         if($encoding===null) $encoding = mb_detect_encoding($str);
         $strlen = mb_strlen($str, $encoding);
-//        if($avoid_word_cut && $strlen > $len) {
-//            $search_str = mb_substr($str, 0, $len+1);
-//            if(preg_match('~\s\S+\z~u',$search_str,$m,PREG_OFFSET_CAPTURE)) {
-//                var_dump($m);
-//                $len = $m[0][1];
-//            }
-//        }
         if($avoid_word_cut && $strlen > $len) {
             $pos = mb_strrpos($str,' ',$len-$strlen, $encoding);
             if($pos !== false) {

@@ -77,4 +77,11 @@ class MathTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(4.5,Math::truncatedMean([-100,4,2,800,7,6,3,5],.125));
         $this->assertEquals(42,Math::truncatedMean([100,0,41,43],.25));
     }
+
+    function testRound() {
+        $this->assertSame(3.0,Math::round(2.6));
+        $this->assertSame(2.5,Math::round(2.6,.5));
+        $this->assertSame(2.5,Math::round(2.25,.5,PHP_ROUND_HALF_UP));
+        $this->assertSame(2.0,Math::round(2.25,.5,PHP_ROUND_HALF_DOWN));
+    }
 }

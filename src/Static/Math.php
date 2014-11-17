@@ -139,7 +139,7 @@ abstract class Math {
      * @return float A pseudo-random float value
      */
     public static function randFloat($min = 0, $max = 1) {
-        return $min + lcg_value() * ($max - $min);
+        return $min + mt_rand() / mt_getrandmax() * ($max - $min);
     }
 
     /**
@@ -152,10 +152,7 @@ abstract class Math {
      * @return float
      */
     public static function rand($min, $max, $step = 1, $max_inclusive=true) {
-        // lcg_value() theoretically picks a value in [0,1] inclusive
-        // subtract a small number to avoid generating values greater than $max in the event that it rolls a perfect 1
-        $offset = $max_inclusive ? 0.99999999999999988897769753748434595763683319091796875 : -0.00000000000000011102230246251565404236316680908203125;
-        return floor(lcg_value() * (($max - $min) / $step + $offset)) * $step + $min;
+        return $min + floor((mt_rand() / (mt_getrandmax() + 1)) * (($max - $min) / $step + ($max_inclusive ? 1 : 0))) * $step;
     }
 
     /**

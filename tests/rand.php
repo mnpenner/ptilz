@@ -17,6 +17,20 @@ $lo = 0;
 $hi = .1;
 $step = .01;
 //$runs = ($hi-$lo)/$step*1000;
+$runs = 110000;
+$res = [];
+
+for($i=0; $i<$runs; ++$i) {
+    $x = Math::rand($lo, $hi, $step, true);
+    Arr::inc($res,(string)$x);
+}
+
+ksort($res,SORT_NUMERIC);
+print_r($res);
+
+
+
+
 $runs = 100000;
 $res = [];
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 
+use Ptilz\Arr;
 use Ptilz\BigMath;
 use Ptilz\Math;
 
@@ -12,15 +13,17 @@ require __DIR__ . '/../vendor/autoload.php';
 //echo '0.698970004336018804786261105275506973231810118537891458689572...';
 
 
-$buckets = 2;
 $lo = 0;
-$hi = 1;
-$runs = $buckets*1000;
-$res = array_fill($lo,$buckets,0);
+$hi = .1;
+$step = .01;
+//$runs = ($hi-$lo)/$step*1000;
+$runs = 100000;
+$res = [];
 
 for($i=0; $i<$runs; ++$i) {
-    $x = BigMath::randInt($lo, $hi);
-    ++$res[$x];
+    $x = Math::rand($lo, $hi, $step, false);
+    Arr::inc($res,(string)$x);
 }
 
+ksort($res,SORT_NUMERIC);
 print_r($res);

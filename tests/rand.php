@@ -11,7 +11,7 @@ require __DIR__ . '/../vendor/autoload.php';
 //echo Math::log(100).PHP_EOL;
 //echo Math::randInt(1000,PHP_INT_MAX).PHP_EOL;
 //echo '0.698970004336018804786261105275506973231810118537891458689572...';
-
+echo "Values should be pretty close to 10000 if the distribution is uniform...\n";
 
 $lo = 0;
 $hi = .1;
@@ -41,3 +41,5 @@ for($i=0; $i<$runs; ++$i) {
 
 ksort($res,SORT_NUMERIC);
 print_r($res);
+
+echo "rand max: ".mt_getrandmax().PHP_EOL;

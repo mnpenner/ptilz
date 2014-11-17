@@ -139,7 +139,6 @@ abstract class Math {
      * @return float A pseudo-random float value
      */
     public static function randFloat($min = 0, $max = 1) {
-        if($min === 0 && $max === 1) return lcg_value();
         return $min + lcg_value() * ($max - $min);
     }
 
@@ -152,10 +151,10 @@ abstract class Math {
      * @param bool $max_inclusive True to generate a number in the range [$min,$max], false for [$min,$max)
      * @return float
      */
-    public static function rand($min = 0, $max = PHP_INT_MAX, $step = 1, $max_inclusive=true) {
+    public static function rand($min, $max, $step = 1, $max_inclusive=true) {
         // lcg_value() theoretically picks a value in [0,1] inclusive
-        // we subtract DBL_EPSILON (http://opensource.apple.com/source/gcc/gcc-937.2/float.h) from 1 to avoid generating a number greater than $max
-        $offset = $max_inclusive ? 0.99999999999999977795539507496869 : -0.00000000000000022204460492503131;
+        // subtract a small number to avoid generating values greater than $max in the event that it rolls a perfect 1
+        $offset = $max_inclusive ? 0.99999999999999988897769753748434595763683319091796875 : -0.00000000000000011102230246251565404236316680908203125;
         return floor(lcg_value() * (($max - $min) / $step + $offset)) * $step + $min;
     }
 

@@ -96,4 +96,16 @@ abstract class Sql {
             throw new UnreachableException("Bad regex");
         }, $query);
     }
+
+    public static function datetime($timestamp = null) {
+        if($timestamp === null) $timestamp = time();
+        elseif(is_string($timestamp) && !is_numeric($timestamp)) $timestamp = strtotime($timestamp);
+        return date('Y-m-d H:i:s', $timestamp);
+    }
+
+    public static function date($timestamp = null) {
+        if($timestamp === null) $timestamp = time();
+        elseif(is_string($timestamp) && !is_numeric($timestamp)) $timestamp = strtotime($timestamp);
+        return date('Y-m-d', $timestamp);
+    }
 }

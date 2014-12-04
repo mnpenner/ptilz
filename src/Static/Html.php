@@ -11,8 +11,7 @@ class Html {
             } else {
                 $attr = htmlspecialchars(trim($key));
                 if($val === true) $attr_pairs[] = $attr;
-                elseif($val === false) continue;
-                elseif($val === null) $attr_pairs[] = $attr . '=""';
+                elseif($val === false || $val === null) continue;
                 elseif(is_string($val)) $attr_pairs[] = $attr . '="' . htmlspecialchars($val) . '"';
                 elseif(is_int($val) || is_float($val)) $attr_pairs[] = $attr . '="' . strval($val) . '"';
                 elseif(is_array($val)) {

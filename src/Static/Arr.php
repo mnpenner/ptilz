@@ -653,4 +653,32 @@ abstract class Arr {
         return implode($delimiter, $array) . $lastDelimiter . $lastElement;
     }
 
+    /**
+     * Push an element into a sub-array.
+     *
+     * @param array $array
+     * @param string $key
+     * @param mixed $var
+     */
+    public static function push(&$array, $key, $var=null) {
+        if(func_num_args() === 3) {
+            if(is_array($key)) {
+                while(count($key) >= 2) {
+                    $k = array_shift($key);
+                    if(!array_key_exists($k, $array)) {
+                        $array[$k] = [];
+                    }
+                    $array = &$array[$k];
+                }
+                $key = reset($key);
+            }
+            if(array_key_exists($key, $array)) {
+                $array[$key][] = $var;
+            } else {
+                $array[$key] = [$var];
+            }
+        } else {
+            $array[] = $key;
+        }
+    }
 }

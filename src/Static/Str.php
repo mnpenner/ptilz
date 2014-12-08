@@ -8,25 +8,58 @@ use Ptilz\Exceptions\NotImplementedException;
  * String helper methods.
  */
 abstract class Str {
-    public static function startsWith($haystack, $needle, $case_insensitive = false) {
-        $substr = substr($haystack, 0, strlen($needle));
+    /**
+     * Tests if a string starts with the given prefix.
+     *
+     * @param string $subject
+     * @param string $prefix
+     * @param bool $case_insensitive
+     * @return bool
+     */
+    public static function startsWith($subject, $prefix, $case_insensitive = false) {
+        $substr = substr($subject, 0, strlen($prefix));
         return $case_insensitive
-            ? mb_strtolower($substr) === mb_strtolower($needle)
-            : $substr === $needle;
+            ? mb_strtolower($substr) === mb_strtolower($prefix)
+            : $substr === $prefix;
     }
 
-    public static function endsWith($haystack, $needle, $case_insensitive = false) {
-        $substr = substr($haystack, -strlen($needle));
+    /**
+     * Tests if a string ends with the given postfix.
+     *
+     * @param string $subject
+     * @param string $postfix
+     * @param bool $case_insensitive
+     * @return bool
+     */
+    public static function endsWith($subject, $postfix, $case_insensitive = false) {
+        $substr = substr($subject, -strlen($postfix));
         return $case_insensitive
-            ? mb_strtolower($substr) === mb_strtolower($needle)
-            : $substr === $needle;
+            ? mb_strtolower($substr) === mb_strtolower($postfix)
+            : $substr === $postfix;
     }
 
+    /**
+     * Renders a PHP file to a string using the given variables.
+     *
+     * @param string $__file__ PHP filename to render
+     * @param array $__vars__ Variables to extract into local/global scope
+     * @return string
+     */
     public static function phpTemplate($__file__, $__vars__) {
         extract($__vars__, EXTR_SKIP);
         ob_start();
         include $__file__;
         return ob_get_clean();
+    }
+
+    /**
+     * Tests if a variable is castable to a string.
+     *
+     * @param mixed $var
+     * @return bool
+     */
+    public static function castable($var) {
+        return $var === null || is_scalar($var) || is_callable([$var, '__toString']);
     }
 
     /**

@@ -81,6 +81,7 @@ abstract class Json {
      * @throws Exceptions\InvalidOperationException
      */
     public static function decode($str, $assoc = true, $depth = 512, $options = 0) {
+        // see https://github.com/symfony/HttpFoundation/blob/88d0642f6afd56488c9129ebf90839cd3f107df9/JsonResponse.php#L96-L127
         $result = json_decode($str, $assoc, $depth, $options);
         $error_code = json_last_error();
         if($error_code !== JSON_ERROR_NONE) {

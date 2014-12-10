@@ -85,7 +85,7 @@ abstract class Path {
         $dirs = explode($sep, rtrim($path, $sep));
         if($isUnc) {
             array_shift($dirs);
-            $rootDir = '\\\\' . array_shift($dirs) . $sep;
+            $rootDir = '\\\\' . array_shift($dirs) . $sep . array_shift($dirs) . $sep; // can't navigate above this directory with pushd; UNC guarantees 2 levels
         } else {
             $rootDir = $isAbs ? array_shift($dirs) . $sep : '';
         }

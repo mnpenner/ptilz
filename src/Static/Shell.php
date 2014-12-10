@@ -128,7 +128,7 @@ abstract class Shell {
     public static function cmdExists($cmd) {
         $arg = escapeshellarg($cmd);
         if(Env::isWindows()) {
-            return self::tryExec("where $arg") || !self::tryExec("help $arg"); // http://superuser.com/a/718194/65387, http://stackoverflow.com/q/27392680/65387
+            return self::tryExec("(help $arg || exit 0) && where $arg"); // http://stackoverflow.com/a/27394096/65387
         }
         return self::tryExec("command -v $arg"); // http://stackoverflow.com/a/677212/65387
     }

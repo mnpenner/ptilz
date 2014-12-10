@@ -91,6 +91,8 @@ abstract class Str {
     /**
      * Generate a random string from the given alphabet.
      *
+     * This function chooses one character at a time, making it a little bit slow ~ O(len)
+     *
      * @param int $len String length
      * @param string $chars Characters to choose from
      * @return string Random string
@@ -554,6 +556,15 @@ REGEX;
         return $reversed;
     }
 
+    /**
+     * Splices a string.
+     *
+     * @param string $string String to splice
+     * @param int $index Index where splice starts
+     * @param int $howmany How many characters to replace (use 0 for insert)
+     * @param string $substring Sub-string to replace spliced characters with
+     * @return string
+     */
     public static function splice($string, $index, $howmany, $substring) {
         return substr($string,0,$index).$substring.substr($string,$index+$howmany);
     }

@@ -112,7 +112,7 @@ abstract class Path {
         return str_repeat('..' . self::$_sep, count($from_parts)) . implode(self::$_sep, $to_parts);
     }
 
-    public static function __initStatic() {
+    private static function _initStatic() {
         self::$_isWin = Env::isWindows();
         self::$_sep = DIRECTORY_SEPARATOR;
     }
@@ -155,4 +155,4 @@ abstract class Path {
     }
 }
 
-Path::__initStatic();
+Func::invokeMethod(Path::class,'_initStatic');

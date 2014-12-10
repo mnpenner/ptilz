@@ -107,5 +107,7 @@ class PathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('C:\\baz', Path::normalize('C:/foo/bar/../../../baz'));
         $this->assertSame('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail', Path::normalize('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail'));
         $this->assertSame('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\normal', Path::normalize('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail\\..\\normal'));
+        $this->assertSame('\\\\MARK-MAIN/Users/Mark/.thumbnails/normal', Path::normalize('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail\\..\\normal','/')); // works in Explorer but not pushd
+        $this->assertSame('\\\\MARK-MAIN\\Users\\Public', Path::normalize('\\\\MARK-MAIN\\Users\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\Public')); // pushd mounts \\MARK-MAIN\\Users to a drive letter and then prevents cd'ing above this level
     }
 }

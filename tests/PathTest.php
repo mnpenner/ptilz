@@ -90,6 +90,8 @@ class PathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('..', Path::normalize('foo/bar/../../..'));
         $this->assertSame('../..', Path::normalize('foo/bar/../../../..'));
         $this->assertSame('/', Path::normalize('/foo/bar/../../'));
+        $this->assertSame('/', Path::normalize('/foo/bar/../../..'));
+        $this->assertSame('/baz', Path::normalize('/foo/bar/../../../baz'));
 
         Path::setWindowsMode(true);
         $this->assertSame('c:\\baz', Path::normalize('c:/foo/bar/../../baz'));
@@ -101,21 +103,7 @@ class PathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('..', Path::normalize('foo/bar/../../..'));
         $this->assertSame('..\\..', Path::normalize('foo/bar/../../../..'));
         $this->assertSame('C:\\', Path::normalize('C:/foo/bar/../../'));
-    }
-
-    /**
-     * @expectedException \Ptilz\Exceptions\InvalidOperationException
-     */
-    function testNormalize2() {
-        Path::setWindowsMode(false);
-        Path::normalize('/foo/bar/../../..');
-    }
-
-    /**
-     * @expectedException \Ptilz\Exceptions\InvalidOperationException
-     */
-    function testNormalize3() {
-        Path::setWindowsMode(true);
-        Path::normalize('C:/foo/bar/../../..');
+        $this->assertSame('C:\\', Path::normalize('C:/foo/bar/../../..'));
+        $this->assertSame('C:\\baz', Path::normalize('C:/foo/bar/../../../baz'));
     }
 }

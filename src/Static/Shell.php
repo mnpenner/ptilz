@@ -118,4 +118,11 @@ abstract class Shell {
         foreach($pipes as $p) fclose($p); // "If you have open pipes to that process, you should fclose() them prior to calling [proc_close] in order to avoid a deadlock - the child process may not be able to exit while the pipes are open."
         return proc_close($proc) === 0;
     }
+
+    public static function cmdExists($cmd) {
+        return self::tryExec(Env::isWindows()
+            ? "where $cmd"  // http://superuser.com/a/718194/5106
+            : "command -v $cmd" // http://stackoverflow.com/a/677212/65387
+        );
+    }
 }

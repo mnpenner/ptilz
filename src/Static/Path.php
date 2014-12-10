@@ -2,6 +2,7 @@
 namespace Ptilz;
 use Exception;
 use Ptilz\Exceptions\ArgumentEmptyException;
+use Ptilz\Exceptions\InvalidOperationException;
 
 abstract class Path {
     /** @var bool Is Windows OS */
@@ -43,17 +44,28 @@ abstract class Path {
      * @throws Exceptions\ArgumentEmptyException
      */
     public static function isAbsolute($path) {
-        // translated from https://github.com/filearts/node-absolute-path/blob/184265b630bac9ff034a22c9dfcad5a0a68f332a/index.js#L3-L18
-        if(Str::isBlank($path)) throw new ArgumentEmptyException('path');
+        // reference https://github.com/filearts/node-absolute-path/blob/184265b630bac9ff034a22c9dfcad5a0a68f332a/index.js#L3-L18
+        // reference http://en.wikipedia.org/wiki/Path_%28computing%29#UNC_in_Windows
+        if(Str::isBlank($path)) {
+            throw new ArgumentEmptyException('path');
+        }
         if(!self::$_isWin) {
             return $path[0] === '/';
         }
-        if(!preg_match('~([a-zA-Z]:|[\\\/]{2}[^\\\/]+[\\\/]+[^\\\/]+)?([\\\/])?([\s\S]*?)\z~A', $path, $m)) {
-            return false;
-        }
-        $device = Arr::get($m, 1, '');
-        $isUnc = $device && $device[1] !== ':';
-        return $m[2] || $isUnc;
+        return preg_match('~[a-zA-Z]:~A', $path) === 1 || self::isUncPath($path);
+    }
+
+    /**
+     * Tests if a path follows the Universal Naming Convention (UNC).
+     *
+     * UNC =  \\<hostname>\<sharename>[\<objectname>]*
+     *
+     * @param string $path
+     * @return bool
+     * @see http://msdn.microsoft.com/en-ca/library/gg465305.aspx
+     */
+    public static function isUncPath($path) {
+        return preg_match('~\\\\(?:\\\\[^\\\\/:*?"<>|]+){2,}\z~A',$path) === 1;
     }
 
     /**
@@ -62,33 +74,33 @@ abstract class Path {
      * @param string $path
      * @param string $sep Path separator
      * @return string
+     * @throws ArgumentEmptyException
+     * @throws InvalidOperationException
      * @see http://nodejs.org/api/path.html#path_path_normalize_p
      */
     public static function normalize($path, $sep=null) {
         if($sep === null) $sep = self::$_sep;
         $path = preg_replace('~[/\\\\]+~', $sep, $path);
-        if($path === $sep) return $path;
+        if($path === $sep) return $path; // fixme: what should we do if we're on Windows? this isn't a valid path!
         $out = [];
         $dirs = explode($sep, rtrim($path, $sep));
-        $isEmpty = !$dirs;
         $isAbs = self::isAbsolute($path);
+        $rootDir = $isAbs ? array_shift($dirs) . $sep : '';
         foreach($dirs as $p) {
             if($p === '.') continue;
             if($p === '..') {
-                if($isEmpty) {
-                    if(!$isAbs) $out[] = '..';
+                if($isAbs && !$out) throw new InvalidOperationException("Can't navigate above root");
+                if(!$out || end($out) === '..') {
+                    $out[] = '..';
                 } else {
                     array_pop($out);
-                    if(!$out) $isEmpty = true;
                 }
+            } else {
+                $out[] = $p;
             }
-            else $out[] = $p;
         }
-        if(!$out) {
-            if($isAbs) return $sep; // todo: need to return Windows drive letter if $_isWin
-            return '.';
-        }
-        return implode($sep, $out);
+        if(!$out) return $isAbs ? $rootDir : '.';
+        return $rootDir.implode($sep, $out);
     }
 
 

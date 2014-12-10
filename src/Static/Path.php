@@ -74,8 +74,6 @@ abstract class Path {
      * @param string $path
      * @param string $sep Path separator
      * @return string
-     * @throws ArgumentEmptyException
-     * @throws InvalidOperationException
      * @see http://nodejs.org/api/path.html#path_path_normalize_p
      */
     public static function normalize($path, $sep=null) {
@@ -89,7 +87,7 @@ abstract class Path {
         foreach($dirs as $p) {
             if($p === '.') continue;
             if($p === '..') {
-                if($isAbs && !$out) throw new InvalidOperationException("Can't navigate above root");
+                if($isAbs && !$out) continue;
                 if(!$out || end($out) === '..') {
                     $out[] = '..';
                 } else {

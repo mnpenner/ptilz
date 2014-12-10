@@ -52,7 +52,7 @@ abstract class Path {
         if(!self::$_isWin) {
             return $path[0] === '/';
         }
-        return preg_match('~[a-zA-Z]:~A', $path) === 1 || self::isUncPath($path);
+        return preg_match('~[a-zA-Z]:~A', $path) === 1 || self::isUnc($path);
     }
 
     /**
@@ -64,7 +64,7 @@ abstract class Path {
      * @return bool
      * @see http://msdn.microsoft.com/en-ca/library/gg465305.aspx
      */
-    public static function isUncPath($path) {
+    public static function isUnc($path) {
         return preg_match('~\\\\(?:\\\\[^\\\\/:*?"<>|]+){2,}\z~A',$path) === 1;
     }
 
@@ -78,12 +78,17 @@ abstract class Path {
      */
     public static function normalize($path, $sep=null) {
         if($sep === null) $sep = self::$_sep;
+        $isAbs = self::isAbsolute($path);
+        $isUnc = self::isUnc($path);
         $path = preg_replace('~[/\\\\]+~', $sep, $path);
-        if($path === $sep) return $path; // fixme: what should we do if we're on Windows? this isn't a valid path!
         $out = [];
         $dirs = explode($sep, rtrim($path, $sep));
-        $isAbs = self::isAbsolute($path);
-        $rootDir = $isAbs ? array_shift($dirs) . $sep : '';
+        if($isUnc) {
+            array_shift($dirs);
+            $rootDir = '\\\\' . array_shift($dirs) . $sep;
+        } else {
+            $rootDir = $isAbs ? array_shift($dirs) . $sep : '';
+        }
         foreach($dirs as $p) {
             if($p === '.') continue;
             if($p === '..') {

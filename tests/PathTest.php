@@ -105,5 +105,7 @@ class PathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('C:\\', Path::normalize('C:/foo/bar/../../'));
         $this->assertSame('C:\\', Path::normalize('C:/foo/bar/../../..'));
         $this->assertSame('C:\\baz', Path::normalize('C:/foo/bar/../../../baz'));
+        $this->assertSame('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail', Path::normalize('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail'));
+        $this->assertSame('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\normal', Path::normalize('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail\\..\\normal'));
     }
 }

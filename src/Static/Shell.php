@@ -120,9 +120,9 @@ abstract class Shell {
     }
 
     public static function cmdExists($cmd) {
-        return self::tryExec(Env::isWindows()
-            ? "where $cmd"  // http://superuser.com/a/718194/5106
-            : "command -v $cmd" // http://stackoverflow.com/a/677212/65387
-        );
+        if(Env::isWindows()) {
+            return !self::tryExec("help $cmd") || self::tryExec("where $cmd"); // http://superuser.com/a/718194/65387, http://stackoverflow.com/q/27392680/65387
+        }
+        return self::tryExec("command -v $cmd"); // http://stackoverflow.com/a/677212/65387
     }
 }

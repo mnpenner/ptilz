@@ -119,10 +119,17 @@ abstract class Shell {
         return proc_close($proc) === 0;
     }
 
+    /**
+     * Checks if a command exists.
+     *
+     * @param string $cmd
+     * @return bool
+     */
     public static function cmdExists($cmd) {
+        $arg = escapeshellarg($cmd);
         if(Env::isWindows()) {
-            return !self::tryExec("help $cmd") || self::tryExec("where $cmd"); // http://superuser.com/a/718194/65387, http://stackoverflow.com/q/27392680/65387
+            return self::tryExec("where $arg") || !self::tryExec("help $arg"); // http://superuser.com/a/718194/65387, http://stackoverflow.com/q/27392680/65387
         }
-        return self::tryExec("command -v $cmd"); // http://stackoverflow.com/a/677212/65387
+        return self::tryExec("command -v $arg"); // http://stackoverflow.com/a/677212/65387
     }
 }

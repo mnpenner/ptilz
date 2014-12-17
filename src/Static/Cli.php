@@ -5,7 +5,7 @@ use Ptilz\Exceptions\NotImplementedException;
 /**
  * Command-line methods
  */
-abstract class Cli { // fixme: rename to Console:: ?
+abstract class Cli { // fixme: rename to Console:: ? Or Term::?
 
     public static function write($format) {
         $args = func_get_args();

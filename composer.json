@@ -1,11 +1,11 @@
 {
-    "name": "mnbayazit/ptilz",
+    "name": "mnpenner/ptilz",
     "description": "PHP utilities",
     "license": "MIT",
     "authors": [
         {
-            "name": "Mark Bayazit",
-            "email": "mnbayazit@gmail.com"
+            "name": "Mark Penner",
+            "email": "marknpenner@gmail.com"
         }
     ],
     "minimum-stability": "dev",

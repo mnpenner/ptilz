@@ -167,8 +167,12 @@ abstract class Cli { // fixme: rename to Console:: ? Or Term::?
         $paddingWidth = strlen(strip_tags($colPadding));
         $columns = [$items];
         $colWidths = [max(array_map('strlen', $items))];
+        $triedChunkSizes = [];
         for($nColumns = 2; $nColumns <= count($items); ++$nColumns) {
-            $testChunks = array_chunk($items, ceil(count($items) / $nColumns));
+            $chunkSize = (int)ceil(count($items) / $nColumns);
+            if(isset($triedChunkSizes[$chunkSize])) continue;
+            $triedChunkSizes[$chunkSize] = true;
+            $testChunks = array_chunk($items, $chunkSize);
             $totalWidth = ($nColumns-1)*$paddingWidth;
             $testWidths = [];
             foreach($testChunks as $x=>$c) {

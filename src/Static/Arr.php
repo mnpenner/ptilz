@@ -314,14 +314,10 @@ abstract class Arr {
      * @param array $keys
      * @param array $values
      * @return array
+     * @deprecated Use the built-in function array_combine
      */
     public static function zipdict(array $keys, array $values) {
-        $keys = array_intersect_key($keys, $values);
-        $out = array();
-        foreach($keys as $k => $_) {
-            $out[$keys[$k]] = $values[$k];
-        }
-        return $out;
+        return array_combine($keys, $values);
     }
 
     /**
@@ -651,6 +647,7 @@ abstract class Arr {
      * @return string
      */
     public static function toSentence($array, $delimiter = ', ', $lastDelimiter = ' and ', $serial_comma=false) {
+        // todo: implement $serial_comma
         if(count($array) <= 2) return implode($lastDelimiter, $array);
         $lastElement = array_pop($array);
         return implode($delimiter, $array) . $lastDelimiter . $lastElement;

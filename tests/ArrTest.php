@@ -416,4 +416,30 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         Arr::inc($arr, ['c','d'], 3);
         $this->assertSame(['a' => 2, 'b' => 2, 'c' => ['d' => 3]], $arr);
     }
+
+    function testDict() {
+        $this->assertSame([
+            'a' => 1,
+            'b' => 2,
+            'c' => 3
+        ], Arr::dict([
+            ['a', 1],
+            ['b', 2],
+            ['c', 3],
+        ]));
+
+        $out = [
+            '2015-01-01' => 1,
+            '2015-01-02' => 2,
+            '2015-01-03' => 3
+        ];
+        $in = [
+            ['date' => '2015-01-01', 'count' => 1, 'type' => 'car'],
+            ['date' => '2015-01-02', 'count' => 2, 'type' => 'car'],
+            ['date' => '2015-01-03', 'count' => 3, 'type' => 'truck'],
+        ];
+        $this->assertSame($out, Arr::dict($in));
+        $this->assertSame($out, Arr::dict($in, 'date', 'count'));
+        $this->assertSame(['car'=>[1,2],'truck'=>3], Arr::dict($in, 'type', 'count'));
+    }
 }

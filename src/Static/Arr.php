@@ -38,6 +38,7 @@ abstract class Arr {
      * @return mixed
      */
     public static function getDeep(array $arr, $key, $default = null) {
+        // todo: merge with above??
         $name = strtok($key, '[');
         if(!isset($arr[$name])) return $default;
         $ret = &$arr[$name];
@@ -186,12 +187,14 @@ abstract class Arr {
      * Takes an array (usually containing 2-tuples) and turns it into a dictionary (associative array)
      *
      * @param array $arr Array to convert
-     * @param int|string $k0 Key that holds keys
-     * @param int|string $k1 Key that holds values
+     * @param int|string $k0 Key that holds keys. Defaults to first key of first sub-array.
+     * @param int|string $k1 Key that holds values. Defaults to second key of first sub-array.
      *
      * @return array Dictionary
      */
     public static function dict(array $arr, $k0 = 0, $k1 = 1) {
+        if(!$arr) return [];
+        if(func_num_args()===1) list($k0,$k1) = array_keys(reset($arr));
         $dict = array();
         foreach($arr as $t) {
             if(isset($dict[$t[$k0]])) {

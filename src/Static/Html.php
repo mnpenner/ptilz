@@ -15,6 +15,7 @@ class Html {
                 elseif(is_string($val)) $attr_pairs[] = $attr . '="' . htmlspecialchars($val) . '"';
                 elseif(is_int($val) || is_float($val)) $attr_pairs[] = $attr . '="' . strval($val) . '"';
                 elseif(is_array($val)) {
+                    $val = Arr::filter($val);
                     if($val === []) continue;
                     elseif(Arr::isAssoc($val)) {
                         $style_pairs = [];

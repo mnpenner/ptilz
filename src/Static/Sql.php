@@ -8,10 +8,16 @@ use Ptilz\Exceptions\ArgumentTypeException;
 use Ptilz\Exceptions\UnreachableException;
 use Ptilz\Internal\RawSql;
 
+// FIXME: make this class non-static; it won't work well with multiple connections if the $connection is static!
 abstract class Sql {
     /** @var PDO|mysqli|resource Connection used for escaping values  */
     public static $connection = null;
 
+    /**
+     * Escapes special characters for use in a LIKE clause.
+     * @param string $str
+     * @return string
+     */
     public static function escapeLike($str) {
         return str_replace(['%', '_'], ['\\%', '\\_'], $str);
     }
@@ -45,6 +51,12 @@ abstract class Sql {
         throw new ArgumentTypeException('value', 'string');
     }
 
+    /**
+     * Tests if an object is a "mysql link".
+     *
+     * @param mixed $resource
+     * @return bool
+     */
     public static function isMySqlLink($resource) {
         return is_resource($resource) && get_resource_type($resource) === 'mysql link';
     }

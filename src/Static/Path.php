@@ -52,7 +52,7 @@ abstract class Path {
         if(!self::$_isWin) {
             return $path[0] === '/';
         }
-        return preg_match('~[a-zA-Z]:~A', $path) === 1 || self::isUnc($path);
+        return preg_match('~[a-zA-Z]:(?![^\\\\/])~A', $path) === 1 || self::isUnc($path);
     }
 
     /**
@@ -65,7 +65,8 @@ abstract class Path {
      * @see http://msdn.microsoft.com/en-ca/library/gg465305.aspx
      */
     public static function isUnc($path) {
-        return preg_match('~\\\\(?:\\\\[^\\\\/:*?"<>|]+){2,}\z~A',$path) === 1;
+        // https://github.com/joyent/node/blob/20229d6896ce4b802a0789b1d2643dcac55bebb9/lib/path.js#L62
+        return preg_match('~[\\\\/](?:[\\\\/][^\\\\/:*?"<>|]+){2}~A',$path) === 1;
     }
 
     /**
@@ -78,6 +79,7 @@ abstract class Path {
      */
     public static function normalize($path, $sep=null) {
         if($sep === null) $sep = self::$_sep;
+        if(strlen($sep) !== 1) throw new \DomainException("Separator must be exactly 1 character");
         $isAbs = self::isAbsolute($path);
         $isUnc = self::isUnc($path);
         $path = preg_replace('~[/\\\\]+~', $sep, $path);
@@ -85,7 +87,8 @@ abstract class Path {
         $dirs = explode($sep, rtrim($path, $sep));
         if($isUnc) {
             array_shift($dirs);
-            $rootDir = '\\\\' . array_shift($dirs) . $sep . array_shift($dirs) . $sep; // can't navigate above this directory with pushd; UNC guarantees 2 levels
+            $rootDir = '\\\\' . array_shift($dirs) . $sep . array_shift($dirs); // can't navigate above this directory with pushd; UNC guarantees 2 levels
+            if($dirs) $rootDir .= $sep;
         } else {
             $rootDir = $isAbs ? array_shift($dirs) . $sep : '';
         }

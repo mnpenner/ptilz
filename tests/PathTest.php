@@ -35,6 +35,65 @@ class PathTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse(Path::isAbsolute('foo\\bar'));
     }
 
+
+    function testNormalize() {
+        Path::setWindowsMode(false);
+        $this->assertSame('/foo', Path::normalize('/foo/'));
+        $this->assertSame('/baz', Path::normalize('/foo/bar/../../baz'));
+        $this->assertSame('/foo/bar', Path::normalize('/foo/bar/baz/..'));
+        $this->assertSame('\\foo\\bar', Path::normalize('/foo/bar/baz/..', '\\'));
+        $this->assertSame('/foo/bar/baz', Path::normalize('/foo/bar/baz/.'));
+        $this->assertSame('foo/bar', Path::normalize('foo//bar/'));
+        $this->assertSame('../baz', Path::normalize('foo/../../bar/../baz'));
+        $this->assertSame('../bax', Path::normalize('foo/../../bar/../baz/../bax'));
+        $this->assertSame('../../bax', Path::normalize('foo/../../bar/../baz/../../bax'));
+        $this->assertSame('.', Path::normalize('foo/bar/../..'));
+        $this->assertSame('..', Path::normalize('foo/bar/../../..'));
+        $this->assertSame('../..', Path::normalize('foo/bar/../../../..'));
+        $this->assertSame('/', Path::normalize('/foo/bar/../../'));
+        $this->assertSame('/', Path::normalize('/foo/bar/../../..'));
+        $this->assertSame('/baz', Path::normalize('/foo/bar/../../../baz'));
+
+        Path::setWindowsMode(true);
+        $this->assertSame('\\\\host\\root', Path::normalize('\\\\host\\root\\'));
+        $this->assertSame('c:\\baz', Path::normalize('c:/foo/bar/../../baz'));
+        $this->assertSame('\\foo\\bar', Path::normalize('\\foo\\bar/baz/..'));
+        $this->assertSame('/foo/bar', Path::normalize('\\foo\\bar/baz/..','/'));
+        $this->assertSame('\\foo\\bar\\baz', Path::normalize('/foo/bar/baz/.'));
+        $this->assertSame('foo\\bar', Path::normalize('foo//bar/'));
+        $this->assertSame('.', Path::normalize('foo/bar/../..'));
+        $this->assertSame('..', Path::normalize('foo/bar/../../..'));
+        $this->assertSame('..\\..', Path::normalize('foo/bar/../../../..'));
+        $this->assertSame('C:\\', Path::normalize('C:/foo/bar/../../'));
+        $this->assertSame('C:\\', Path::normalize('C:/foo/bar/../../..'));
+        $this->assertSame('C:\\baz', Path::normalize('C:/foo/bar/../../../baz'));
+        $this->assertSame('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail', Path::normalize('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail'));
+        $this->assertSame('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\normal', Path::normalize('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail\\..\\normal'));
+        $this->assertSame('\\\\MARK-MAIN/Users/Mark/.thumbnails/normal', Path::normalize('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail\\..\\normal','/')); // works in Explorer but not pushd
+        $this->assertSame('\\\\MARK-MAIN\\Users\\Public', Path::normalize('\\\\MARK-MAIN\\Users\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\Public')); // pushd mounts \\MARK-MAIN\\Users to a drive letter and then prevents cd'ing above this level
+    }
+
+    /**
+     * @depends testNormalize
+     */
+    function testResolve() {
+        Path::setWindowsMode(false);
+        $this->assertSame('/foo/bar/baz', Path::resolve('/foo/bar', 'baz'));
+        $this->assertSame('/foo/bar/baz', Path::resolve(__DIR__, '/foo/bar', 'baz'));
+        $this->assertSame('/foo/bar/baz/img.jpg', Path::resolve('/foo/bar', 'baz', 'img.jpg'));
+        $this->assertSame('/foo/bar/c:/baz/img.jpg', Path::resolve('/foo/bar', 'c:/baz', 'img.jpg'));
+
+        Path::setWindowsMode(true);
+        $this->assertSame('\\\\host\\root', Path::resolve('\\\\host\\root'));
+        $this->assertSame('c:\\foo\\bar\\baz', Path::resolve('c:/foo/bar', 'baz'));
+        $this->assertSame('C:\\foo\\bar\\baz', Path::resolve(__DIR__, 'C:/foo/bar', 'baz'));
+        $this->assertSame('c:\\foo\\bar\\baz\\img.jpg', Path::resolve('c:/foo/bar', 'baz', 'img.jpg'));
+        $this->assertSame('c:\\baz\\img.jpg', Path::resolve('/foo/bar', 'c:/baz', 'img.jpg'));
+    }
+
+    /**
+     * @depends testResolve
+     */
     function testRelative() {
         Path::setWindowsMode(false);
         $this->assertEquals('../../impl/bbb', Path::relative('/data/orandea/test/aaa', '/data/orandea/impl/bbb'));
@@ -62,52 +121,4 @@ class PathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("foo\\bar\\baz", Path::join('foo', 'bar/baz'));
     }
 
-    function testResolve() {
-        Path::setWindowsMode(false);
-        $this->assertSame('/foo/bar/baz', Path::resolve('/foo/bar', 'baz'));
-        $this->assertSame('/foo/bar/baz', Path::resolve(__DIR__, '/foo/bar', 'baz'));
-        $this->assertSame('/foo/bar/baz/img.jpg', Path::resolve('/foo/bar', 'baz', 'img.jpg'));
-        $this->assertSame('/foo/bar/c:/baz/img.jpg', Path::resolve('/foo/bar', 'c:/baz', 'img.jpg'));
-
-        Path::setWindowsMode(true);
-        $this->assertSame('\\foo\\bar\\baz', Path::resolve('/foo/bar', 'baz'));
-        $this->assertSame('\\foo\\bar\\baz', Path::resolve(__DIR__, '/foo/bar', 'baz'));
-        $this->assertSame('\\foo\\bar\\baz\\img.jpg', Path::resolve('/foo/bar', 'baz', 'img.jpg'));
-        $this->assertSame('c:\\baz\\img.jpg', Path::resolve('/foo/bar', 'c:/baz', 'img.jpg'));
-    }
-
-    function testNormalize() {
-        Path::setWindowsMode(false);
-        $this->assertSame('/baz', Path::normalize('/foo/bar/../../baz'));
-        $this->assertSame('/foo/bar', Path::normalize('/foo/bar/baz/..'));
-        $this->assertSame('\\foo\\bar', Path::normalize('/foo/bar/baz/..', '\\'));
-        $this->assertSame('/foo/bar/baz', Path::normalize('/foo/bar/baz/.'));
-        $this->assertSame('foo/bar', Path::normalize('foo//bar/'));
-        $this->assertSame('../baz', Path::normalize('foo/../../bar/../baz'));
-        $this->assertSame('../bax', Path::normalize('foo/../../bar/../baz/../bax'));
-        $this->assertSame('../../bax', Path::normalize('foo/../../bar/../baz/../../bax'));
-        $this->assertSame('.', Path::normalize('foo/bar/../..'));
-        $this->assertSame('..', Path::normalize('foo/bar/../../..'));
-        $this->assertSame('../..', Path::normalize('foo/bar/../../../..'));
-        $this->assertSame('/', Path::normalize('/foo/bar/../../'));
-        $this->assertSame('/', Path::normalize('/foo/bar/../../..'));
-        $this->assertSame('/baz', Path::normalize('/foo/bar/../../../baz'));
-
-        Path::setWindowsMode(true);
-        $this->assertSame('c:\\baz', Path::normalize('c:/foo/bar/../../baz'));
-        $this->assertSame('\\foo\\bar', Path::normalize('\\foo\\bar/baz/..'));
-        $this->assertSame('/foo/bar', Path::normalize('\\foo\\bar/baz/..','/'));
-        $this->assertSame('\\foo\\bar\\baz', Path::normalize('/foo/bar/baz/.'));
-        $this->assertSame('foo\\bar', Path::normalize('foo//bar/'));
-        $this->assertSame('.', Path::normalize('foo/bar/../..'));
-        $this->assertSame('..', Path::normalize('foo/bar/../../..'));
-        $this->assertSame('..\\..', Path::normalize('foo/bar/../../../..'));
-        $this->assertSame('C:\\', Path::normalize('C:/foo/bar/../../'));
-        $this->assertSame('C:\\', Path::normalize('C:/foo/bar/../../..'));
-        $this->assertSame('C:\\baz', Path::normalize('C:/foo/bar/../../../baz'));
-        $this->assertSame('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail', Path::normalize('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail'));
-        $this->assertSame('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\normal', Path::normalize('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail\\..\\normal'));
-        $this->assertSame('\\\\MARK-MAIN/Users/Mark/.thumbnails/normal', Path::normalize('\\\\MARK-MAIN\\Users\\Mark\\.thumbnails\\fail\\..\\normal','/')); // works in Explorer but not pushd
-        $this->assertSame('\\\\MARK-MAIN\\Users\\Public', Path::normalize('\\\\MARK-MAIN\\Users\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\Public')); // pushd mounts \\MARK-MAIN\\Users to a drive letter and then prevents cd'ing above this level
-    }
 }

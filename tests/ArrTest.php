@@ -442,4 +442,12 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame($out, Arr::dict($in, 'date', 'count'));
         $this->assertSame(['car'=>[1,2],'truck'=>3], Arr::dict($in, 'type', 'count'));
     }
+
+    function testPush() {
+        $arr = ['a'=>[1,2]];
+        Arr::push($arr,'a',3);
+        $this->assertSame(['a'=>[1,2,3]],$arr);
+        Arr::push($arr,['b','c'],4);
+        $this->assertSame(['a'=>[1,2,3],'b'=>['c'=>[4]]],$arr);
+    }
 }

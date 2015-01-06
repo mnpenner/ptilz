@@ -657,7 +657,7 @@ abstract class Arr {
      * Push an element into a sub-array.
      *
      * @param array $array
-     * @param string $key
+     * @param string|array $key
      * @param mixed $var
      */
     public static function push(&$array, $key, $var=null) {

@@ -97,12 +97,16 @@ abstract class Sql {
         return preg_replace_callback('~(?|(\?{1,2})|(:{1,2})([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*))~', function ($matches) use (&$params) {
             switch($matches[1]) {
                 case '?':
+                    if(!$params) throw new \DomainException("Not enough params");
                     return Sql::quote(array_shift($params));
                 case '??':
+                    if(!$params) throw new \DomainException("Not enough params");
                     return Sql::escapeId(array_shift($params));
                 case ':':
+                    if(!array_key_exists($matches[2],$params)) throw new \DomainException("\"$matches[2]\" param does not exist");
                     return Sql::quote($params[$matches[2]]);
                 case '::':
+                    if(!array_key_exists($matches[2],$params)) throw new \DomainException("\"$matches[2]\" param does not exist");
                     return Sql::escapeId($params[$matches[2]]);
             }
             throw new UnreachableException("Bad regex");

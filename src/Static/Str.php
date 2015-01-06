@@ -539,8 +539,19 @@ REGEX;
      *
      * @param string $str
      * @return string
+     * @deprecated Renamed to collapseWhitespace to be consistent w/ W3C
      */
     public static function compressWhitespace($str) {
+        return self::collapseWhitespace($str);
+    }
+
+    /**
+     * Compress some whitespaces to one.
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function collapseWhitespace($str) {
         return trim(preg_replace('~\s+~',' ',$str));
     }
 

@@ -40,7 +40,7 @@ abstract class Sql {
                 }
                 return implode(', ', $pairs);
             }
-            return '(' . implode(', ', array_map(__METHOD__, $value)) . ')';
+            return '(' . implode(',', array_map(__METHOD__, $value)) . ')';
         } elseif(is_string($value)) {
             if(self::$connection === null) return "'" . str_replace(["'", '\\', "\0", "\t", "\n", "\r", "\x08", "\x1a"], ["''", '\\\\', '\\0', '\\t', '\\n', '\\r', '\\b', '\\Z'], $value) . "'";
             if(self::$connection instanceof PDO) return self::$connection->quote($value, PDO::PARAM_STR);
@@ -93,8 +93,16 @@ abstract class Sql {
         return $forbidQualified ? $ret : str_replace('.', '`.`', $ret);
     }
 
+    /**
+     * Formats a parameterized query by replacing ?, ??, :value, and ::table with corresponding parameters.
+     *
+     * @param string $query
+     * @param array $params
+     * @return mixed
+     */
     public static function format($query, $params = []) {
-        return preg_replace_callback('~(?|(\?{1,2})|(:{1,2})([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*))~', function ($matches) use (&$params) {
+        return preg_replace_callback('~(?|`(?:[^`\\\\]|\\\\.|``)*`|\'(?:[^\'\\\\]|\\\\.|\'\')*\'|"(?:[^"\\\\]|\\\\.|"")*"|(\?{1,2})|(:{1,2})([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*))~', function ($matches) use (&$params) {
+            if(!isset($matches[1])) return $matches[0];
             switch($matches[1]) {
                 case '?':
                     if(!$params) throw new \DomainException("Not enough params");

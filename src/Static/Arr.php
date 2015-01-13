@@ -11,10 +11,11 @@ abstract class Arr {
      * @param array $arr Array
      * @param int|string|array $key Key(s)
      * @param mixed $default Default value if key is not found
+     * @param string $type "bool"|"int"|"float"|"array"|"object"|"null" Cast return value to this type or return $default on failure
      *
      * @return mixed
      */
-    public static function get(array $arr, $key, $default = null) {
+    public static function get(array $arr, $key, $default = null, $type=null) {
         if(is_array($key)) {
             foreach($key as $k) {
                 if(array_key_exists($k, $arr)) {
@@ -25,7 +26,16 @@ abstract class Arr {
             }
             return $arr;
         }
-        return array_key_exists($key, $arr) ? $arr[$key] : $default;
+        if(array_key_exists($key, $arr)) {
+            $result = $arr[$key];
+            if($type) {
+                if(!settype($result, $type)) {
+                    return $default;
+                }
+            }
+            return $result;
+        }
+        return $default;
     }
 
     /**

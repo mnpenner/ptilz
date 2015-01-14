@@ -1,7 +1,24 @@
 <?php
 use Ptilz\Str;
+mb_internal_encoding('UTF-8');
 
 class StrTest extends PHPUnit_Framework_TestCase {
+    function testStartsWith() {
+        $this->assertTrue(Str::startsWith("abc","a"));
+        $this->assertFalse(Str::startsWith("abc","A"));
+        $this->assertTrue(Str::startsWith("abc","A",true));
+        $this->assertTrue(Str::startsWith("Åland","åla",true));
+        $this->assertFalse(Str::startsWith("Åland","Ala"));
+    }
+
+    function testEndsWith() {
+        $this->assertTrue(Str::endsWith("abc","c"));
+        $this->assertFalse(Str::endsWith("abc","C"));
+        $this->assertTrue(Str::endsWith("abc","C",true));
+        $this->assertTrue(Str::endsWith("résumé","UMÉ",true));
+        $this->assertFalse(Str::endsWith("exposé","ose"));
+    }
+
     function testIsBlank() {
         $this->assertTrue(Str::isBlank(''));
         $this->assertTrue(Str::isBlank(null));

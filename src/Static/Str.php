@@ -6,6 +6,7 @@ use Ptilz\Exceptions\NotImplementedException;
 
 /**
  * String helper methods.
+ * Use mb_internal_encoding() to set the default encoding.
  */
 abstract class Str {
     /**
@@ -13,13 +14,15 @@ abstract class Str {
      *
      * @param string $subject
      * @param string $prefix
-     * @param bool $case_insensitive
+     * @param bool $ignore_case
+     * @param string $encoding Character encoding
      * @return bool
      */
-    public static function startsWith($subject, $prefix, $case_insensitive = false) {
-        $substr = substr($subject, 0, strlen($prefix));
-        return $case_insensitive
-            ? mb_strtolower($substr) === mb_strtolower($prefix)
+    public static function startsWith($subject, $prefix, $ignore_case = false, $encoding = null) {
+        if($encoding === null) $encoding = mb_internal_encoding();
+        $substr = mb_substr($subject, 0, mb_strlen($prefix, $encoding), $encoding);
+        return $ignore_case
+            ? mb_strtolower($substr, $encoding) === mb_strtolower($prefix, $encoding)
             : $substr === $prefix;
     }
 
@@ -28,13 +31,15 @@ abstract class Str {
      *
      * @param string $subject
      * @param string $postfix
-     * @param bool $case_insensitive
+     * @param bool $ignore_case
+     * @param string $encoding Character encoding
      * @return bool
      */
-    public static function endsWith($subject, $postfix, $case_insensitive = false) {
-        $substr = substr($subject, -strlen($postfix));
-        return $case_insensitive
-            ? mb_strtolower($substr) === mb_strtolower($postfix)
+    public static function endsWith($subject, $postfix, $ignore_case = false, $encoding = null) {
+        if($encoding === null) $encoding = mb_internal_encoding();
+        $substr = mb_substr($subject, -mb_strlen($postfix, $encoding), null, $encoding);
+        return $ignore_case
+            ? mb_strtolower($substr, $encoding) === mb_strtolower($postfix, $encoding)
             : $substr === $postfix;
     }
 
@@ -79,7 +84,8 @@ abstract class Str {
      * @param string $encoding Character encoding
      * @return int
      */
-    public static function length($str, $encoding='UTF-8') {
+    public static function length($str, $encoding=null) {
+        if($encoding === null) $encoding = mb_internal_encoding();
         return function_exists('mb_strlen') ? mb_strlen($str,$encoding) : preg_match_all('/./us', $str);
     }
 
@@ -475,7 +481,7 @@ REGEX;
      * @return string
      */
     public static function truncate($str, $len, $end='…', $avoid_word_cut=true, $encoding=null) {
-        if($encoding===null) $encoding = mb_detect_encoding($str);
+        if($encoding === null) $encoding = mb_internal_encoding();
         $strlen = mb_strlen($str, $encoding);
         if($avoid_word_cut && $strlen > $len) {
             $pos = mb_strrpos($str,' ',$len-$strlen, $encoding);
@@ -587,9 +593,7 @@ REGEX;
      * @credit http://kvz.io/blog/2012/10/09/reverse-a-multibyte-string-in-php/
      */
     public static function reverse($string, $encoding = null) {
-        if($encoding === null) {
-            $encoding = mb_detect_encoding($string);
-        }
+        if($encoding === null) $encoding = mb_internal_encoding();
 
         $length = mb_strlen($string, $encoding);
         $reversed = '';

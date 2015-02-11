@@ -35,6 +35,7 @@ abstract class Sql {
         elseif(is_int($value) || is_float($value) || $value instanceof RawSql) return (string)$value;
         elseif($value instanceof DateTime) return "'" . $value->format('Y-m-d H:i:s') . "'";
         elseif(is_array($value)) {
+            if($value === []) return '/* empty array */';
             if(Arr::isAssoc($value)) {
                 $pairs = [];
                 foreach($value as $k => $v) {

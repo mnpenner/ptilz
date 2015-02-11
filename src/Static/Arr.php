@@ -72,14 +72,13 @@ abstract class Arr {
      */
     public static function inc(array &$array, $key, $amount = 1) {
         if(is_array($key)) {
-            while(count($key) >= 2) {
-                $k = array_shift($key);
-                if(!array_key_exists($k,$array)) {
-                    $array[$k] = [];
+            for($p=reset($key),$n=next($key); $n!==false; $p=$n,$n=next($key)) {
+                if(!array_key_exists($p, $array)) {
+                    $array[$p] = [];
                 }
-                $array = &$array[$k];
+                $array = &$array[$p];
             }
-            $key = reset($key);
+            $key = $p;
         }
 
         if(array_key_exists($key, $array)) {

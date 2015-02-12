@@ -103,7 +103,7 @@ abstract class Str {
      * @return array
      */
     public static function rsplit($str, $delim, $limit = PHP_INT_MAX, $pad = null) {
-        $parts = array();
+        $parts = [];
         for($i = $limit; $i > 1; --$i) {
             $pos = strrpos($str, $delim);
             if($pos === false) break;
@@ -332,9 +332,9 @@ REGEX;
                 case "\n": return '\n';
                 case "\r": return '\r';
                 case "\t": return '\t';
-                case "\v": return '\v';
-                case "\x1B": return '\e';
-                case "\f": return '\f';
+                case "\v": return '\v'; // since PHP 5.2.5
+                case "\x1B": return '\e'; // since PHP 5.4.4
+                case "\f": return '\f'; // since PHP 5.2.5
                 case '$': return '\$';
                 case '"': return '\\"';
                 case "'": return "\\'";
@@ -423,7 +423,22 @@ REGEX;
      * @return string
      */
     public static function classify($str) {
-        throw new NotImplementedException;
+        return implode('',array_map('ucfirst',self::splitCodeWords($str)));
+    }
+
+    protected static function removeDiacritics($str, $encoding=null) {
+        if($encoding === null) $encoding = mb_internal_encoding();
+        return iconv($encoding, 'ASCII//TRANSLIT//IGNORE', $str);
+    }
+
+    protected static function splitCodeWords($str) {
+        $str = str_replace("'",'',$str); // strip apostrophes
+        $str = preg_replace_callback('~\p{Lu}+~u',function($m) {
+            $w = mb_strtolower($m[0]);
+            return ' ' . (mb_strlen($w) > 1 ? mb_substr($w, 0, -1) . ' ' . mb_substr($w, -1) : $w);
+        },$str); // split CamelCase words
+        $str = preg_replace('~\A[^\pL\pN]+|[^\pL\pN]+\z~u','',$str); // trim punctuation off ends
+        return preg_split('~[^\pL\pN]+~u',$str);
     }
 
     /**
@@ -434,18 +449,31 @@ REGEX;
      * @return string
      */
     public static function underscored($str) {
-        throw new NotImplementedException;
+        return mb_strtolower(implode('_',self::splitCodeWords($str)));
     }
 
     /**
-     * Converts a underscored or camelized string into an dasherized one
+     * Converts a underscored or camelized string into an dasherized one. Will start with leading dash if the first letter is uppercase.
      *
      * @param string $str
      * @throws NotImplementedException
      * @return string
      */
     public static function dasherized($str) {
-        throw new NotImplementedException;
+        $str = str_replace("'", '', $str); // strip apostrophes
+        $str = preg_replace('~\A[^\pL\pN]+|[^\pL\pN]+\z~u', '', $str); // trim punctuation off ends
+        $str = preg_replace_callback('~\p{Lu}+~u', function ($m) {
+            $w = mb_strtolower($m[0]);
+            return '-' . (mb_strlen($w) > 1 ? mb_substr($w, 0, -1) . '-' . mb_substr($w, -1) : $w);
+        }, $str); // split CamelCase words
+        return mb_strtolower(preg_replace('~[^\pL\pN]+~u', '-', $str));
+    }
+
+    protected function mb_ucfirst($string, $encoding=null) {
+        if($encoding === null) $encoding = mb_internal_encoding();
+        $firstChar = mb_substr($string, 0, 1, $encoding);
+        $then = mb_substr($string, 1, mb_strlen($string)-1, $encoding);
+        return mb_strtoupper($firstChar, $encoding) . $then;
     }
 
     /**
@@ -456,7 +484,10 @@ REGEX;
      * @return string
      */
     public static function humanize($str) {
-        throw new NotImplementedException;
+        if(preg_match('~[-_]id~i',$str)) {
+            $str = substr($str,0,-3);
+        }
+        return self::mb_ucfirst(mb_strtolower(implode(' ',self::splitCodeWords($str))));
     }
 
     /**
@@ -518,7 +549,7 @@ REGEX;
      * @return string
      */
     public static function slugify($str) {
-        return trim(preg_replace('~[^a-z0-9]+~','-',strtolower(str_replace("'",'',iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $str)))),'-');
+        return trim(preg_replace('~[^a-z0-9]+~','-',strtolower(str_replace("'",'',self::removeDiacritics($str)))),'-');
     }
 
     /**

@@ -107,18 +107,55 @@ class StrTest extends PHPUnit_Framework_TestCase {
 
     function testClassify() {
         $this->assertSame('SomeClassName', Str::classify("some_class_name"));
+        $this->assertSame('MyWonderfullClassName', Str::classify("my wonderfull class_name"));
+        $this->assertSame('MyWonderfullClassName', Str::classify("my wonderfull.class.name"));
+        $this->assertSame('MyLittleCamel', Str::classify("myLittleCamel"));
+        $this->assertSame('MyLittleCamelClassName', Str::classify("myLittleCamel.class.name"));
+        $this->assertSame('123', Str::classify(123));
+        $this->assertSame('', Str::classify(''));
     }
 
     function testUnderscored() {
         $this->assertSame('moz_transform', Str::underscored("MozTransform"));
+        $this->assertSame('the_underscored_string_method', Str::underscored("the-underscored-string-method"));
+        $this->assertSame('the_underscored_string_method', Str::underscored("theUnderscoredStringMethod"));
+        $this->assertSame('the_underscored_string_method', Str::underscored("TheUnderscoredStringMethod"));
+        $this->assertSame('the_underscored_string_method', Str::underscored(" the underscored  string method"));
+        $this->assertSame('html_parser', Str::underscored("HtmlParser"));
+        $this->assertSame('html_parser', Str::underscored("HTMLParser"));
+        $this->assertSame('', Str::underscored(""));
     }
 
     function testDasherize() {
         $this->assertSame('-moz-transform', Str::dasherized("MozTransform"));
+        $this->assertSame('the-dasherize-string-method', Str::dasherized("the_dasherize_string_method"));
+        $this->assertSame('-the-dasherize-string-method', Str::dasherized("TheDasherizeStringMethod"));
+        $this->assertSame('this-is-a-test', Str::dasherized("thisIsATest"));
+        $this->assertSame('this-is-a-test', Str::dasherized("this Is A Test"));
+        $this->assertSame('this-is-a-test123', Str::dasherized("thisIsATest123"));
+        $this->assertSame('123this-is-a-test', Str::dasherized("123thisIsATest"));
+        $this->assertSame('123this-is-a-test', Str::dasherized("123thisIsATest"));
+        $this->assertSame('the-dasherize-string-method', Str::dasherized("the dasherize string method"));
+        $this->assertSame('the-dasherize-string-method', Str::dasherized("the  dasherize string method  "));
+        $this->assertSame('téléphone', Str::dasherized("téléphone"));
+        $this->assertSame('foo-bar', Str::dasherized('foo$bar')); // differs from underscore.string https://github.com/epeli/underscore.string/blob/4774b3e9a22d05073261d9872f9d11ad5de8ee5b/test/strings.js#L443
+        $this->assertSame('-html-parser', Str::dasherized("HtmlParser"));
+        $this->assertSame('-html-parser', Str::dasherized("HTMLParser"));
+        $this->assertSame('html-parser', Str::dasherized("htmlParser"));
+        $this->assertSame('', Str::dasherized(''));
     }
 
     function testHumanize() {
         $this->assertSame('Capitalize dash camel case underscore trim', Str::humanize('  capitalize dash-CamelCase_underscore trim  '));
+        $this->assertSame('This is a test', Str::humanize('thisIsATest'));
+        $this->assertSame('The humanize string method', Str::humanize('the_humanize_string_method'));
+        $this->assertSame('Thehumanize string method', Str::humanize('ThehumanizeStringMethod'));
+        $this->assertSame('Thehumanize string method', Str::humanize('-ThehumanizeStringMethod'));
+        $this->assertSame('The humanize string method', Str::humanize('the humanize string method'));
+        $this->assertSame('The humanize id string method', Str::humanize('the humanize_id string method_id'));
+        $this->assertSame('The humanize string method', Str::humanize('the  humanize string method  '));
+        $this->assertSame('Html parser', Str::humanize("HtmlParser"));
+        $this->assertSame('Html parser', Str::humanize("HTMLParser"));
     }
 
     function testSlugify() {

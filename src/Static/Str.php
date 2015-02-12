@@ -94,6 +94,20 @@ abstract class Str {
     }
 
     /**
+     * Split a string into an array using a delimiter, working from left to right, up to the specified number of elements.
+     *
+     * @param string $str   The input string.
+     * @param string $delim The boundary string.
+     * @param int $limit    Maximum of limit elements with the last element containing the rest of string.
+     * @param mixed $pad    If $limit and $pad are provided, the result will be padded up to the limit with this value. Useful when used with list(...) = rsplit(...) to avoid warnings.
+     * @return array
+     * @throws NotImplementedException
+     */
+    public static function split($str, $delim, $limit = PHP_INT_MAX, $pad = null) {
+        throw new NotImplementedException();
+    }
+
+    /**
      * Split a string into an array using a delimiter, working from right to left, up to the specified number of elements.
      *
      * @param string $str The input string.
@@ -668,5 +682,69 @@ REGEX;
      */
     public static function repeat($string, $count, $separator='') {
         return str_repeat($string.$separator, $count-1).$string;
+    }
+
+
+    /**
+     * Trims a prefix off the start of the string if it exists
+     *
+     * @param string $str    String with prefix
+     * @param string $prefix Prefix to remove
+     *
+     * @return string    String without prefix. Unaltered if prefix not found.
+     */
+    public static function removePrefix($str,$prefix) {
+        return self::startsWith($str,$prefix) ? mb_substr($str,mb_strlen($prefix)) : $str;
+    }
+
+    /**
+     * Trims a postfix off the start of the string if it exists
+     *
+     * @param string $str     String with postfix
+     * @param string $postfix Postfix to remove
+     *
+     * @return string    String without postfix. Unaltered if postfix not found.
+     */
+    public static function removePostfix($str,$postfix) {
+        return self::endsWith($str,$postfix) ? mb_substr($str,0,-mb_strlen($postfix)) : $str;
+    }
+
+    /**
+     * Trim the minimum number of leading spaces from each line
+     *
+     * @param string $str String
+     *
+     * @return string    String with leading spaces removed
+     */
+    public static function trimLeadingWhitespace($str) {
+        if(trim($str)==='') return '';
+        preg_match_all('`^[ \t]*(?=\S)`m',$str,$matches,PREG_PATTERN_ORDER);
+        if($matches[0][0]==='') array_shift($matches[0]);
+        if($matches[0]) {
+            $min = min(array_map('strlen',$matches[0]));
+            return preg_replace('`^[ \t]{'.$min.'}`m','',$str);
+        } else {
+            return $str;
+        }
+    }
+
+    /**
+     * Removes blank lines from the start and end of a multi-line string.
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function trimBlankLines($str) {
+        return preg_replace('`\A\s*^|$\s*\z`m','',$str);
+    }
+
+    /**
+     * Removes excess whitespace surrounding a block of code.
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function dedent($str) {
+        return self::trimBlankLines(self::trimLeadingWhitespace($str));
     }
 }

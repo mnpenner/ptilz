@@ -45,10 +45,10 @@ abstract class Sql {
             }
             return '(' . implode(',', array_map(__METHOD__, $value)) . ')';
         } elseif(is_string($value)) {
-            if(self::$connection === null) return "'" . str_replace(["'", '\\', "\0", "\t", "\n", "\r", "\x08", "\x1a"], ["''", '\\\\', '\\0', '\\t', '\\n', '\\r', '\\b', '\\Z'], $value) . "'";
             if(self::$connection instanceof PDO) return self::$connection->quote($value, PDO::PARAM_STR);
             if(self::$connection instanceof mysqli) self::$connection->real_escape_string($value);
             if(self::isMySqlLink(self::$connection)) return "'" . mysql_real_escape_string($value, self::$connection) . "'";
+            if(self::$connection === null) return "'" . str_replace(["'", '\\', "\0", "\t", "\n", "\r", "\x08", "\x1a"], ["''", '\\\\', '\\0', '\\t', '\\n', '\\r', '\\b', '\\Z'], $value) . "'"; // WARNING: this is not safe if NO_BACKSLASH_ESCAPES is enabled or if the server character set is one of big5, cp932, gb2312, bgk or sjis; see http://stackoverflow.com/a/12118602/65387 for details
             throw new ArgumentTypeException('conn', 'PDO|mysqli');
         }
         throw new ArgumentTypeException('value', 'string');

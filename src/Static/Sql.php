@@ -114,10 +114,10 @@ abstract class Sql {
                     if(!$params) throw new \DomainException("Not enough params");
                     return Sql::escapeId(array_shift($params));
                 case ':':
-                    if(!array_key_exists($matches[2],$params)) throw new \DomainException("\"$matches[2]\" param does not exist");
+                    if(!array_key_exists($matches[2],$params)) throw new \DomainException("\"$matches[2]\" param not provided");
                     return Sql::quote($params[$matches[2]]);
                 case '::':
-                    if(!array_key_exists($matches[2],$params)) throw new \DomainException("\"$matches[2]\" param does not exist");
+                    if(!array_key_exists($matches[2],$params)) throw new \DomainException("\"$matches[2]\" param not provided");
                     return Sql::escapeId($params[$matches[2]]);
             }
             throw new UnreachableException("Bad regex");

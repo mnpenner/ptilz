@@ -15,9 +15,8 @@ class MyPdo extends PdoPlus {
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_STATEMENT_CLASS => array('PdoPlusStatement', array()),
             PDO::ATTR_EMULATE_PREPARES => true,
-            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
         ), $options);
-        $dsn = "mysql:host=$host;dbname=$database_name;charset=utf8";
+        $dsn = "mysql:host=$host;dbname=$database_name;charset=utf8mb4"; // charset requires PHP >= 5.3.6; see http://php.net/manual/en/ref.pdo-mysql.connection.php
         parent::__construct($dsn, $username, $password, $options);
     }
 

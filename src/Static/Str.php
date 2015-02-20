@@ -182,7 +182,7 @@ abstract class Str {
      * @return bool
      */
     public static function isBlank($str) {
-        return $str === null || trim($str) === '';
+        return $str === null || trim($str," \t\n\r\0\x0B\x0C") === '';
     }
 
     /**
@@ -603,7 +603,7 @@ REGEX;
      * @return string
      */
     public static function collapseWhitespace($str) {
-        return preg_replace('~\s+~',' ',trim($str));
+        return preg_replace('~[ \t\n\r\0\x0B\x0C]+~',' ',trim($str," \t\n\r\0\x0B\x0C"));
     }
 
     /**

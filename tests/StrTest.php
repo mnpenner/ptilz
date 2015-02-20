@@ -196,5 +196,6 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("x",Str::collapseWhitespace(" x"));
         $this->assertSame("a b",Str::collapseWhitespace(" a b "));
         $this->assertSame("a b c de f g",Str::collapseWhitespace("    a     b   c de \n f\n\r  \t g  "));
+        $this->assertSame("a b",Str::collapseWhitespace(" \t\n\r\0\x0Ba \t\n\r\0\x0Bb \t\n\r\0\x0B"));
     }
 }

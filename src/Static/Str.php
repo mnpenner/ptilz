@@ -603,7 +603,7 @@ REGEX;
      * @return string
      */
     public static function collapseWhitespace($str) {
-        return trim(preg_replace('~\s+~',' ',$str));
+        return preg_replace('~\s+~',' ',trim($str));
     }
 
     /**

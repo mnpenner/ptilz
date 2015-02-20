@@ -188,4 +188,13 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('cba',Str::reverse('abc'));
         $this->assertSame('sevlaçnoG',Str::reverse('Gonçalves'));
     }
+
+    function testCollapseWhitespace() {
+        $this->assertSame("",Str::collapseWhitespace(""));
+        $this->assertSame("x",Str::collapseWhitespace("x"));
+        $this->assertSame("x",Str::collapseWhitespace("x "));
+        $this->assertSame("x",Str::collapseWhitespace(" x"));
+        $this->assertSame("a b",Str::collapseWhitespace(" a b "));
+        $this->assertSame("a b c de f g",Str::collapseWhitespace("    a     b   c de \n f\n\r  \t g  "));
+    }
 }

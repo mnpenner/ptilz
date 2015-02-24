@@ -78,7 +78,7 @@ abstract class V {
      */
     public static function resourceName($resource) {
         $name = get_resource_type($resource);
-        if(preg_match('~(\d+)$~', (string)$resource, $matches)) {
+        if(preg_match('~(\d+)\z~', (string)$resource, $matches)) {
             $name .= ' #'.$matches[1];
         }
         return $name;

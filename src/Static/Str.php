@@ -133,12 +133,15 @@ abstract class Str {
 
     /**
      * @static
-     * @param array $dict Search => Replace pairs
+     * @param array $dict   Search => Replace pairs
      * @param string $input Input
+     * @param string $encoding
+     * @param int $count
      * @return string
      */
-    public static function replace($dict, $input) {
-        return self::mbReplace(array_keys($dict), array_values($dict), $input);
+    public static function replace($dict, $input, $encoding=null, &$count=0) {
+        if($encoding === null) $encoding = mb_internal_encoding();
+        return self::mbReplace(array_keys($dict), array_values($dict), $input, $encoding, $count);
     }
 
     /**
@@ -759,7 +762,8 @@ REGEX;
      * @param int $count If passed, this will be set to the number of replacements performed.
      * @return array|string
      */
-    public static function mbReplace($search, $replace, $subject, $encoding = 'auto', &$count=0) {
+    public static function mbReplace($search, $replace, $subject, $encoding = null, &$count=0) {
+        if($encoding === null) $encoding = mb_internal_encoding();
         if(!is_array($subject)) {
             $searches = is_array($search) ? array_values($search) : [$search];
             $replacements = is_array($replace) ? array_values($replace) : [$replace];

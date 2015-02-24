@@ -198,4 +198,13 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("a b c de f g",Str::collapseWhitespace("    a     b   c de \n f\n\r  \t g  "));
         $this->assertSame("a b",Str::collapseWhitespace(" \t\n\r\0\x0Ba \t\n\r\0\x0Bb \t\n\r\0\x0B"));
     }
+
+    function testMbReplace() {
+        $this->assertSame('bbb',Str::mbReplace('a','b','aaa','auto',$count1));
+        $this->assertSame(3,$count1);
+        $this->assertSame('ccc',Str::mbReplace(['a','b'],['b','c'],'aaa','auto',$count2));
+        $this->assertSame(6,$count2);
+        $this->assertSame("\xbf\x5c\x27",Str::mbReplace("\x27","\x5c\x27","\xbf\x27",'iso-8859-1'));
+        $this->assertSame("\xbf\x27",Str::mbReplace("\x27","\x5c\x27","\xbf\x27",'gbk'));
+    }
 }

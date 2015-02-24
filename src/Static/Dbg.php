@@ -82,6 +82,6 @@ abstract class Dbg {
      * @deprecated Moved to V::
      */
     public static function getType($var) {
-        return is_object($var) ? get_class($var) : gettype($var);
+        return V::getType($var);
     }
 }

@@ -207,4 +207,24 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("\xbf\x5c\x27",Str::mbReplace("\x27","\x5c\x27","\xbf\x27",'iso-8859-1'));
         $this->assertSame("\xbf\x27",Str::mbReplace("\x27","\x5c\x27","\xbf\x27",'gbk'));
     }
+
+    function testJoin() {
+        $arr = ['a', 'bc', 'd'];
+        $this->assertSame('abcd',Str::join($arr));
+        $this->assertSame('a,bc,d',Str::join($arr,','));
+
+        $arrIt = new ArrayIterator($arr);
+        $this->assertSame('abcd',Str::join($arrIt));
+        $this->assertSame('a,bc,d',Str::join($arrIt,','));
+
+        $f = function() {
+            yield 'a';
+            yield 'bc';
+            yield 'd';
+        };
+        $this->assertSame('abcd',Str::join($f()));
+        $this->assertSame('a | bc | d',Str::join($f(),' | '));
+
+
+    }
 }

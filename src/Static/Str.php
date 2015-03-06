@@ -115,10 +115,7 @@ abstract class Str {
      * @return string
      */
     public static function join($trav, $glue = '') {
-        if(is_array($trav)) {
-            return implode($glue, $trav);
-        }
-        return implode($glue, iterator_to_array($trav, false));
+        return implode($glue, is_array($trav) ? $trav : iterator_to_array($trav, false));
     }
 
     /**

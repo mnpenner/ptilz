@@ -89,9 +89,10 @@ abstract class Cli { // fixme: rename to Console:: ? Or Term::?
                                 case 'blue': $colorNumber += 4; break;
                                 case 'magenta': $colorNumber += 5; break;
                                 case 'cyan': $colorNumber += 6; break;
-                                case 'gray' :$colorNumber += 7; break;
                                 case 'grey': $colorNumber += 7; break;
+                                case 'gray' :$colorNumber += 7; break;
                                 case 'bright-grey': $colorNumber += 7; break;
+                                case 'bright-gray': $colorNumber += 7; break;
                                 case 'light-grey': $colorNumber += 7; break;
                                 case 'light-gray': $colorNumber += 7; break;
                                 case 'default': $colorNumber += 9; break;

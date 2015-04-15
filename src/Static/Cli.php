@@ -56,6 +56,8 @@ abstract class Cli { // fixme: rename to Console:: ? Or Term::?
                         case 'hidden': $codes[] = 28; break;
                         case 'conceal': $codes[] = 28; break;
                         case 'strike': $codes[] = 29; break;
+                        case 's': $codes[] = 29; break;
+                        case 'del': $codes[] = 29; break;
                         case 'framed': $codes[] = 54; break;
                         case 'encircled': $codes[] = 54; break;
                         case 'overlined': $codes[] = 55; break;
@@ -137,6 +139,8 @@ abstract class Cli { // fixme: rename to Console:: ? Or Term::?
                             case 'hidden': $codes[] = 8; break;
                             case 'conceal': $codes[] = 8; break;
                             case 'strike': $codes[] = 9; break;
+                            case 's': $codes[] = 9; break;
+                            case 'del': $codes[] = 9; break;
                             case 'primary': $codes[] = 10; break;
                             case 'fraktur': $codes[] = 20; break;
                             case 'framed': $codes[] = 51; break;

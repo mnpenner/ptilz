@@ -47,11 +47,19 @@ abstract class Str {
      * Renders a PHP file to a string using the given variables.
      *
      * @param string $__file__ PHP filename to render
-     * @param array $__vars__ Variables to extract into local/global scope
+     * @param array  $__vars__ Variables to extract into local/global scope
+     * @param bool   $htmlescape Recursively HTML-escape all variables
+     *
      * @return string
      */
-    public static function phpTemplate($__file__, $__vars__) {
+    public static function phpTemplate($__file__, $__vars__, $htmlescape=false) {
+        if($htmlescape) {
+            array_walk_recursive($__vars__, function (&$v) {
+                $v = htmlspecialchars($v);
+            });
+        }
         extract($__vars__, EXTR_SKIP);
+        unset($__vars__);
         ob_start();
         include $__file__;
         return ob_get_clean();

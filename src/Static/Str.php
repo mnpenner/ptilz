@@ -116,6 +116,17 @@ abstract class Str {
     }
 
     /**
+     * Join the elements of a traversable to form a string.
+     *
+     * @param array|\Traversable $trav
+     * @param string $glue
+     * @return string
+     */
+    public static function join($trav, $glue = '') {
+        return implode($glue, is_array($trav) ? $trav : iterator_to_array($trav, false));
+    }
+
+    /**
      * Split a string into an array using a delimiter, working from right to left, up to the specified number of elements.
      *
      * @param string $str The input string.

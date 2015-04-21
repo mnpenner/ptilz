@@ -48,14 +48,14 @@ abstract class Str {
      *
      * @param string $__file__ PHP filename to render
      * @param array  $__vars__ Variables to extract into local/global scope
-     * @param bool   $htmlescape Recursively HTML-escape all variables
+     * @param bool   $htmlescape Recursively HTML-escape and nl2br all variables
      *
      * @return string
      */
     public static function phpTemplate($__file__, $__vars__, $htmlescape=false) {
         if($htmlescape) {
             array_walk_recursive($__vars__, function (&$v) {
-                $v = htmlspecialchars($v);
+                $v = nl2br(htmlspecialchars($v));
             });
         }
         extract($__vars__, EXTR_SKIP);

@@ -60,7 +60,7 @@ abstract class Math {
      * @return string
      */
     public static function changeBase($num, $fromBase, $toBase, $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') {
-        return self::decToAnyBase(self::anyBaseToDec($num, $fromBase, $chars), $toBase, $chars);
+        return self::decToAnyBase($fromBase != 10 ? self::anyBaseToDec($num, $fromBase, $chars) : $num, $toBase, $chars);
     }
 
     /**

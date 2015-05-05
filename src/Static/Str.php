@@ -263,13 +263,14 @@ abstract class Str {
         $u = (2 << $k) - $n;
         $out = '';
 
-        // see http://www.wikiwand.com/en/Truncated_binary_encoding#/Example_with_n_.3D_10
+        // see http://en.wikipedia.org/wiki/Truncated_binary_encoding#Example_with_n_.3D_10
 
         while(!$data->eof()) {
             $i = $data->read($k);
             //echo str_pad(decbin($i),$k,'0',STR_PAD_LEFT).PHP_EOL;
             if($k >= $u) {
-                $i = ($i << 1 | $data->read(1)) - $u;
+                //$i = ($i | ($data->read(1) << $k)) - $u;
+                $i = ($i << 1 | $data->read(1)) - $u; // not entirely sure if the new bit should be added to the left or right. not sure it matters either
             }
             //dump($i);
             $out .= $alphabet[$i];

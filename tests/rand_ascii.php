@@ -1,11 +1,13 @@
 #!/usr/bin/env php
 <?php
 
+use Ptilz\Bin;
+use Ptilz\BitStream;
 use Ptilz\Cli;
 use Ptilz\Str;
 
 call_user_func(function() {
-    $errorType = array (
+    $errorType = [
         E_ERROR              => '<bg:red;fg:white;b> ERROR <reset>',
         E_WARNING            => '<bg:yellow;fg:white;b> WARNING <reset>',
         E_PARSE              => '<bg:red;fg:white;b> PARSING ERROR <reset>',
@@ -19,7 +21,7 @@ call_user_func(function() {
         E_USER_NOTICE        => '<bg:cyan;fg:white;b> USER NOTICE <reset>',
         E_STRICT             => '<bg:light-blue;fg:white;b> STRICT NOTICE <reset>',
         E_RECOVERABLE_ERROR  => '<bg:magenta;fg:white;b> RECOVERABLE ERROR <reset>',
-    );
+    ];
 
     $rootLen = strlen(dirname(__DIR__));
 
@@ -41,5 +43,36 @@ call_user_func(function() {
 require __DIR__ . '/../vendor/autoload.php';
 
 
+for($i=0; $i<10; ++$i) {
+    //echo Str::secureRandomAscii(10,'01') . PHP_EOL;
+    $data = Bin::secureRandomBytes(10);
+    echo Str::encode($data,'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/').' '.base64_encode($data).PHP_EOL;
+}
 
-dump(Str::secureRandomAscii(128));
+echo PHP_EOL;
+
+$printable = implode('',range(chr(0x21),chr(0x7E)));
+
+for($i=0; $i<10; ++$i) {
+    $stream = new BitStream(Bin::secureRandomBytes(16));
+    echo Str::encode($stream,Str::Z85).' '.Str::encode($stream,$printable).PHP_EOL;
+    //echo Str::secureRandomAscii(128) . PHP_EOL;
+    //echo Str::secureRandomAscii(128,$printable) . PHP_EOL;
+}
+
+echo PHP_EOL;
+
+for($i=0; $i<10; ++$i) {
+    echo Str::secureRandomAscii(128) . PHP_EOL;
+}
+
+//echo Str::WHITESPACE;
+
+__halt_compiler();
+
+sGzaFaZ/eRuhM2
+nIorKfr9znVGsA==
+
+
+RDKKTY3Y2Sie2012asuab2
+VHOOX]$]#W3/#!"#+=?+,#

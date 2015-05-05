@@ -10,6 +10,37 @@ use Ptilz\Exceptions\NotSupportedException;
  * Use mb_internal_encoding() to set the default encoding.
  */
 abstract class Str {
+
+    /**
+     * Ascii85, ZeroMQ version.
+     *
+     * @see http://en.wikipedia.org/wiki/Ascii85#ZeroMQ_Version_.28Z85.29
+     * @see http://rfc.zeromq.org/spec:32
+     */
+    const Z85 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#';
+
+    /**
+     * Ascii85, Adobe version.
+     *
+     * @see http://en.wikipedia.org/wiki/Ascii85#Adobe_version
+     */
+    const ADOBE85 = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstu';
+
+    /**
+     * Printable ASCII characters (0x20 - 0x7E).
+     *
+     * @see http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters
+     */
+    const PRINTABLE_ASCII = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+
+    /**
+     * Space characters.
+     *
+     * @see http://en.wikipedia.org/wiki/Whitespace_character
+     */
+    //const WHITESPACE = "\x09\x0A\x0B\x0C\x0D\x20\x85\xA0";
+    const WHITESPACE = " \t\n\r\0\x0B\x0C";
+
     /**
      * Tests if a string starts with the given prefix.
      *
@@ -201,40 +232,52 @@ abstract class Str {
         return strtr(substr(base64_encode(openssl_random_pseudo_bytes(ceil($len * 3 / 4))), 0, $len), '+/', '-_');
     }
 
-
     /**
      * @param int $bits
      * @param string $alphabet
      * @return string
      */
-    public static function secureRandomAscii($bits, $alphabet='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#') { // Z85 alphabet https://www.wikiwand.com/en/Ascii85#/ZeroMQ_Version_.28Z85.29 http://rfc.zeromq.org/spec:32
+    public static function secureRandomAscii($bits, $alphabet=self::Z85) {
         $bytes = (int)ceil($bits/8);
         $data = Bin::secureRandomBytes($bytes);
+        $stream = new BitStream($data, $bits);
+        return self::encode($stream, $alphabet);
+    }
+
+    /**
+     * Encodes binary data with the given alphabet.
+     *
+     * @param string|BitStream $data
+     * @param string $alphabet
+     * @return string
+     */
+    public static function encode($data, $alphabet=self::Z85) {
+        if($data instanceof BitStream) {
+            $data->rewind();
+        } else {
+            $data = new BitStream($data);
+        }
+
         $n = strlen($alphabet);
         $k = (int)floor(log($n,2));
         $u = (2 << $k) - $n;
-        $stream = new BitStream($data, $bits);
-
-        echo "$n $k $u\n";
-        echo $stream.PHP_EOL;
-
         $out = '';
 
         // see http://www.wikiwand.com/en/Truncated_binary_encoding#/Example_with_n_.3D_10
 
-        while(!$stream->eof()) {
-            $i = $stream->read($k);
-            echo str_pad(decbin($i),$k,'0',STR_PAD_LEFT).PHP_EOL;
+        while(!$data->eof()) {
+            $i = $data->read($k);
+            //echo str_pad(decbin($i),$k,'0',STR_PAD_LEFT).PHP_EOL;
             if($k >= $u) {
-                $i = ($i | ($stream->read(1) << $k)) - $u;
+                $i = ($i << 1 | $data->read(1)) - $u;
             }
             //dump($i);
             $out .= $alphabet[$i];
         }
 
-
         return $out;
     }
+
 
     /**
      * Checks if a string is null, empty or all whitespace.

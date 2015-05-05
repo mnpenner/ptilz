@@ -66,6 +66,25 @@ class BitStream {
         return $this->pos >= $this->length;
     }
 
+    public function rewind() {
+        $this->pos = 0;
+    }
+
+    public function seek($offset, $whence = SEEK_SET) {
+        switch($whence) {
+            case SEEK_SET:
+                $this->pos = $offset;
+                break;
+            case SEEK_CUR:
+                $this->pos += $offset;
+                break;
+            case SEEK_END:
+                $this->pos = $this->length + $offset;
+                break;
+            default:
+                throw new \DomainException("Bad whence: $whence");
+        }
+    }
 
 
     function __toString() {

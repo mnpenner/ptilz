@@ -46,7 +46,8 @@ require __DIR__ . '/../vendor/autoload.php';
 for($i=0; $i<10; ++$i) {
     //echo Str::secureRandomAscii(10,'01') . PHP_EOL;
     $data = Bin::secureRandomBytes(10);
-    echo Str::encode($data,'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/').' '.base64_encode($data).PHP_EOL;
+    // characters copied from http://base64.sourceforge.net/b64.c
+    echo Str::encode($data,'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/').' '.base64_encode($data).PHP_EOL;
 }
 
 echo PHP_EOL;

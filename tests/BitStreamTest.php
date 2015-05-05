@@ -25,7 +25,7 @@ class BitStreamTest extends PHPUnit_Framework_TestCase {
     }
 
     function test4() {
-        $stream = new BitStream(chr(0b01010101)); // 0101 0101
+        $stream = new BitStream(chr(0b01010101));
         $this->assertSame(1,$stream->read(2));
         $this->assertSame(21,$stream->read(6));
     }
@@ -61,5 +61,13 @@ class BitStreamTest extends PHPUnit_Framework_TestCase {
         $stream = new BitStream(chr(0b00000100).chr(0b01100000));
         $this->assertSame(0b100,$stream->read(3));
         $this->assertSame(0b0000001100000,$stream->read(13));
+    }
+
+    function test11() {
+        $stream = new BitStream(chr(0b00000100).chr(0b01100001));
+        //echo PHP_EOL.$stream;
+        $this->assertSame(0b100,$stream->read(3));
+        $this->assertSame(0b0000001,$stream->read(7));
+        $this->assertSame(0b011000,$stream->read(6));
     }
 }

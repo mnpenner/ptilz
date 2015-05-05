@@ -30,58 +30,28 @@ class BitStream {
 
         $read = min($length, $this->length - $this->pos);
 
+        $i = (int)floor($this->pos / 8);
+        $offset = $this->pos % 8;
 
-        $byteOffset = (int)floor($this->pos / 8);
-        $firstByteBitOffset = $this->pos % 8;
-        $byteLength = (int)ceil(($read + $firstByteBitOffset)/8);
+        $left = $read;
+        $value = 0;
 
-        $data = substr($this->data, $byteOffset, $byteLength);
+        while($left > 0) {
+            $ord = ord($this->data[$i]);
+            $rem = 8 - $offset;
+            $r = min($rem, $left);
 
-
-        if($firstByteBitOffset) {
-            $data[0] = chr(ord($data[0]) >> $firstByteBitOffset);
+            if($offset) {
+                $ord >>= $offset;
+                $offset = 0;
+            }
+            if($left < $rem) {
+                $ord &= (1 << $left) - 1;
+            }
+            $value = ($value << $r) + $ord;
+            $left -= $r;
+            ++$i;
         }
-
-        $value = hexdec(bin2hex($data)); // reinterpret bytes as int
-
-
-
-
-        //dump($firstByteBitOffset);
-
-        //$value >>= $firstByteBitOffset;
-        $value &= (1 << $read) - 1;
-
-
-        //$value <<= (8 - $firstByteBitOffset) % 8;
-
-
-
-
-
-        //if($byteLength > 1) {
-        //    $lastByteBitOffset = ($firstByteBitOffset + $read) % 8;
-        //    if($lastByteBitOffset !== 0) {
-        //        $data = substr($data,0,-1).chr(ord(substr($data,-1)) << $lastByteBitOffset);
-        //    }
-        //} else {
-        //    $lastByteBitOffset = 0;
-        //}
-        //
-        //$value = hexdec(bin2hex($data));
-        //
-        //echo "\n$firstByteBitOffset $lastByteBitOffset";
-        //dump($value);
-        //
-        //
-        //if($firstByteBitOffset) {
-        //    if($byteLength === 1) {
-        //        $value &= (1 << ($firstByteBitOffset+1)) -1;
-        //    } else {
-        //        $value <<= $firstByteBitOffset;
-        //        $value >>= ($firstByteBitOffset + $lastByteBitOffset);
-        //    }
-        //}
 
         $this->pos += $read;
         return $value;

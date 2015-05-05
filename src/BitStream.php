@@ -19,44 +19,72 @@ class BitStream {
      * Read bits.
      *
      * @param int $length Up to number of bits to read
-     * @param int $read_bits The actual number of bits that were read
+     * @param int $read The actual number of bits that were read
      * @return int
      */
-    public function read($length = 1, &$read_bits=null) {
+    public function read($length = 1, &$read=null) {
         if($this->eof()) {
-            $read_bits = 0;
+            $read = 0;
             return false;
         }
 
+        $read = min($length, $this->length - $this->pos);
+
+
         $byteOffset = (int)floor($this->pos / 8);
-        $bitOffset = $length % 8;
-        $byte = ord($this->data[$byteOffset]);
-        $read_bits = min($length, $this->length - $this->pos);
+        $firstByteBitOffset = $this->pos % 8;
+        $byteLength = (int)ceil(($read + $firstByteBitOffset)/8);
 
-        static $masks = [
-            1 => 0b00000001,
-            2 => 0b00000011,
-            3 => 0b00000111,
-            4 => 0b00001111,
-            5 => 0b00011111,
-            6 => 0b00111111,
-            7 => 0b01111111,
-        ];
+        $data = substr($this->data, $byteOffset, $byteLength);
 
-        if($bitOffset > 0) {
-            $byte >>= $bitOffset;
+
+        if($firstByteBitOffset) {
+            $data[0] = chr(ord($data[0]) >> $firstByteBitOffset);
         }
 
-        if($read_bits < 8) {
-            $byte &= $masks[$read_bits];
-        }
+        $value = hexdec(bin2hex($data)); // reinterpret bytes as int
 
 
-        // shift right, apply mask... repeat
 
 
-        $this->pos += $read_bits;
-        return mt_rand(0,pow(2,$read_bits)-1);
+        //dump($firstByteBitOffset);
+
+        //$value >>= $firstByteBitOffset;
+        $value &= (1 << $read) - 1;
+
+
+        //$value <<= (8 - $firstByteBitOffset) % 8;
+
+
+
+
+
+        //if($byteLength > 1) {
+        //    $lastByteBitOffset = ($firstByteBitOffset + $read) % 8;
+        //    if($lastByteBitOffset !== 0) {
+        //        $data = substr($data,0,-1).chr(ord(substr($data,-1)) << $lastByteBitOffset);
+        //    }
+        //} else {
+        //    $lastByteBitOffset = 0;
+        //}
+        //
+        //$value = hexdec(bin2hex($data));
+        //
+        //echo "\n$firstByteBitOffset $lastByteBitOffset";
+        //dump($value);
+        //
+        //
+        //if($firstByteBitOffset) {
+        //    if($byteLength === 1) {
+        //        $value &= (1 << ($firstByteBitOffset+1)) -1;
+        //    } else {
+        //        $value <<= $firstByteBitOffset;
+        //        $value >>= ($firstByteBitOffset + $lastByteBitOffset);
+        //    }
+        //}
+
+        $this->pos += $read;
+        return $value;
     }
 
     /**
@@ -68,21 +96,12 @@ class BitStream {
         return $this->pos >= $this->length;
     }
 
-    /**
-     * Returns a binary representation of the data (1s and 0s!)
-     *
-     * @param string $bin Binary data
-     * @param int $len Length in bits
-     * @return string
-     */
-    private static function binrep($bin, $len = null) {
-        if($len === null) $len = strlen($bin) * 8;
-        return implode(' ', str_split(str_pad(decbin(hexdec(bin2hex($bin))), $len, '0', STR_PAD_LEFT), 8));
-    }
+
 
     function __toString() {
+        // TODO: XXXX out the unused bits
         return implode(PHP_EOL, array_map(function($s) {
             return implode(' ',str_split(str_pad(decbin(hexdec(bin2hex($s))),strlen($s)*8,'0',STR_PAD_LEFT),8));
-        }, str_split($this->data, 4)));
+        }, str_split($this->data, PHP_INT_SIZE)));
     }
 }

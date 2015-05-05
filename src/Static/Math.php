@@ -166,4 +166,22 @@ abstract class Math {
     public static function round($val, $step = 1, $mode = PHP_ROUND_HALF_UP) {
         return round($val / $step, 0, $mode) * $step;
     }
+
+    /**
+     * Round up to the next highest power of 2
+     *
+     * @param int $v
+     * @return int
+     */
+    public static function nextPow2($v) {
+        // see http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+        --$v;
+        $v |= $v >> 1;
+        $v |= $v >> 2;
+        $v |= $v >> 4;
+        $v |= $v >> 8;
+        $v |= $v >> 16;
+        //$v |= $v >> 32;
+        return $v + 1;
+    }
 }

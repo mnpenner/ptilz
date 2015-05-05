@@ -15,11 +15,23 @@ class BitStream {
         $this->pos = 0;
     }
 
-    public function read($bits = 1) {
+    /**
+     * Read bits.
+     *
+     * @param int $length Up to number of bits to read
+     * @param int $read_bits The actual number of bits that were read
+     * @return int
+     */
+    public function read($length = 1, &$read_bits=null) {
+        if($this->eof()) {
+            $read_bits = 0;
+            return false;
+        }
+
         $byteOffset = (int)floor($this->pos / 8);
-        $bitOffset = $bits % 8;
+        $bitOffset = $length % 8;
         $byte = ord($this->data[$byteOffset]);
-        $bitLength = min($bits, $this->length - $this->pos);
+        $read_bits = min($length, $this->length - $this->pos);
 
         static $masks = [
             1 => 0b00000001,
@@ -35,18 +47,23 @@ class BitStream {
             $byte >>= $bitOffset;
         }
 
-        if($bitLength < 8) {
-            $byte &= $masks[$bitLength];
+        if($read_bits < 8) {
+            $byte &= $masks[$read_bits];
         }
 
 
         // shift right, apply mask... repeat
 
 
-        $this->pos += $bitLength;
-        return mt_rand(0,pow(2,$bitLength)-1);
+        $this->pos += $read_bits;
+        return mt_rand(0,pow(2,$read_bits)-1);
     }
 
+    /**
+     * End of bit stream has been reached.
+     *
+     * @return bool
+     */
     public function eof() {
         return $this->pos >= $this->length;
     }

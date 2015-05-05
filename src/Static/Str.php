@@ -425,6 +425,7 @@ REGEX;
      * @return bool
      */
     public static function isBinary($str) {
+        // alternatively, we can use http://php.net/manual/en/function.mb-check-encoding.php or (bool) preg_match('//u', $str);
         return preg_match('~[^\x20-\x7E\t\r\n]~', $str) > 0;
     }
 

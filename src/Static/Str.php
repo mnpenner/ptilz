@@ -220,6 +220,8 @@ abstract class Str {
 
         $out = '';
 
+        // see http://www.wikiwand.com/en/Truncated_binary_encoding#/Example_with_n_.3D_10
+
         while(!$stream->eof()) {
             $i = $stream->read($k);
             echo str_pad(decbin($i),$k,'0',STR_PAD_LEFT).PHP_EOL;

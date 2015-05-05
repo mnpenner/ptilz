@@ -212,15 +212,17 @@ abstract class Str {
         $data = Bin::secureRandomBytes($bytes);
         $n = strlen($alphabet);
         $k = (int)floor(log($n,2));
-        $u = pow(2,$k+1) - $n;
+        $u = (2 << $k) - $n;
         $stream = new BitStream($data, $bits);
+
+        echo "$n $k $u\n";
         echo $stream.PHP_EOL;
 
         $out = '';
 
         while(!$stream->eof()) {
             $i = $stream->read($k);
-            dump(str_pad(decbin($i),$k,'0',STR_PAD_LEFT));
+            echo str_pad(decbin($i),$k,'0',STR_PAD_LEFT).PHP_EOL;
             if($k >= $u) {
                 $i = ($i | ($stream->read(1) << $k)) - $u;
             }

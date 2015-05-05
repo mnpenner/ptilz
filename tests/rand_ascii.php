@@ -42,4 +42,4 @@ require __DIR__ . '/../vendor/autoload.php';
 
 
 
-dump(Str::secureRandomAscii(120,'abcdefghij'));
+dump(Str::secureRandomAscii(128));

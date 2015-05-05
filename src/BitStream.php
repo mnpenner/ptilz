@@ -16,40 +16,35 @@ class BitStream {
     }
 
     public function read($bits = 1) {
-        if($this->eof()) return null;
-
-        $value = 0;
-
+        $byteOffset = (int)floor($this->pos / 8);
+        $bitOffset = $bits % 8;
+        $byte = ord($this->data[$byteOffset]);
         $bitLength = min($bits, $this->length - $this->pos);
 
+        static $masks = [
+            1 => 0b00000001,
+            2 => 0b00000011,
+            3 => 0b00000111,
+            4 => 0b00001111,
+            5 => 0b00011111,
+            6 => 0b00111111,
+            7 => 0b01111111,
+        ];
 
-        $byteOffset = (int)floor($this->pos / 8);
-        $bitOffset = abs(8 - ($this->pos + $bitLength)) % 8;
-        $byte = ord($this->data[$byteOffset]) >> $bitOffset;
-
-
-        $valueMult = ($bitLength - 1) % 8;
-
-        $i = 0;
-        while(true) {
-            $bit = $byte & 1;
-            $value |= $bit << $valueMult;
-            --$valueMult;
-            if(++$i >= $bitLength) {
-                break;
-            }
-            if(++$bitOffset >= 8) {
-                $bitOffset = 0;
-                $byte = ord($this->data[++$byteOffset]);
-                $valueMult += 16;
-            } else {
-                $byte >>= 1;
-            }
+        if($bitOffset > 0) {
+            $byte >>= $bitOffset;
         }
 
-        $this->pos += $bitLength;
+        if($bitLength < 8) {
+            $byte &= $masks[$bitLength];
+        }
 
-        return $value;
+
+        // shift right, apply mask... repeat
+
+
+        $this->pos += $bitLength;
+        return mt_rand(0,pow(2,$bitLength)-1);
     }
 
     public function eof() {

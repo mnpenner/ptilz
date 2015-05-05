@@ -33,5 +33,8 @@ class BitStreamTest extends PHPUnit_Framework_TestCase {
 
         $stream = new BitStream("\x01\x03"); // 0000 0001 0000 0011
         $this->assertSame(49280,$stream->read(16));
+
+        $stream = new BitStream("\x01\x80"); // 0000 0001 1000 0000
+        $this->assertSame(384,$stream->read(16));
     }
 }

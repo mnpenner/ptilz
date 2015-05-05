@@ -84,4 +84,39 @@ class MathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(2.5,Math::round(2.25,.5,PHP_ROUND_HALF_UP));
         $this->assertSame(2.0,Math::round(2.25,.5,PHP_ROUND_HALF_DOWN));
     }
+
+
+    function testNextPow2() {
+        //$this->assertSame(0,Math::nextPow2(0));
+        $this->assertSame(1,Math::nextPow2(1));
+        $this->assertSame(2,Math::nextPow2(2));
+        $this->assertSame(4,Math::nextPow2(3));
+        $this->assertSame(4,Math::nextPow2(4));
+        $this->assertSame(8,Math::nextPow2(5));
+        $this->assertSame(8,Math::nextPow2(6));
+        $this->assertSame(8,Math::nextPow2(7));
+        $this->assertSame(8,Math::nextPow2(8));
+        $this->assertSame(16,Math::nextPow2(9));
+        $this->assertSame(16,Math::nextPow2(10));
+        $this->assertSame(16,Math::nextPow2(15));
+        $this->assertSame(16,Math::nextPow2(16));
+        $this->assertSame(32,Math::nextPow2(17));
+        $this->assertSame(32,Math::nextPow2(31));
+        $this->assertSame(32,Math::nextPow2(32));
+        $this->assertSame(64,Math::nextPow2(33));
+        $this->assertSame(64,Math::nextPow2(63));
+        $this->assertSame(64,Math::nextPow2(64));
+        $this->assertSame(128,Math::nextPow2(65));
+        $this->assertSame(128,Math::nextPow2(127));
+        $this->assertSame(128,Math::nextPow2(128));
+        $this->assertSame(256,Math::nextPow2(129));
+        $this->assertSame(256,Math::nextPow2(255));
+        $this->assertSame(256,Math::nextPow2(256));
+        $this->assertSame(512,Math::nextPow2(257));
+        $this->assertSame(512,Math::nextPow2(511));
+        $this->assertSame(512,Math::nextPow2(512));
+        $this->assertSame(1024,Math::nextPow2(513));
+        $this->assertSame(2147483648,Math::nextPow2(2140000000));
+        //$this->assertSame(4294967296,Math::nextPow2(4290000000));
+    }
 }

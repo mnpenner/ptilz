@@ -315,15 +315,41 @@ abstract class Bin {
      * @param int $length
      * @return string The generated string of bytes
      * @throws Exceptions\NotSupportedException
+     * @deprecated
      */
     public static function random($length) {
-        if(function_exists('openssl_random_pseudo_bytes')) {
-            return openssl_random_pseudo_bytes($length);
+        return self::secureRandomBytes($length);
+    }
+
+    /**
+     * Generates a string of pseudo-random bytes, with the number of bytes determined by the length parameter.
+     *
+     * @param int $length
+     * @return string
+     * @throws NotSupportedException
+     */
+    public static function secureRandomBytes($length) {
+        // todo: update to something more robust; see here: https://github.com/GeorgeArgyros/Secure-random-bytes-in-PHP/blob/master/srand.php
+
+        if(function_exists('openssl_random_pseudo_bytes') && PHP_VERSION_ID >= 50304) {
+            $data = openssl_random_pseudo_bytes($length, $strong);
+            if($strong) {
+                return $data;
+            }
         }
+
+        if(function_exists('mcrypt_create_iv') && PHP_VERSION_ID >= 50307) {
+            $data = mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
+            if($data !== false) {
+                return $data;
+            }
+        }
+
         $data = @file_get_contents('/dev/urandom', null, null, 0, $length);
         if($data !== false) {
             return $data;
         }
+
         throw new NotSupportedException("Your system does does not support any sources of randomness");
     }
 }

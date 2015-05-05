@@ -3,6 +3,7 @@ namespace Ptilz;
 use Ptilz\Exceptions\ArgumentOutOfRangeException;
 use Ptilz\Exceptions\InvalidOperationException;
 use Ptilz\Exceptions\NotImplementedException;
+use Ptilz\Exceptions\NotSupportedException;
 
 /**
  * String helper methods.
@@ -173,6 +174,7 @@ abstract class Str {
      * @param string $chars Characters to choose from
      * @return string Random string
      * @throws ArgumentOutOfRangeException
+     * @deprecated
      */
     public static function random($len, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') {
         if($len < 0) throw new ArgumentOutOfRangeException('len',"Length must be non-negative");
@@ -192,10 +194,42 @@ abstract class Str {
      * @param $len String length
      * @throws ArgumentOutOfRangeException
      * @return string
+     * @deprecated
      */
     public static function securand($len) {
         if($len < 0) throw new ArgumentOutOfRangeException('len',"Length must be non-negative");
         return strtr(substr(base64_encode(openssl_random_pseudo_bytes(ceil($len * 3 / 4))), 0, $len), '+/', '-_');
+    }
+
+
+    /**
+     * @param int $bits
+     * @param string $alphabet
+     * @return string
+     */
+    public static function secureRandomAscii($bits, $alphabet='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#') { // Z85 alphabet https://www.wikiwand.com/en/Ascii85#/ZeroMQ_Version_.28Z85.29 http://rfc.zeromq.org/spec:32
+        $bytes = (int)ceil(log($bits,2));
+        $data = Bin::secureRandomBytes($bytes);
+        $n = strlen($alphabet);
+        $k = (int)floor(log($n,2));
+        $u = pow(2,$k+1) - $n;
+        $stream = new BinaryStream($data);
+
+        $out = '';
+        $bitsOut = 0;
+
+        while($bitsOut < $bits) {
+            $i = $stream->readBits($k);
+            $bitsOut += $k;
+
+            if($k >= $u) {
+                $i = ($i | ($stream->readBits(1) << $k)) - $u;
+                ++$bitsOut;
+            }
+            dump($i);
+            $out .= $alphabet[$i];
+        }
+        return $out;
     }
 
     /**

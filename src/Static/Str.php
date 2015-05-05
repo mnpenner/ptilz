@@ -208,27 +208,27 @@ abstract class Str {
      * @return string
      */
     public static function secureRandomAscii($bits, $alphabet='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#') { // Z85 alphabet https://www.wikiwand.com/en/Ascii85#/ZeroMQ_Version_.28Z85.29 http://rfc.zeromq.org/spec:32
-        $bytes = (int)ceil(log($bits,2));
+        $bytes = (int)ceil($bits/8);
         $data = Bin::secureRandomBytes($bytes);
         $n = strlen($alphabet);
         $k = (int)floor(log($n,2));
         $u = pow(2,$k+1) - $n;
-        $stream = new BinaryStream($data);
+        $stream = new BitStream($data, $bits);
+        echo $stream.PHP_EOL;
 
         $out = '';
-        $bitsOut = 0;
 
-        while($bitsOut < $bits) {
-            $i = $stream->readBits($k);
-            $bitsOut += $k;
-
+        while(!$stream->eof()) {
+            $i = $stream->read($k);
+            dump(str_pad(decbin($i),$k,'0',STR_PAD_LEFT));
             if($k >= $u) {
-                $i = ($i | ($stream->readBits(1) << $k)) - $u;
-                ++$bitsOut;
+                $i = ($i | ($stream->read(1) << $k)) - $u;
             }
-            dump($i);
+            //dump($i);
             $out .= $alphabet[$i];
         }
+
+
         return $out;
     }
 

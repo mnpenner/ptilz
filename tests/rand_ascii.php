@@ -67,6 +67,12 @@ for($i=0; $i<10; ++$i) {
     echo Str::secureRandomAscii(128) . PHP_EOL;
 }
 
+echo PHP_EOL;
+
+echo Str::encode("Hello World","Helo Wrld"). PHP_EOL;
+echo Str::encode("What does the fox say?","wa-po"). PHP_EOL;
+echo Str::encode("What does the fox say?","jof-tch"). PHP_EOL;
+
 //echo Str::WHITESPACE;
 
 __halt_compiler();

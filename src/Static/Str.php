@@ -259,6 +259,9 @@ abstract class Str {
         }
 
         $n = strlen($alphabet);
+        if($n < 2) {
+            throw new \DomainException("Alphabet must contain at least 2 characters");
+        }
         $k = (int)floor(log($n,2));
         $u = (2 << $k) - $n;
         $out = '';
@@ -267,6 +270,8 @@ abstract class Str {
 
         while(!$data->eof()) {
             $i = $data->read($k);
+
+
             //echo str_pad(decbin($i),$k,'0',STR_PAD_LEFT).PHP_EOL;
             //echo "k = $k, u = $u, BEFORE $i, ";
             if($i >= $u) {

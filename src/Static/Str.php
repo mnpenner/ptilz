@@ -268,11 +268,12 @@ abstract class Str {
         while(!$data->eof()) {
             $i = $data->read($k);
             //echo str_pad(decbin($i),$k,'0',STR_PAD_LEFT).PHP_EOL;
-            if($k >= $u) {
+            //echo "k = $k, u = $u, BEFORE $i, ";
+            if($i >= $u) {
                 //$i = ($i | ($data->read(1) << $k)) - $u;
                 $i = ($i << 1 | $data->read(1)) - $u; // not entirely sure if the new bit should be added to the left or right. not sure it matters either
             }
-            //dump($i);
+            //echo "AFTER $i\n";
             $out .= $alphabet[$i];
         }
 

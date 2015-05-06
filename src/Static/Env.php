@@ -44,4 +44,14 @@ abstract class Env {
         // DIRECTORY_SEPARATOR, PHP_SHLIB_SUFFIX, PATH_SEPARATOR
         return defined('PHP_WINDOWS_VERSION_MAJOR');
     }
+
+    /**
+     * Checks if your PHP version is equal to or greater than the given version.
+     *
+     * @param string $ver_str
+     * @return bool
+     */
+    public static function PhpVerAtLeast($ver_str) {
+        return version_compare(PHP_VERSION, $ver_str, '>=');
+    }
 }

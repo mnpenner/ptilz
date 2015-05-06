@@ -73,11 +73,11 @@ require __DIR__ . '/../vendor/autoload.php';
 //echo Str::encode("What does the fox say?","jof-tch"). PHP_EOL;
 
 //dump(Bin::isLittleEndian());exit;
-$alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 $source = "ABCD";
 echo "B64 ".base64_encode($source).PHP_EOL;
-echo "BE  ".Str::encode(new BitStream($source,null,BitStream::LITTLE_ENDIAN),$alphabet).PHP_EOL;
-echo "LE  ".Str::encode(new BitStream($source,null,BitStream::BIG_ENDIAN),$alphabet);
+echo "BS  ".Str::encode(new BitStream($source),Str::BASE64).PHP_EOL;
+
+//echo Str::export(implode('',range(chr(0),chr(127)))).PHP_EOL;
 
 //echo Str::WHITESPACE;
 

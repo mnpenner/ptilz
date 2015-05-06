@@ -3,6 +3,7 @@ namespace Ptilz;
 
 use Ptilz\BigMath;
 use Ptilz\Exceptions\ArgumentException;
+use Ptilz\Exceptions\ArgumentOutOfRangeException;
 use Ptilz\Exceptions\ArgumentTypeException;
 use Ptilz\Exceptions\NotImplementedException;
 use Ptilz\Exceptions\NotSupportedException;
@@ -330,6 +331,9 @@ abstract class Bin {
      */
     public static function secureRandomBytes($length) {
         // todo: update to something more robust; see here: https://github.com/GeorgeArgyros/Secure-random-bytes-in-PHP/blob/master/srand.php
+        if($length <= 0) {
+            throw new ArgumentOutOfRangeException("Length must be positive");
+        }
 
         if(function_exists('openssl_random_pseudo_bytes') && PHP_VERSION_ID >= 50304) {
             $data = openssl_random_pseudo_bytes($length, $strong);
@@ -350,6 +354,6 @@ abstract class Bin {
             return $data;
         }
 
-        throw new NotSupportedException("Your system does does not support any sources of randomness");
+        throw new NotSupportedException("Your system does does not support any secure sources of randomness");
     }
 }

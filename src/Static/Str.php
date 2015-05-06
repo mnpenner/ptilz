@@ -31,15 +31,76 @@ abstract class Str {
      *
      * @see http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters
      */
-    const PRINTABLE_ASCII = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+    const ASCII_PRINTABLE = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
 
     /**
-     * Space characters.
+     * Character set used by base64_encode.
+     */
+    const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz+/';
+
+    /**
+     * Standard 'base64url' with URL and Filename Safe Alphabet (RFC 4648 §5 'Table 2: The "URL and Filename safe" Base 64 Alphabet')
+     *
+     * @see http://tools.ietf.org/html/rfc3548#page-6
+     */
+    const BASE64URL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz-_';
+
+
+
+    // see also: http://php.net/manual/en/regexp.reference.character-classes.php and http://php.net/manual/en/regexp.reference.escape.php
+
+    /**
+     * Character codes 0 - 127
+     */
+    const ASCII = "\0\x01\x02\x03\x04\x05\x06\x07\x08\t\n\v\f\r\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F !\"#\$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7F";
+
+    /**
+     * Lowercase letters
+     */
+    const ASCII_LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
+
+    /**
+     * Uppercase letters
+     */
+    const ASCII_UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    /**
+     * Upper and lowercase letters.
+     */
+    const ASCII_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    /**
+     * Uppercase letters (A-Z), lowercase letters (a-z), and numbers (0-9).
+     */
+    const ALPHANUM = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+    /**
+     * Numbers 0-9
+     */
+    const DIGITS = '0123456789';
+
+    /**
+     * Hexadecimal characters: 0-9, a-f, A-F
+     */
+    const HEXDIGITS = '0123456789abcdefABCDEF';
+
+    /**
+     * Base 8 numbers, 0-8
+     */
+    const OCTDIGITS = '012345678';
+
+    /**
+     * Word characters
+     */
+    const WORD_CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_';
+
+    /**
+     * Space (\x20), tab (\t), new line/line feed (\n), carriage return (\r), vertical tab/line tabulation (\x0B), form feed (\x0C).
+     * Excludes NUL-byte (\x00), extended ASCII, and unicode characters.
      *
      * @see http://en.wikipedia.org/wiki/Whitespace_character
      */
-    //const WHITESPACE = "\x09\x0A\x0B\x0C\x0D\x20\x85\xA0";
-    const WHITESPACE = " \t\n\r\0\x0B\x0C";
+    const WHITESPACE = "\x09\x0A\x0B\x0C\x0D\x20";
 
     /**
      * Tests if a string starts with the given prefix.
@@ -229,15 +290,17 @@ abstract class Str {
      */
     public static function securand($len) {
         if($len < 0) throw new ArgumentOutOfRangeException('len',"Length must be non-negative");
-        return strtr(substr(base64_encode(openssl_random_pseudo_bytes(ceil($len * 3 / 4))), 0, $len), '+/', '-_');
+        return self::secureRandom($len*8, self::BASE64URL);
     }
 
     /**
-     * @param int $bits
-     * @param string $alphabet
+     * Generates a secure, randomly generated string from the given character set.
+     *
+     * @param int $bits Number of *bits* to generate.
+     * @param string $alphabet Alphabet to draw characters from. Identical to base64_encode minus the padding when you use Str::BASE64.
      * @return string
      */
-    public static function secureRandomAscii($bits, $alphabet=self::Z85) {
+    public static function secureRandom($bits, $alphabet) {
         $bytes = (int)ceil($bits/8);
         $data = Bin::secureRandomBytes($bytes);
         $stream = new BitStream($data, $bits);
@@ -250,8 +313,9 @@ abstract class Str {
      * @param string|BitStream $data
      * @param string $alphabet
      * @return string
+     * @throws \Ptilz\Exceptions\ArgumentOutOfRangeException
      */
-    public static function encode($data, $alphabet=self::Z85) {
+    public static function encode($data, $alphabet) {
         if($data instanceof BitStream) {
             $data->rewind();
         } else {
@@ -260,7 +324,7 @@ abstract class Str {
 
         $n = strlen($alphabet);
         if($n < 2) {
-            throw new \DomainException("Alphabet must contain at least 2 characters");
+            throw new ArgumentOutOfRangeException("Alphabet must contain at least 2 characters");
         }
         $k = (int)floor(log($n,2));
         $u = (2 << $k) - $n;
@@ -271,14 +335,10 @@ abstract class Str {
         while(!$data->eof()) {
             $i = $data->read($k);
 
-
-            //echo str_pad(decbin($i),$k,'0',STR_PAD_LEFT).PHP_EOL;
-            //echo "k = $k, u = $u, BEFORE $i, ";
             if($i >= $u) {
-                //$i = ($i | ($data->read(1) << $k)) - $u;
-                $i = ($i << 1 | $data->read(1)) - $u; // not entirely sure if the new bit should be added to the left or right. not sure it matters either
+                $i = ($i << 1 | $data->read(1)) - $u;
             }
-            //echo "AFTER $i\n";
+
             $out .= $alphabet[$i];
         }
 
@@ -595,7 +655,14 @@ REGEX;
         return mb_strtolower(preg_replace('~[^\pL\pN]+~u', '-', $str));
     }
 
-    protected function mb_ucfirst($string, $encoding=null) {
+    /**
+     * Multi-byte safe uppercase first character.
+     *
+     * @param $string
+     * @param null|string $encoding Defaults to mb_internal_encoding().
+     * @return string
+     */
+    protected static function mb_ucfirst($string, $encoding=null) {
         if($encoding === null) $encoding = mb_internal_encoding();
         $firstChar = mb_substr($string, 0, 1, $encoding);
         $then = mb_substr($string, 1, mb_strlen($string)-1, $encoding);

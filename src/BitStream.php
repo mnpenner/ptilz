@@ -1,11 +1,6 @@
 <?php namespace Ptilz;
 
 class BitStream {
-    /** Most significant byte first */
-    const BIG_ENDIAN = 1;
-    /** Least significant byte first */
-    const LITTLE_ENDIAN = 2;
-
     /** @var string */
     protected $data;
     /** @var int Length in bits */
@@ -15,11 +10,10 @@ class BitStream {
     /** @var int */
     protected $byte_order;
 
-    public function __construct($data, $length = null, $byte_order=self::LITTLE_ENDIAN) {
+    public function __construct($data, $length = null) {
         $this->data = $data;
         $this->length = $length !== null ? $length : strlen($data) * 8;
         $this->pos = 0;
-        $this->byte_order = $byte_order;
     }
 
     /**
@@ -46,22 +40,19 @@ class BitStream {
         while($bits_left > 0) {
             $ord = ord($this->data[$i]);
             $rem_byte = 8 - $offset;
+            $offset = 0;
             $read = min($rem_byte, $bits_left);
 
-            if($offset) {
-                $ord >>= $offset;
-                $offset = 0;
-            }
             if($bits_left < $rem_byte) {
-                $ord &= (1 << $bits_left) - 1;
+                $ord >>= ($rem_byte - $bits_left);
             }
 
-            if($this->byte_order === self::BIG_ENDIAN) {
-                $value = ($value << $read) | $ord;
-            } else {
-                $so_far = $total_bits - $bits_left;
-                $value = $value | ($ord << $so_far);
+            if($read < 8) {
+                $ord &= (1 << $read) - 1;
             }
+
+            $value = ($value << $read) | $ord;
+
             $bits_left -= $read;
             ++$i;
         }
@@ -69,6 +60,7 @@ class BitStream {
         $this->pos += $total_bits;
         return $value;
     }
+
 
     /**
      * End of bit stream has been reached.

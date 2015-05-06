@@ -6,9 +6,8 @@ use Exception;
 
 /**
  * Thrown when an argument is incorrectly formatted.
- * @seealso http://php.net/manual/en/class.logicexception.php
  */
-class ArgumentOutOfRangeException extends Exception {
+class ArgumentOutOfRangeException extends \DomainException {
     public function __construct($paramName, $details=null, $code = 0, Exception $previous = null) {
         $message = "Argument `$paramName` is outside of the valid range";
         if($details) {

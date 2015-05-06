@@ -1,5 +1,8 @@
 <?php
+use Ptilz\Bin;
 use Ptilz\Str;
+use Ptilz\V;
+
 mb_internal_encoding('UTF-8');
 
 class StrTest extends PHPUnit_Framework_TestCase {
@@ -224,7 +227,34 @@ class StrTest extends PHPUnit_Framework_TestCase {
         };
         $this->assertSame('abcd',Str::join($f()));
         $this->assertSame('a | bc | d',Str::join($f(),' | '));
+    }
 
+    function testSecureRandom() {
+        for($i=1; $i<10000; $i *= 3) {
+            $str = Str::secureRandom($i, '01');
+            $this->assertSame($i, strlen($str));
+        }
+        for($i=1; $i<10000; $i *= 3) {
+            $str = Str::secureRandom($i, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef');
+            $this->assertSame((int)ceil($i/5), strlen($str));
+        }
+    }
+
+    /**
+     * @depends testSecureRandom
+     */
+    function testEncode() {
+        for($i=0; $i<100; ++$i) {
+            $len = mt_rand(1,10);
+            //$bin = Bin::secureRandomBytes($len);
+            $bin = Str::secureRandom($len*8,Str::WORD_CHARACTERS);
+
+            $b64 = base64_encode($bin);
+            $enc = Str::encode($bin, Str::BASE64);
+            $pad = str_pad($enc,(int)ceil($len/3)*4,'=',STR_PAD_RIGHT);
+            $this->assertSame($b64,$pad,Str::format("Base64 encode {:V}", $bin));
+        }
 
     }
+
 }

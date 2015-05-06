@@ -108,7 +108,7 @@ abstract class V {
                 if(strlen($var)<=64) return 'b16,'.strtoupper(bin2hex($var));
                 return 'b64,'.base64_encode($var);
             }
-            return Str::export($var); // can't decide if this should we should Str::addSlashes or Str::export this or leave it alone...
+            return Str::export($var);
         }
         if(is_int($var)) return (string)$var;
         if(is_float($var)) {

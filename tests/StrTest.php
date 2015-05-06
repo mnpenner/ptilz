@@ -1,5 +1,6 @@
 <?php
 use Ptilz\Bin;
+use Ptilz\BitStream;
 use Ptilz\Str;
 use Ptilz\V;
 
@@ -240,15 +241,53 @@ class StrTest extends PHPUnit_Framework_TestCase {
         }
     }
 
+    function testEncodeLength() {
+        for($i=0; $i<50; ++$i) {
+            $src_bits = mt_rand(1,256);
+            $bin = openssl_random_pseudo_bytes(ceil($src_bits/8));
+
+            $min = mt_rand(0x20,0x7D);
+            $max = mt_rand($min+1,0x7E);
+            $alpha = implode('',array_map('chr',range($min,$max)));
+
+            $enc = Str::encode(new BitStream($bin,$src_bits), $alpha);
+
+            $outlen = strlen($enc);
+
+            $alpha_bits = log(strlen($alpha),2);
+
+            $low = (int)ceil($src_bits/ceil($alpha_bits));
+            $high = (int)ceil($src_bits/floor($alpha_bits));
+
+            $msg = Str::format("Str::encode({:V}:{:V},{:V}) expect between {:n} and {:n}, got {:n}", $bin, $src_bits, $alpha, $low, $high, $outlen);
+
+            $this->assertGreaterThanOrEqual($low,$outlen, $msg);
+            $this->assertLessThanOrEqual($high,$outlen, $msg);
+        }
+    }
+
     /**
      * @depends testSecureRandom
+     * @depends testRandom
+     * @depends testEncodeLength
      */
     function testEncode() {
-        for($i=0; $i<100; ++$i) {
-            $len = mt_rand(1,10);
-            //$bin = Bin::secureRandomBytes($len);
-            $bin = Str::secureRandom($len*8,Str::WORD_CHARACTERS);
+        $this->assertSame("OG1i",Str::encode("8mb",Str::BASE64));
+        $this->assertSame("VGhpcyBpcyBhbiBlbmNvZGVkIHN0cmluZw",Str::encode("This is an encoded string",Str::BASE64));
+        $this->assertSame("/w",Str::encode("\xFF",Str::BASE64));
 
+        for($i=0; $i<50; ++$i) {
+            $len = mt_rand(1,20);
+            $bin = Str::random($len,Str::WORD_CHARACTERS);
+            $b64 = base64_encode($bin);
+            $enc = Str::encode($bin, Str::BASE64);
+            $pad = str_pad($enc,(int)ceil($len/3)*4,'=',STR_PAD_RIGHT);
+            $this->assertSame($b64,$pad,Str::format("Base64 encode {:V}", $bin));
+        }
+
+        for($i=0; $i<50; ++$i) {
+            $len = mt_rand(1,256);
+            $bin = openssl_random_pseudo_bytes($len);
             $b64 = base64_encode($bin);
             $enc = Str::encode($bin, Str::BASE64);
             $pad = str_pad($enc,(int)ceil($len/3)*4,'=',STR_PAD_RIGHT);

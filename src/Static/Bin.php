@@ -332,7 +332,7 @@ abstract class Bin {
     public static function secureRandomBytes($length) {
         // todo: update to something more robust; see here: https://github.com/GeorgeArgyros/Secure-random-bytes-in-PHP/blob/master/srand.php
         if($length <= 0) {
-            throw new ArgumentOutOfRangeException("Length must be positive");
+            throw new ArgumentOutOfRangeException('length',"Length must be positive");
         }
 
         if(function_exists('openssl_random_pseudo_bytes') && PHP_VERSION_ID >= 50304) {

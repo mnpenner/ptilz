@@ -73,11 +73,14 @@ require __DIR__ . '/../vendor/autoload.php';
 //echo Str::encode("What does the fox say?","jof-tch"). PHP_EOL;
 
 //dump(Bin::isLittleEndian());exit;
-$source = "ABCD";
-echo "B64 ".base64_encode($source).PHP_EOL;
-echo "BS  ".Str::encode(new BitStream($source),Str::BASE64).PHP_EOL;
+//$source = "abcd";
+//echo "B64 ".base64_encode($source).PHP_EOL;
+//echo "BS  ".Str::encode(new BitStream($source),Str::BASE64).PHP_EOL;
 
 //echo Str::export(implode('',range(chr(0),chr(127)))).PHP_EOL;
+
+echo PHP_EOL.Str::encode("\xFF",Str::BASE64).PHP_EOL;
+echo PHP_EOL.Str::encode("8mb",Str::BASE64).PHP_EOL;
 
 //echo Str::WHITESPACE;
 

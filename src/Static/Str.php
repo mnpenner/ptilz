@@ -36,14 +36,14 @@ abstract class Str {
     /**
      * Character set used by base64_encode.
      */
-    const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz+/';
+    const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
     /**
      * Standard 'base64url' with URL and Filename Safe Alphabet (RFC 4648 §5 'Table 2: The "URL and Filename safe" Base 64 Alphabet')
      *
      * @see http://tools.ietf.org/html/rfc3548#page-6
      */
-    const BASE64URL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz-_';
+    const BASE64URL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
 
 
@@ -266,9 +266,8 @@ abstract class Str {
      * @param string $chars Characters to choose from
      * @return string Random string
      * @throws ArgumentOutOfRangeException
-     * @deprecated
      */
-    public static function random($len, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') {
+    public static function random($len, $chars = self::ALPHANUM) {
         if($len < 0) throw new ArgumentOutOfRangeException('len',"Length must be non-negative");
         $str = '';
         $randMax = strlen($chars) - 1;
@@ -297,7 +296,7 @@ abstract class Str {
      * Generates a secure, randomly generated string from the given character set.
      *
      * @param int $bits Number of *bits* to generate.
-     * @param string $alphabet Alphabet to draw characters from. Identical to base64_encode minus the padding when you use Str::BASE64.
+     * @param string $alphabet Set to draw characters from.
      * @return string
      */
     public static function secureRandom($bits, $alphabet) {
@@ -310,9 +309,9 @@ abstract class Str {
     /**
      * Encodes binary data with the given alphabet.
      *
-     * @param string|BitStream $data
-     * @param string $alphabet
-     * @return string
+     * @param string|BitStream $data Data to encode. Use a BitStream if you wish to omit trailing bits from the encoding.
+     * @param string $alphabet Characters to encode with. Identical to base64_encode minus the padding when you use Str::BASE64.
+     * @return string String with length betweeen `ceil($src_bits/ceil($alpha_bits))` and `ceil($src_bits/floor($alpha_bits))` characters, where $alpha_bits = log(strlen($alpha),2) and $src_bits = strlen($data)*8 unless a BitStream is used.
      * @throws \Ptilz\Exceptions\ArgumentOutOfRangeException
      */
     public static function encode($data, $alphabet) {
@@ -324,7 +323,7 @@ abstract class Str {
 
         $n = strlen($alphabet);
         if($n < 2) {
-            throw new ArgumentOutOfRangeException("Alphabet must contain at least 2 characters");
+            throw new ArgumentOutOfRangeException('alphabet',Str::format("Alphabet must contain at least 2 characters; got {:V}",$alphabet));
         }
         $k = (int)floor(log($n,2));
         $u = (2 << $k) - $n;

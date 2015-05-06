@@ -37,6 +37,9 @@ class BitStream {
         $bits_left = $total_bits;
         $value = 0;
 
+        //echo "read $nbits bits starting at $i:$offset from data of length $this->length\n";
+
+
         while($bits_left > 0) {
             $ord = ord($this->data[$i]);
             $rem_byte = 8 - $offset;
@@ -44,13 +47,17 @@ class BitStream {
             $read = min($rem_byte, $bits_left);
 
             if($bits_left < $rem_byte) {
+
                 $ord >>= ($rem_byte - $bits_left);
             }
+
 
             if($read < 8) {
                 $ord &= (1 << $read) - 1;
             }
 
+            //$so_far = $total_bits - $bits_left;
+            //$value = $value | ($ord << $so_far);
             $value = ($value << $read) | $ord;
 
             $bits_left -= $read;
@@ -58,6 +65,11 @@ class BitStream {
         }
 
         $this->pos += $total_bits;
+
+        //if($value === 3) {
+        //    return 48;
+        //}
+
         return $value;
     }
 

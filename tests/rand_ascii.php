@@ -43,34 +43,41 @@ call_user_func(function() {
 require __DIR__ . '/../vendor/autoload.php';
 
 
-for($i=0; $i<10; ++$i) {
-    //echo Str::secureRandomAscii(10,'01') . PHP_EOL;
-    $data = Bin::secureRandomBytes(10);
-    // characters copied from http://base64.sourceforge.net/b64.c   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-    echo Str::encode($data,'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/')."\n".base64_encode($data).PHP_EOL;
-}
+//for($i=0; $i<10; ++$i) {
+//    //echo Str::secureRandomAscii(10,'01') . PHP_EOL;
+//    $data = Bin::secureRandomBytes(10);
+//    // characters copied from http://base64.sourceforge.net/b64.c   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+//    echo Str::encode($data,'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/')."\n".base64_encode($data).PHP_EOL;
+//}
+//
+//echo PHP_EOL;
+//
 
-echo PHP_EOL;
+//for($i=0; $i<10; ++$i) {
+//    $stream = new BitStream(Bin::secureRandomBytes(16));
+//    echo Str::encode($stream,Str::Z85)."\n".Str::encode($stream,Str::PRINTABLE_ASCII).PHP_EOL;
+//    //echo Str::secureRandomAscii(128) . PHP_EOL;
+//    //echo Str::secureRandomAscii(128,$printable) . PHP_EOL;
+//}
+//
+//echo PHP_EOL;
+//
+//for($i=0; $i<10; ++$i) {
+//    echo Str::secureRandomAscii(128) . PHP_EOL;
+//}
+//
+//echo PHP_EOL;
+//
+//echo Str::encode("Hello World","Helo Wrld"). PHP_EOL;
+//echo Str::encode("What does the fox say?","wa-po"). PHP_EOL;
+//echo Str::encode("What does the fox say?","jof-tch"). PHP_EOL;
 
-
-for($i=0; $i<10; ++$i) {
-    $stream = new BitStream(Bin::secureRandomBytes(16));
-    echo Str::encode($stream,Str::Z85)."\n".Str::encode($stream,Str::PRINTABLE_ASCII).PHP_EOL;
-    //echo Str::secureRandomAscii(128) . PHP_EOL;
-    //echo Str::secureRandomAscii(128,$printable) . PHP_EOL;
-}
-
-echo PHP_EOL;
-
-for($i=0; $i<10; ++$i) {
-    echo Str::secureRandomAscii(128) . PHP_EOL;
-}
-
-echo PHP_EOL;
-
-echo Str::encode("Hello World","Helo Wrld"). PHP_EOL;
-echo Str::encode("What does the fox say?","wa-po"). PHP_EOL;
-echo Str::encode("What does the fox say?","jof-tch"). PHP_EOL;
+//dump(Bin::isLittleEndian());exit;
+$alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+$source = "ABCD";
+echo "B64 ".base64_encode($source).PHP_EOL;
+echo "BE  ".Str::encode(new BitStream($source,null,BitStream::LITTLE_ENDIAN),$alphabet).PHP_EOL;
+echo "LE  ".Str::encode(new BitStream($source,null,BitStream::BIG_ENDIAN),$alphabet);
 
 //echo Str::WHITESPACE;
 

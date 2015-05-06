@@ -1,59 +1,72 @@
 <?php namespace Ptilz;
 
 class BitStream {
+    /** Most significant byte first */
+    const BIG_ENDIAN = 1;
+    /** Least significant byte first */
+    const LITTLE_ENDIAN = 2;
+
     /** @var string */
     protected $data;
     /** @var int Length in bits */
     protected $length;
     /** @var int Position in bits */
     protected $pos;
+    /** @var int */
+    protected $byte_order;
 
-    // TODO: Add endianness/bit order parameter
-    public function __construct($data, $length = null) {
+    public function __construct($data, $length = null, $byte_order=self::LITTLE_ENDIAN) {
         $this->data = $data;
-        $this->length = func_num_args() >= 2 ? $length : strlen($data) * 8;
+        $this->length = $length !== null ? $length : strlen($data) * 8;
         $this->pos = 0;
+        $this->byte_order = $byte_order;
     }
 
     /**
      * Read bits.
      *
-     * @param int $length Up to number of bits to read
-     * @param int $read The actual number of bits that were read
+     * @param int $nbits Up to number of bits to read
+     * @param int $total_bits The actual number of bits that were read
      * @return int
      */
-    public function read($length = 1, &$read=null) {
+    public function read($nbits = 1, &$total_bits=null) {
         if($this->eof()) {
-            $read = 0;
+            $total_bits = 0;
             return false;
         }
 
-        $read = min($length, $this->length - $this->pos);
+        $total_bits = min($nbits, $this->length - $this->pos);
 
         $i = (int)floor($this->pos / 8);
         $offset = $this->pos % 8;
 
-        $left = $read;
+        $bits_left = $total_bits;
         $value = 0;
 
-        while($left > 0) {
+        while($bits_left > 0) {
             $ord = ord($this->data[$i]);
-            $rem = 8 - $offset;
-            $r = min($rem, $left);
+            $rem_byte = 8 - $offset;
+            $read = min($rem_byte, $bits_left);
 
             if($offset) {
                 $ord >>= $offset;
                 $offset = 0;
             }
-            if($left < $rem) {
-                $ord &= (1 << $left) - 1;
+            if($bits_left < $rem_byte) {
+                $ord &= (1 << $bits_left) - 1;
             }
-            $value = ($value << $r) + $ord;
-            $left -= $r;
+
+            if($this->byte_order === self::BIG_ENDIAN) {
+                $value = ($value << $read) | $ord;
+            } else {
+                $so_far = $total_bits - $bits_left;
+                $value = $value | ($ord << $so_far);
+            }
+            $bits_left -= $read;
             ++$i;
         }
 
-        $this->pos += $read;
+        $this->pos += $total_bits;
         return $value;
     }
 

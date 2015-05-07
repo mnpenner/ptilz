@@ -241,14 +241,14 @@ class StrTest extends PHPUnit_Framework_TestCase {
         }
     }
 
-    function testEncodeLength() {
+    function testEncodeCharAndLength() {
         for($i=0; $i<50; ++$i) {
             $src_bits = mt_rand(1,256);
             $bin = openssl_random_pseudo_bytes(ceil($src_bits/8));
 
-            $min = mt_rand(0x20,0x7D);
-            $max = mt_rand($min+1,0x7E);
-            $alpha = implode('',array_map('chr',range($min,$max)));
+            $low = mt_rand(0x20,0x7D);
+            $high = mt_rand($low+1,0x7E);
+            $alpha = implode('',array_map('chr',range($low,$high)));
 
             $enc = Str::encode(new BitStream($bin,$src_bits), $alpha);
 
@@ -256,22 +256,26 @@ class StrTest extends PHPUnit_Framework_TestCase {
 
             $alpha_bits = log(strlen($alpha),2);
 
-            $low = (int)ceil($src_bits/ceil($alpha_bits));
-            $high = (int)ceil($src_bits/floor($alpha_bits));
+            $min = (int)ceil($src_bits/ceil($alpha_bits));
+            $max = (int)ceil($src_bits/floor($alpha_bits));
 
-            $msg = Str::format("Str::encode({:V}:{:V},{:V}) expect between {:n} and {:n}, got {:n}", $bin, $src_bits, $alpha, $low, $high, $outlen);
+            $msg = Str::format("Str::encode({:V}:{:V},{:V}) expect between {:n} and {:n}, got {:n}", $bin, $src_bits, $alpha, $min, $max, $outlen);
 
-            $this->assertGreaterThanOrEqual($low,$outlen, $msg);
-            $this->assertLessThanOrEqual($high,$outlen, $msg);
+            $patt = '/['.preg_quote($alpha,'/').']{'.$min.','.$max.'}\z/A';
+
+            $this->assertRegExp($patt,$enc,$msg);
+
+            //$this->assertGreaterThanOrEqual($min,$outlen, $msg);
+            //$this->assertLessThanOrEqual($max,$outlen, $msg);
         }
     }
 
     /**
      * @depends testSecureRandom
      * @depends testRandom
-     * @depends testEncodeLength
+     * @depends testEncodeCharAndLength
      */
-    function testEncode() {
+    function testEncodeAgainstBase64() {
         $this->assertSame("OG1i",Str::encode("8mb",Str::BASE64));
         $this->assertSame("VGhpcyBpcyBhbiBlbmNvZGVkIHN0cmluZw",Str::encode("This is an encoded string",Str::BASE64));
         $this->assertSame("/w",Str::encode("\xFF",Str::BASE64));

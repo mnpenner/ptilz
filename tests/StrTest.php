@@ -276,6 +276,7 @@ class StrTest extends PHPUnit_Framework_TestCase {
      * @depends testEncodeCharAndLength
      */
     function testEncodeAgainstBase64() {
+        $this->assertSame("QQ",Str::encode("A",Str::BASE64),"010000 01");
         $this->assertSame("OG1i",Str::encode("8mb",Str::BASE64));
         $this->assertSame("VGhpcyBpcyBhbiBlbmNvZGVkIHN0cmluZw",Str::encode("This is an encoded string",Str::BASE64));
         $this->assertSame("/w",Str::encode("\xFF",Str::BASE64));
@@ -297,7 +298,13 @@ class StrTest extends PHPUnit_Framework_TestCase {
             $pad = str_pad($enc,(int)ceil($len/3)*4,'=',STR_PAD_RIGHT);
             $this->assertSame($b64,$pad,Str::format("Base64 encode {:V}", $bin));
         }
+    }
 
+
+    function testBitStreamToString() {
+        $this->assertSame('01000001 01000001',(string)new BitStream('AA',16));
+        $this->assertSame('01000001 0100000X',(string)new BitStream('AA',15));
+        $this->assertSame('0100000X XXXXXXXX',(string)new BitStream('AA',7));
     }
 
 }

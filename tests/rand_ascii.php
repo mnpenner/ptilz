@@ -53,13 +53,42 @@ require __DIR__ . '/../vendor/autoload.php';
 //echo PHP_EOL;
 //
 
-//for($i=0; $i<10; ++$i) {
-//    $stream = new BitStream(Bin::secureRandomBytes(16));
-//    echo Str::encode($stream,Str::Z85)."\n".Str::encode($stream,Str::PRINTABLE_ASCII).PHP_EOL;
-//    //echo Str::secureRandomAscii(128) . PHP_EOL;
-//    //echo Str::secureRandomAscii(128,$printable) . PHP_EOL;
-//}
-//
+for($i=0; $i<10; ++$i) {
+    $stream = new BitStream(Bin::secureRandomBytes(17),132);
+    echo "Z85 ".Str::encode($stream,Str::Z85).PHP_EOL;
+    echo "A85 ".Str::encode($stream,Str::ADOBE85).PHP_EOL;
+    echo "A96 ".Str::encode($stream,Str::ASCII96).PHP_EOL;
+    echo "B64 ".Str::encode($stream,Str::BASE64URL).PHP_EOL;
+    echo PHP_EOL;
+    //echo Str::secureRandomAscii(128) . PHP_EOL;
+    //echo Str::secureRandomAscii(128,$printable) . PHP_EOL;
+}
+
+$shortest = new BitStream("\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF",132);
+echo "Shortest:\n";
+echo "Z85 ".Str::encode($shortest,Str::Z85).PHP_EOL;
+echo "A85 ".Str::encode($shortest,Str::ADOBE85).PHP_EOL;
+echo "A96 ".Str::encode($shortest,Str::ASCII96).PHP_EOL;
+echo "B64 ".Str::encode($shortest,Str::BASE64URL).PHP_EOL;
+echo PHP_EOL;
+
+$iters = 0;
+while(true) {
+    ++$iters;
+
+    $bin = Bin::secureRandomBytes(17);
+    $stream = new BitStream($bin,132);
+    $str = Str::encode($stream,Str::ASCII96);
+
+    if(strlen($str) <= 19) {
+        echo number_format($iters).PHP_EOL;
+        echo Str::export($bin).PHP_EOL;
+        echo $stream.PHP_EOL;
+        break;
+    }
+}
+
+//rMRec<5as5pmYf4qCf{F30
 //echo PHP_EOL;
 //
 //for($i=0; $i<10; ++$i) {
@@ -79,8 +108,8 @@ require __DIR__ . '/../vendor/autoload.php';
 
 //echo Str::export(implode('',range(chr(0),chr(127)))).PHP_EOL;
 
-echo PHP_EOL.Str::encode("\xFF",Str::BASE64).PHP_EOL;
-echo PHP_EOL.Str::encode("8mb",Str::BASE64).PHP_EOL;
+//echo PHP_EOL.Str::encode("\xFF",Str::BASE64).PHP_EOL;
+//echo PHP_EOL.Str::encode("8mb",Str::BASE64).PHP_EOL;
 
 //echo Str::WHITESPACE;
 

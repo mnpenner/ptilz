@@ -27,6 +27,11 @@ abstract class Str {
     const ADOBE85 = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstu';
 
     /**
+     * Printable ASCII characters, excluding space (0x21 - 0x7E).
+     */
+    const ASCII96 = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+
+    /**
      * Printable ASCII characters (0x20 - 0x7E).
      *
      * @see http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters

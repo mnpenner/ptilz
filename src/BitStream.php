@@ -7,8 +7,6 @@ class BitStream {
     protected $length;
     /** @var int Position in bits */
     protected $pos;
-    /** @var int */
-    protected $byte_order;
 
     public function __construct($data, $length = null) {
         $this->data = $data;
@@ -47,28 +45,24 @@ class BitStream {
             $read = min($rem_byte, $bits_left);
 
             if($bits_left < $rem_byte) {
-
                 $ord >>= ($rem_byte - $bits_left);
             }
-
 
             if($read < 8) {
                 $ord &= (1 << $read) - 1;
             }
 
-            //$so_far = $total_bits - $bits_left;
-            //$value = $value | ($ord << $so_far);
             $value = ($value << $read) | $ord;
 
             $bits_left -= $read;
             ++$i;
         }
 
-        $this->pos += $total_bits;
+        if($total_bits < $nbits) {
+            $value <<= ($nbits - $total_bits); // needed to conform with b64; this is like padding with 0s
+        }
 
-        //if($value === 3) {
-        //    return 48;
-        //}
+        $this->pos += $total_bits;
 
         return $value;
     }
@@ -105,9 +99,21 @@ class BitStream {
 
 
     function __toString() {
-        // TODO: XXXX out the unused bits
-        return implode(PHP_EOL, array_map(function($s) {
-            return implode(' ',str_split(str_pad(decbin(hexdec(bin2hex($s))),strlen($s)*8,'0',STR_PAD_LEFT),8));
+        $so_far = 0;
+        $str = implode(PHP_EOL, array_map(function ($s) use (&$so_far) {
+            $nbits = strlen($s) * 8;
+            if($so_far >= $this->length) {
+                $bit_str = str_repeat('X', $nbits);
+            } else {
+                $bit_str = str_pad(decbin(hexdec(bin2hex($s))), $nbits, '0', STR_PAD_LEFT);
+                $repl = $nbits - ($this->length - $so_far);
+                if($repl > 0) {
+                    $bit_str = substr($bit_str, 0, -$repl) . str_repeat('X', $repl);
+                }
+            }
+            $so_far += $nbits;
+            return implode(' ', str_split($bit_str, 8));
         }, str_split($this->data, PHP_INT_SIZE)));
+        return $str;
     }
 }

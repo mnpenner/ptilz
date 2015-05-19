@@ -145,12 +145,14 @@ abstract class Shell {
             if(is_int($k)) {
                 $cmdArr[] = escapeshellarg($v);
             } elseif($v !== false) {
-                if(strlen($k) === 1) {
+                $noSpace = strlen($k) === 1;
+                if($noSpace) {
                     $arg = '-' . escapeshellcmd($k);
                 } else {
-                    $arg = '--' . escapeshellcmd($k).' ';
+                    $arg = '--' . escapeshellcmd($k);
                 }
                 if(!in_array($v, [true, null], true)) {
+                    if(!$noSpace) $arg .= ' ';
                     $arg .= escapeshellarg($v);
                 }
                 $cmdArr[] = $arg;

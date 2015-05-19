@@ -132,4 +132,30 @@ abstract class Shell {
         }
         return self::tryExec("command -v $arg"); // http://stackoverflow.com/a/677212/65387
     }
+
+    /**
+     * Builds a properly escaped string of shell args.
+     *
+     * @param array $args
+     * @return string
+     */
+    public static function escapeArgs(array $args) {
+        $cmdArr = [];
+        foreach($args as $k => $v) {
+            if(is_int($k)) {
+                $cmdArr[] = escapeshellarg($v);
+            } elseif($v !== false) {
+                if(strlen($k) === 1) {
+                    $arg = '-' . escapeshellcmd($k);
+                } else {
+                    $arg = '--' . escapeshellcmd($k).' ';
+                }
+                if(!in_array($v, [true, null], true)) {
+                    $arg .= escapeshellarg($v);
+                }
+                $cmdArr[] = $arg;
+            }
+        }
+        return $cmdArr ?  ' '.implode(' ', $cmdArr) : '';
+    }
 }

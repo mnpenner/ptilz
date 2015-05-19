@@ -638,7 +638,7 @@ REGEX;
      * @throws NotImplementedException
      * @return string
      */
-    public static function underscored($str) {
+    public static function underscored($str) { // snakeCase? https://lodash.com/docs#snakeCase
         return mb_strtolower(implode('_',self::splitCodeWords($str)));
     }
 
@@ -649,7 +649,7 @@ REGEX;
      * @throws NotImplementedException
      * @return string
      */
-    public static function dasherized($str) {
+    public static function dasherized($str) { // TODO: rename to kebabCase? https://lodash.com/docs#kebabCase
         $str = str_replace("'", '', $str); // strip apostrophes
         $str = preg_replace('~\A[^\pL\pN]+|[^\pL\pN]+\z~u', '', $str); // trim punctuation off ends
         $str = preg_replace_callback('~\p{Lu}+~u', function ($m) {

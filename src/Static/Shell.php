@@ -140,24 +140,25 @@ abstract class Shell {
      * @return string
      */
     public static function escapeArgs(array $args) {
-        $cmdArr = [];
-        foreach($args as $k => $v) {
-            if(is_int($k)) {
-                $cmdArr[] = escapeshellarg($v);
-            } elseif($v !== false) {
-                $noSpace = strlen($k) === 1;
-                if($noSpace) {
-                    $arg = '-' . escapeshellcmd($k);
-                } else {
-                    $arg = '--' . escapeshellcmd($k);
+        $out = [];
+        foreach($args as $opt => $val) {
+            if(!is_array($val)) {
+                $val = [$val];
+            }
+            foreach($val as $v) {
+                if(is_int($opt)) {
+                    $out[] = escapeshellarg($v);
+                } elseif($v !== false) {
+                    $shortOpt = strlen($opt) === 1;
+                    $arg = ($shortOpt ? '-' : '--').escapeshellcmd($opt);
+                    if($v !== true && $v !== null) {
+                        if(!$shortOpt) $arg .= ' ';
+                        $arg .= escapeshellarg($v);
+                    }
+                    $out[] = $arg;
                 }
-                if(!in_array($v, [true, null], true)) {
-                    if(!$noSpace) $arg .= ' ';
-                    $arg .= escapeshellarg($v);
-                }
-                $cmdArr[] = $arg;
             }
         }
-        return $cmdArr ?  ' '.implode(' ', $cmdArr) : '';
+        return $out ?  ' '.implode(' ', $out) : '';
     }
 }

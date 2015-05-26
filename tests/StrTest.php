@@ -315,5 +315,7 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(["o'clock"],Str::splitSearchQuery("o\\'clock"),"escaped quote");
         $this->assertSame(["o","clock"],Str::splitSearchQuery("o'clock'"),"clock is quoted");
         $this->assertSame(["o","clock"],Str::splitSearchQuery("o'clock"),"unterminated string");
+        $this->assertSame([],Str::splitSearchQuery(" \r\n\0"),"all whitespace");
+        $this->assertSame([],Str::splitSearchQuery('"'),"a dangling quote");
     }
 }

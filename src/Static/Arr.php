@@ -56,7 +56,12 @@ abstract class Arr {
         if($rem) {
             $rem = explode('[', str_replace(']', '', $rem));
             while(($k = array_shift($rem)) !== null) {
-                if(!isset($ret[$k])) return $default;
+                if(!isset($ret[$k])) {
+                    if($k === '') { // empty brackets[]
+                        continue;
+                    }
+                    return $default;
+                }
                 $ret = &$ret[$k];
             }
         }

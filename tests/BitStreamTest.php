@@ -5,7 +5,6 @@ use Ptilz\BitStream;
 
 class BitStreamTest extends PHPUnit_Framework_TestCase {
 
-
     function test1() {
         $stream = new BitStream(chr(0b11100000));
         $this->assertSame(7,$stream->read(3));

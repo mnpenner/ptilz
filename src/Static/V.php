@@ -40,6 +40,7 @@ abstract class V {
 
     /**
      * Test if not falsey (according to V::isFalsey)
+     *
      * @param mixed $var
      * @return bool
      */
@@ -48,12 +49,13 @@ abstract class V {
     }
 
     /**
-     * Test if a variable is false, null, an empty string, integer 0, or an empty array
+     * Test if a variable is false, null, an empty string, integer 0, float 0.0, or an empty array. String "0" is *not* considered falsey.
+     *
      * @param mixed$var
      * @return bool
      */
     public static function isFalsey($var) {
-        return in_array($var, [false, null, '', 0, []], true);
+        return in_array($var, [false, null, '', 0, [], 0.0], true);
     }
 
     /**

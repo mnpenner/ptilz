@@ -31,15 +31,14 @@ class Iter {
 
 
     /**
-     * @param array|Traversable $iter
+     * Copy the iterator into an array
+     *
+     * @param array|Traversable $iter The iterator being copied.
+     * @param bool $use_keys Whether to use the iterator element keys as index.
      * @return array
      */
-    public static function toArray($iter) {
-        $result = [];
-        foreach($iter as $k=>$v) {
-            $result[$k] = $v;
-        }
-        return $result;
+    public static function toArray($iter, $use_keys=true) {
+        return is_array($iter) ? $iter : iterator_to_array($iter, $use_keys);
     }
 
     /**

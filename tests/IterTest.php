@@ -8,6 +8,13 @@ class IterTest extends PHPUnit_Framework_TestCase {
             yield 'b' => 2;
         };
         $this->assertSame([1, 'b' => 2], Iter::toArray($generator()));
+
+        $array = ['recipe' => 'pancakes', 'egg', 'milk', 'flour'];
+        $iterator = new ArrayIterator($array);
+
+        $this->assertSame($array, Iter::toArray($array));
+        $this->assertSame($array, Iter::toArray($iterator));
+        $this->assertSame(array_values($array), Iter::toArray($iterator, false));
     }
 
     function testMap() {

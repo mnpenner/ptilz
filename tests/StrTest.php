@@ -307,4 +307,15 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('0100000X XXXXXXXX',(string)new BitStream('AA',7));
     }
 
+    function testSplitSearchQuery() {
+        $this->assertSame(['so','simple'],Str::splitSearchQuery('so simple'),"smoke test");
+        $this->assertSame(['plz','halp','so lost','much  confuse'],Str::splitSearchQuery(' plz  halp  "so lost" "much  confuse" '),"strings and spaces");
+        $this->assertSame(['文字','化け'],Str::splitSearchQuery('文字 化け'),"unicode");
+        $this->assertSame(["o'clock"],Str::splitSearchQuery('"o\'clock"'),"quoted quote");
+        $this->assertSame(["o'clock"],Str::splitSearchQuery("o\\'clock"),"escaped quote");
+        $this->assertSame(["o","clock"],Str::splitSearchQuery("o'clock'"),"clock is quoted");
+        $this->assertSame(["o","clock"],Str::splitSearchQuery("o'clock"),"unterminated string");
+        $this->assertSame([],Str::splitSearchQuery(" \r\n\0"),"all whitespace");
+        $this->assertSame([],Str::splitSearchQuery('"'),"a dangling quote");
+    }
 }

@@ -185,6 +185,98 @@ abstract class Str {
     }
 
     /**
+     * Splits a search query into separate terms. Supports quoting and escape sequences.
+     *
+     * @param string $query
+     * @return array
+     */
+    public static function splitSearchQuery($query) {
+        $terms = [];
+
+        $quo = null;
+        $esc = false;
+
+        $term = '';
+
+        foreach(self::splitChars($query) as $ch) {
+            switch($ch) {
+                case ' ': // space
+                case "\n": // new line/line feed
+                case "\r": // carriage return
+                case "\0": // null byte
+                case "\x0B": // vertical tab
+                    if($esc || $quo) {
+                        $term .= $ch;
+                    } elseif(strlen($term)) {
+                        $terms[] = $term;
+                        $term = '';
+                    }
+                    break;
+                case '"':
+                case "'":
+                    if($esc) {
+                        $term .= $ch;
+                    } elseif($quo) {
+                        if($quo === $ch) { // end quote
+                            if(strlen($term)) {
+                                $terms[] = $term;
+                                $term = '';
+                            }
+                            $quo = null;
+                        } else { // quoted quote
+                            $term .= $ch;
+                        }
+                    } else { // start quote
+                        if(strlen($term)) {
+                            $terms[] = $term;
+                            $term = '';
+                        }
+                        $quo = $ch;
+                    }
+                    break;
+                case '\\':
+                    if($esc) {
+                        $term .= $ch;
+                        $esc = false;
+                    } else {
+                        $esc = true;
+                    }
+                    break;
+                default:
+                    if($esc) {
+                        switch($ch) { // custom escape sequences! because why not?
+                            case 'n':
+                                $term .= "\n";
+                                break;
+                            case 'r':
+                                $term .= "\r";
+                                break;
+                            case 't':
+                                $term .= "\t";
+                                break;
+                            case '0':
+                                $term .= "\0";
+                                break;
+                            default:
+                                $term .= $ch;
+                                break;
+                        }
+                        $esc = false;
+                    } else {
+                        $term .= $ch;
+                    }
+                    break;
+            }
+        }
+
+        if(strlen($term)) {
+            $terms[] = $term;
+        }
+
+        return $terms;
+    }
+
+    /**
      * Gets the length of a string. Works on multi-byte characters.
      *
      * @param string $str The string being checked for length
@@ -638,7 +730,7 @@ REGEX;
      * @throws NotImplementedException
      * @return string
      */
-    public static function underscored($str) {
+    public static function underscored($str) { // snakeCase? https://lodash.com/docs#snakeCase
         return mb_strtolower(implode('_',self::splitCodeWords($str)));
     }
 
@@ -649,7 +741,7 @@ REGEX;
      * @throws NotImplementedException
      * @return string
      */
-    public static function dasherized($str) {
+    public static function dasherized($str) { // TODO: rename to kebabCase? https://lodash.com/docs#kebabCase
         $str = str_replace("'", '', $str); // strip apostrophes
         $str = preg_replace('~\A[^\pL\pN]+|[^\pL\pN]+\z~u', '', $str); // trim punctuation off ends
         $str = preg_replace_callback('~\p{Lu}+~u', function ($m) {

@@ -154,7 +154,7 @@ abstract class Cli { // fixme: rename to Console:: ? Or Term::?
             return implode(';',$codes);
         };
 
-        return htmlspecialchars_decode(preg_replace_callback('~<(?<tag>[^>]+)>~', function ($m) use ($replaceMatch) {
+        return htmlspecialchars_decode(preg_replace_callback('~<(?<tag>/?[a-z0-9:;-]+)>~', function ($m) use ($replaceMatch) {
             $code = $replaceMatch($m[1]);
             return $code === null ? $m[0] : "\033[{$code}m";
         }, $str), ENT_QUOTES|ENT_HTML5);

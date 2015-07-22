@@ -142,6 +142,6 @@ class Html {
     }
 
     private static function buildClass($class_arr) {
-        return implode(' ',array_filter(array_map('trim',$class_arr),'strlen'));
+        return implode(' ',array_unique(array_filter(array_map('trim',$class_arr),'strlen')));
     }
 }

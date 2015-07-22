@@ -47,6 +47,13 @@ class HtmlTest extends PHPUnit_Framework_TestCase {
             ['class'=>'btn','disabled'=>false,'id'=>'ignite']
         ));
 
+        $this->assertSame(['data-Foo'=>'Bar','data-BAZ'=>'QUX'],Html::mergeAttrs(['data-Foo'=>'Bar'],['DATA-BAZ'=>'QUX']));
+    }
 
+    function testDataAttrs() {
+        $this->assertSame(['data-foo'=>'bar','data-baz'=>'qux'],Html::dataAttrs(['foo'=>'bar','baz'=>'qux']));
+        $this->assertSame(['data-foo'=>'true','data-bar'=>'false','data-baz'=>'null'],Html::dataAttrs(['foo'=>true,'bar'=>false,'baz'=>null]));
+        $this->assertSame(['data-foo'=>'["bar","baz"]'],Html::dataAttrs(['foo'=>['bar','baz']]));
+        $this->assertSame(['data-foo'=>'{"bar":"baz"}'],Html::dataAttrs(['foo'=>['bar'=>'baz']]));
     }
 }

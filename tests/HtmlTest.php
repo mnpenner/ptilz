@@ -17,4 +17,33 @@ class HtmlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('<a>b<d>e</d>g', Html::stripTags($html, ['a', 'd'], false));
         $this->assertSame('b', Html::stripTags('<?php a ?>b<? c'));
     }
+
+    function testMergeAttrs() {
+        $this->assertSame(['a'=>'x','b'=>'y'],Html::mergeAttrs(['a'=>'x'],['b'=>'y']));
+        $this->assertSame(['class'=>'foo bar baz'],Html::mergeAttrs(['class'=>'foo bar'],['class'=>'baz']));
+        $this->assertSame(['class'=>'foo bar baz'],Html::mergeAttrs(['class'=>['foo','bar']],['class'=>'baz']));
+        $this->assertSame(['class'=>'foo bar baz'],Html::mergeAttrs(['class'=>'foo bar'],['class'=>['baz']]));
+
+        $this->assertSame(['style'=>'font-weight:bold;color:red'],Html::mergeAttrs(
+            ['style'=>['font-weight'=>'bold']],
+            ['style'=>['color'=>'red']])
+        );
+        $this->assertSame(['style'=>'font-weight:bold;color:red'],Html::mergeAttrs(
+            ['style'=>'font-weight:bold'],
+            ['style'=>'color:red'])
+        );
+        $this->assertSame(['style'=>'font-weight:bold;color:red'],Html::mergeAttrs(
+            ['style'=>['font-weight'=>'bold']],
+            ['style'=>'color:red'])
+        );
+        $this->assertSame(['style'=>'color:blue;font-weight:bold'],Html::mergeAttrs(
+            ['style'=>'color:red'],
+            ['style'=>['font-weight'=>'bold','color'=>'blue']])
+        );
+
+        $this->assertSame(['disabled'=>false,'class'=>'danger btn','name'=>'explode','id'=>'ignite'],Html::mergeAttrs(
+            ['disabled'=>true,'class'=>'danger','name'=>'explode'],
+            ['class'=>'btn','disabled'=>false,'id'=>'ignite']
+        ));
+    }
 }

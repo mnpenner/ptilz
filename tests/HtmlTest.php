@@ -23,6 +23,7 @@ class HtmlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(['class'=>'foo bar baz'],Html::mergeAttrs(['class'=>'foo bar'],['class'=>'baz']));
         $this->assertSame(['class'=>'foo bar baz'],Html::mergeAttrs(['class'=>['foo','bar']],['class'=>'baz']));
         $this->assertSame(['class'=>'foo bar baz'],Html::mergeAttrs(['class'=>'foo bar'],['class'=>['baz']]));
+        $this->assertSame(['class'=>'foo bar'],Html::mergeAttrs(['class'=>'foo bar'],['class'=>'foo']));
 
         $this->assertSame(['style'=>'font-weight:bold;color:red'],Html::mergeAttrs(
             ['style'=>['font-weight'=>'bold']],
@@ -45,5 +46,7 @@ class HtmlTest extends PHPUnit_Framework_TestCase {
             ['disabled'=>true,'class'=>'danger','name'=>'explode'],
             ['class'=>'btn','disabled'=>false,'id'=>'ignite']
         ));
+
+
     }
 }

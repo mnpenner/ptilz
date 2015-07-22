@@ -74,7 +74,12 @@ class Html {
         $style = [];
         foreach($attr_arrays as $arr) {
             foreach($arr as $name=>$val) {
-                $name = mb_strtolower($name);
+                if(Str::startsWith($name,'data-',true)) {
+                    // don't modify case of data attributes
+                    $name = 'data-'.substr($name,5);
+                } else {
+                    $name = mb_strtolower($name);
+                }
                 switch($name) {
                     case 'class':
                         if(is_array($val)) {
@@ -143,5 +148,20 @@ class Html {
 
     private static function buildClass($class_arr) {
         return implode(' ',array_unique(array_filter(array_map('trim',$class_arr),'strlen')));
+    }
+
+    /**
+     * Prepend "data-" to each of the array keys and JSON-encode values as necessary.
+     *
+     * @param array $data
+     * @return array
+     * @throws Exceptions\InvalidOperationException
+     */
+    public static function dataAttrs(array $data) {
+        $attrs = [];
+        foreach($data as $k=>$v) {
+            $attrs["data-$k"] = Str::unquote(Json::encode($v, JSON_ESCAPE_SCRIPTS));
+        }
+        return $attrs;
     }
 }

@@ -318,4 +318,9 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame([],Str::splitSearchQuery(" \r\n\0"),"all whitespace");
         $this->assertSame([],Str::splitSearchQuery('"'),"a dangling quote");
     }
+
+    function testRemoveDiacritics() {
+        $this->assertSame("Je suis alle a l'ecole",Str::removeDiacritics("Je suis allé à l'école"));
+        $this->assertSame("Un elephant a l'oree du bois",Str::removeDiacritics('Un éléphant à l\'orée du bois'));
+    }
 }

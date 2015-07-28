@@ -320,7 +320,9 @@ class StrTest extends PHPUnit_Framework_TestCase {
     }
 
     function testRemoveDiacritics() {
+        $this->assertSame("This is a very wrong sentence!",Str::removeDiacritics("Thîs îs à vêry wrong séntènce!")); // http://stackoverflow.com/a/25414406/65387
         $this->assertSame("Je suis alle a l'ecole",Str::removeDiacritics("Je suis allé à l'école"));
         $this->assertSame("Un elephant a l'oree du bois",Str::removeDiacritics('Un éléphant à l\'orée du bois'));
+        $this->assertSame("usuario o contrasena incorrectos",Str::removeDiacritics("usuario o contraseña incorrectos")); // http://stackoverflow.com/questions/1017599/how-do-i-remove-accents-from-characters-in-a-php-string#comment43187391_25414406
     }
 }

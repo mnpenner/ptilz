@@ -33,7 +33,7 @@ abstract class Cli { // fixme: rename to Console:: ? Or Term::?
             if($m[0] === '/') {
                 $attrs = explode(';',substr($m,1));
                 foreach($attrs as $attr) {
-                    switch($attr) {
+                    switch(strtok($attr,':')) {
                         case 'fg': $codes[] = 39; break;
                         case 'bg': $codes[] = 49; break;
                         case 'all': $codes[] = 0; break;

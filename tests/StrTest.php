@@ -325,4 +325,47 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("Un elephant a l'oree du bois",Str::removeDiacritics('Un éléphant à l\'orée du bois'));
         $this->assertSame("usuario o contrasena incorrectos",Str::removeDiacritics("usuario o contraseña incorrectos")); // http://stackoverflow.com/questions/1017599/how-do-i-remove-accents-from-characters-in-a-php-string#comment43187391_25414406
     }
+
+    function testQuote() {
+        $this->assertSame('"foo"',Str::quote('foo'));
+        $this->assertSame('""',Str::quote(''));
+        $this->assertSame("'bar'",Str::quote('bar',"'"));
+        $this->assertSame("«baz»",Str::quote('baz','«','»'));
+        $this->assertSame("[[quux]]",Str::quote('quux','[[',']]'));
+    }
+
+    function testUnquote() {
+        $this->assertSame('foo',Str::unquote('"foo"'));
+        $this->assertSame('"',Str::unquote('"'));
+        $this->assertSame('',Str::unquote(''));
+        $this->assertSame('bar',Str::unquote("'bar'","'"));
+        $this->assertSame('baz',Str::unquote("«baz»",'«','»'));
+        $this->assertSame("«baz»",Str::unquote("«baz»",'«'));
+        $this->assertSame('quux',Str::unquote("[[quux]]",'[[',']]'));
+        $this->assertSame('[[quux]',Str::unquote("[[quux]",'[[',']]'));
+    }
+
+    function testContains() {
+        $this->assertTrue(Str::contains('abc','b'));
+        $this->assertTrue(Str::contains('abc','bc'));
+        $this->assertTrue(Str::contains('abc','abc'));
+        $this->assertFalse(Str::contains('abc','abcd'));
+        $this->assertFalse(Str::contains('abc','x'));
+        $this->assertFalse(Str::contains('abc','B'));
+        $this->assertTrue(Str::contains('abc','B',true));
+        $this->assertTrue(Str::contains('abc','Ab',true));
+        $this->assertTrue(Str::contains('abc','B',true,1));
+        $this->assertTrue(Str::contains('abc','BC',true,1));
+        $this->assertFalse(Str::contains('abc','BC',true,0));
+        $this->assertFalse(Str::contains('abc','BC',false,1));
+        $this->assertTrue(Str::contains('abc','bc',false,1));
+    }
+
+    function testSmartSplit() {
+        $this->assertSame(['a','b','c','d'],Str::smartSplit("a, b,c , d "));
+        $this->assertSame(['a',' b','c ',' d '],Str::smartSplit('a," b","c "," d "'));
+        $this->assertSame(['a','b,c','d'],Str::smartSplit('a,"b,c",d'));
+        $this->assertSame(['a',' b ;; c ','d'],Str::smartSplit("a;;'' b ;; c '';;d",';;',"''"));
+        $this->assertSame(['a','b'],Str::smartSplit(",a,, ,b,"));
+    }
 }

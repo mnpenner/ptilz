@@ -116,11 +116,7 @@ abstract class Str {
      * @return bool
      */
     public static function startsWith($subject, $prefix, $ignore_case = false, $encoding = null) {
-        if($encoding === null) $encoding = mb_internal_encoding();
-        $substr = mb_substr($subject, 0, mb_strlen($prefix, $encoding), $encoding);
-        return $ignore_case
-            ? mb_strtolower($substr, $encoding) === mb_strtolower($prefix, $encoding)
-            : $substr === $prefix;
+        return self::contains($subject, $prefix, $ignore_case, 0, $encoding);
     }
 
     /**
@@ -133,11 +129,36 @@ abstract class Str {
      * @return bool
      */
     public static function endsWith($subject, $postfix, $ignore_case = false, $encoding = null) {
-        if($encoding === null) $encoding = mb_internal_encoding();
-        $substr = mb_substr($subject, -mb_strlen($postfix, $encoding), null, $encoding);
+        return self::contains($subject, $postfix, $ignore_case, -self::length($postfix, $encoding), $encoding);
+    }
+
+    /**
+     * Tests if a string contains a substring.
+     *
+     * @param string $subject String to search
+     * @param string $substr Substring to search for
+     * @param bool $ignore_case Perform case-insensitive search
+     * @param int|bool $pos If specified, substring must occur at this position (in characters)
+     * @param string|null $encoding Character encoding
+     * @return bool
+     */
+    public static function contains($subject, $substr, $ignore_case = false, $pos = false, $encoding = null) {
+        if($encoding === null) {
+            $encoding = mb_internal_encoding();
+        }
+
+        if($pos === false) {
+            return $ignore_case
+                ? mb_stripos($subject, $substr, 0, $encoding) !== false
+                : mb_strpos($subject, $substr, 0, $encoding) !== false;
+        }
+
+        $subject_substr = mb_substr($subject, $pos, mb_strlen($substr, $encoding), $encoding);
+
         return $ignore_case
-            ? mb_strtolower($substr, $encoding) === mb_strtolower($postfix, $encoding)
-            : $substr === $postfix;
+            ? mb_strtolower($subject_substr, $encoding) === mb_strtolower($substr, $encoding)
+            : $subject_substr === $substr;
+
     }
 
     /**
@@ -646,25 +667,37 @@ REGEX;
         return '"'.self::addSlashes($str,'"\\$').'"';
     }
 
-    /**
-     * Adds quotes around a string.
-     *
-     * @param string $string
-     * @param string $quoteChar
-     * @return string
-     */
-    public static function quote($string, $quoteChar = '"') {
-        return $quoteChar.$string.$quoteChar;
+    public static function import($str) {
+        throw new NotImplementedException();
     }
 
     /**
-     * @param string $string
-     * @param null|string $quoteChar
+     * Adds quotes around a string.
+     *
+     * @param string $string String to add quotes to.
+     * @param string $lquo Left quote
+     * @param string|null $rquo Right quote. Defaults to same as left.
      * @return string
      */
-    public static function unquote($string, $quoteChar = '"') {
-        if(strlen($string) >= 2 && $string[0] === $quoteChar && $string[strlen($string) - 1] === $quoteChar) {
-            return substr($string, 1, -1);
+    public static function quote($string, $lquo = '"', $rquo = null) {
+        if($rquo === null) $rquo = $lquo;
+        return $lquo.$string.$rquo;
+    }
+
+    /**
+     * Removes surrounding quotes from a string, if they exist.
+     *
+     * @param string $string String to remove quotes from.
+     * @param string $lquo Left quote
+     * @param string|null $rquo Right quote. Defaults to same as left.
+     * @return string
+     */
+    public static function unquote($string, $lquo = '"', $rquo = null) {
+        if($rquo === null) $rquo = $lquo;
+        $startLen = strlen($lquo);
+        $endLen = strlen($rquo);
+        if(strlen($string) >= ($startLen + $endLen) && self::startsWith($string,$lquo) && self::endsWith($string,$rquo)) {
+            return substr($string, $startLen, -$endLen);
         }
         return $string;
     }
@@ -1155,19 +1188,6 @@ REGEX;
     }
 
     /**
-     * Tests if a string contains a substring.
-     * @param string $str String to search
-     * @param string $needle Substring to search for
-     * @param bool $case_sensitive Perform case sensitive search
-     * @return bool
-     */
-    public static function contains($str, $needle, $case_sensitive=true) {
-        return $case_sensitive
-            ? strpos($str, $needle) !== false
-            : stripos($str, $needle) !== false;
-    }
-
-    /**
      * Split a string into lines.
      *
      * @param string $str
@@ -1332,5 +1352,43 @@ REGEX;
             }
         }
         return $subject;
+    }
+
+    /**
+     * Splits a string, trims whitespace, and removes empty elements. Supports CSV format in case your args start/end with whitespace and/or contain a comma.
+     *
+     * Useful for parsing user-submitted text into an array.
+     *
+     * @param string $subject
+     * @param string $delimiter
+     * @param string $enclosure
+     * @return array
+     */
+    public static function smartSplit($subject, $delimiter = ',', $enclosure = '"') {
+        $out = [];
+        $delimLen = strlen($delimiter);
+        $encLen = strlen($enclosure);
+        $subjectLen = strlen($subject);
+        $end = $subjectLen - $delimLen;
+        $start = 0;
+        $inQuotes = false;
+        for($i=0; $i<=$end;) {
+            if(self::contains($subject,$enclosure,false,$i)) { // todo: how to handle escaping of quotes??
+                $inQuotes = !$inQuotes;
+                $i += $encLen;
+            } elseif(!$inQuotes && self::contains($subject,$delimiter,false,$i)) {
+                $frag = self::unquote(trim(substr($subject, $start, $i - $start)), $enclosure); // todo: implement self::import and use that instead
+                if($frag !==  '') $out[] = $frag;
+                $i += $delimLen;
+                $start = $i;
+            } else {
+                ++$i;
+            }
+        }
+        if($start < $subjectLen) {
+            $frag = self::unquote(trim(substr($subject, $start)), $enclosure);
+            if($frag !==  '') $out[] = $frag;
+        }
+        return $out;
     }
 }

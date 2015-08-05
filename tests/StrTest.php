@@ -1,6 +1,7 @@
 <?php
 use Ptilz\Bin;
 use Ptilz\BitStream;
+use Ptilz\Math;
 use Ptilz\Str;
 use Ptilz\V;
 
@@ -100,8 +101,63 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('01000001 01000010 01000011', Str::binary('ABC'));
     }
 
+
+    function testAddSlashes() {
+        $this->assertSame('A\n\r\t\v\e\f\\\\ "\x7F\x7Fz',Str::addSlashes("A\n\r\t\v\x1B\f\\ \"\177\x7Fz"));
+        $this->assertSame('A\n\r\t\v\e\f\\ \\"\x7F\x7Fz',Str::addSlashes("A\n\r\t\v\x1B\f\\ \"\177\x7Fz",'"'));
+        $this->assertSame('"',Str::addSlashes('"'));
+        $this->assertSame("'",Str::addSlashes("'"));
+        $this->assertSame('\x27',Str::addSlashes("'","'"));
+    }
+
+    function testInterpretSlashes() {
+        $this->assertSame("A\n\r\t\v\x1B\f\\ \"\177\x7Fz",Str::interpretSlashes('A\n\r\t\v\e\f\\\\ "\177\x7Fz'));
+        $this->assertSame('Q\\',Str::interpretSlashes('\\Q\\'),"Q is not an escape sequence, print it literally");
+    }
+
     function testExport() {
         $this->assertSame('"A\n\r\t\v\e\f\\\\ \$\xFFz"', Str::export("A\n\r\t\v\x1B\f\\ \$\xffz"));
+        $this->assertSame('"p\x03d"',Str::export("\x70\x03\x64"));
+        $this->assertSame('"\x1E\x02"',Str::export("\x1E\x02"));
+        $this->assertSame('"\xE1\xB8\x82"',Str::export("\xE1\xB8\x82"));
+        $this->assertSame('"\x07"',Str::export("\x07"));
+        $this->assertSame('"7"',Str::export("7"));
+        $this->assertSame('"\x00\x03"',Str::export("\x00\x03"));
+        $this->assertSame('"\x00"',Str::export("\00"));
+        $this->assertSame('"\x005"',Str::export(hex2bin('0035')));
+    }
+
+    function testImport() {
+        $this->assertSame("A\n\r\t\v\x1B\f\\ '\$\xFFz", Str::import('"A\n\r\t\v\e\f\\\\ \\\'\$\xFFz"'));
+        $this->assertSame('A\n\r\t\v\e\f\\ \'\$\xFFz', Str::import('\'A\n\r\t\v\e\f\\\\ \\\'\$\xFFz\''));
+        $this->assertSame("\x70\x03\x64",Str::import('"p\x03d"'));
+        $this->assertSame('p\x03d',Str::import('\'p\x03d\''));
+        $this->assertSame("\x1E\x02", Str::import('"\x1E\x02"'));
+        $this->assertSame("\xE1\xB8\x82", Str::import('"\xE1\xB8\x82"'));
+        $this->assertSame("\x07",Str::import('"\x07"'));
+        $this->assertSame("7",Str::import('"7"'));
+        $this->assertSame("\x00\x03",Str::import('"\0\x03"'));
+        $this->assertSame("\0",Str::import('"\0"'));
+        $this->assertSame("\00",Str::import('"\00"'));
+        $this->assertSame("\000",Str::import('"\000"'));
+    }
+/*
+FAIL CASE:
+46c78f24f7c359c51d866b916bb80d336d134384a629e8b41207402e3e541e69971998270fd5d5c7fea46740f571112700364fc92c159e9a4e34cd15ef2a8a2e35f7a2fdb593a8b1
+46c78f24f7c359c51d866b916bb80d336d134384a629e8b41207402e3e541e69971998270fd5d5c7fea46740f5711127064fc92c159e9a4e34cd15ef2a8a2e35f7a2fdb593a8b1
+
+ */
+
+    function testExportImport() {
+        for($i=0; $i<250; ++$i) {
+            $str = Bin::secureRandomBytes(Math::rand(1,250));
+            $exp = Str::export($str);
+            $imp = Str::import($exp);
+            //dump(bin2hex($str));
+            //dump($exp);
+            //dump($imp);
+            $this->assertEquals($str,$imp,$str);
+        }
     }
 
     function testIsBinary() {

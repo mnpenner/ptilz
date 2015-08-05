@@ -1,8 +1,10 @@
 <?php
 namespace Ptilz;
+use Ptilz\Exceptions\ArgumentFormatException;
 use Ptilz\Exceptions\ArgumentOutOfRangeException;
 use Ptilz\Exceptions\InvalidOperationException;
 use Ptilz\Exceptions\NotImplementedException;
+use Ptilz\Exceptions\UnreachableException;
 
 /**
  * String helper methods.
@@ -306,6 +308,28 @@ abstract class Str {
     public static function length($str, $encoding=null) {
         if($encoding === null) $encoding = mb_internal_encoding();
         return function_exists('mb_strlen') ? mb_strlen($str,$encoding) : preg_match_all('/./us', $str);
+    }
+
+    public static function substrLen($str, $start, $length=null, $encoding=null) {
+        if($encoding === null) $encoding = mb_internal_encoding();
+        if(function_exists('mb_substr')) {
+            return mb_substr($str, $start, $length, $encoding);
+        }
+        $patt = '/.{'.$start.'}(.';
+        if($length !== null) {
+            if($length < 0) {
+                $length += self::length($str, $encoding);
+                if($length < 0) {
+                    return false;
+                }
+            }
+            $patt .= '{,'.$length.'}';
+        } else {
+            $patt .= '*';
+        }
+        $patt .= ')/Aus';
+        preg_match($patt, $str, $matches);
+        return isset($matches[1]) ? $matches[1] : false;
     }
 
     public static function cEscapeStr($str) {
@@ -620,9 +644,12 @@ REGEX;
     /**
      * Adds backslashes before unprintable characters.
      *
+     * Does not escape quotes or backslashes unless added to the "add" string.
+     *
      * @param $str String to escape
      * @param string $add Additional characters to escape
      * @return mixed
+     * @see http://php.net/manual/en/language.types.string.php#language.types.string.syntax.double
      */
     public static function addSlashes($str, $add='\\') {
         $patt = '~[^\x20-\x7E]';
@@ -638,8 +665,7 @@ REGEX;
                 case "\f": return '\f'; // since PHP 5.2.5
                 case '$': return '\$';
                 case '"': return '\\"';
-                case "'": return "\\'";
-                case "\0": return '\0';
+                case "\0": return '\x00'; // can't export as \0 because if the next character is a digit 0-7, this will be misinterpreted!
                 case '\\': return '\\\\';
             }
             return '\\x' . strtoupper(bin2hex($m[0]));
@@ -667,8 +693,46 @@ REGEX;
         return '"'.self::addSlashes($str,'"\\$').'"';
     }
 
+    /**
+     * Interpret backslash escape sequences the way PHP does.
+     *
+     * @param string $str
+     * @return string
+     * @see http://php.net/manual/en/language.types.string.php#language.types.string.syntax.double
+     */
+    public static function interpretSlashes($str) {
+        return preg_replace_callback('#\\\\(x[0-9A-Fa-f]{1,2}|[0-7]{1,3}|.)#', function($m) {
+            switch($m[1]) {
+                case 'n': return "\n";
+                case 'r': return "\r";
+                case 't': return "\t";
+                case 'v': return "\v"; // since PHP 5.2.5
+                case 'e': return "\x1B"; // since PHP 5.4.4
+                case 'f': return "\f"; // since PHP 5.2.5
+            }
+            if($m[1][0] === 'x') {
+                return hex2bin(substr($m[1],1));
+            }
+            if($m[1][0] >= '0' && $m[1][0] <= '7') {
+                return chr(octdec($m[1]));
+            }
+            return $m[1];
+        }, $str);
+    }
+
     public static function import($str) {
-        throw new NotImplementedException();
+        if(strlen($str) < 2) {
+            throw new ArgumentFormatException('str',"String must be wrapped in quotes");
+        }
+        $end = $str[strlen($str)-1];
+        $inner = self::substrLen($str,1,-1);
+        if($str[0] === '"' && $end === '"') {
+            return self::interpretSlashes($inner);
+        }
+        if($str[0] === "'" && $end === "'") {
+            return self::replace(['\\\\'=>'\\','\\\''=>"'"],$inner);
+        }
+        throw new ArgumentFormatException('str',"String must be wrapped in single or double quotes");
     }
 
     /**

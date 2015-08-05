@@ -103,18 +103,22 @@ class StrTest extends PHPUnit_Framework_TestCase {
 
 
     function testAddSlashes() {
-        $this->assertSame('A\n\r\t\v\e\f\\\\ "\x7F\x7Fz',Str::addSlashes("A\n\r\t\v\x1B\f\\ \"\177\x7Fz"));
-        $this->assertSame('A\n\r\t\v\e\f\\ \\"\x7F\x7Fz',Str::addSlashes("A\n\r\t\v\x1B\f\\ \"\177\x7Fz",'"'));
-        $this->assertSame('"',Str::addSlashes('"'));
-        $this->assertSame("'",Str::addSlashes("'"));
-        $this->assertSame('\x27',Str::addSlashes("'","'"));
+        $this->assertSame('A\n\r\t\v\e\f\\\\ \\"\x7F\x7Fz',Str::addSlashes("A\n\r\t\v\x1B\f\\ \"\177\x7Fz"));
     }
 
-    function testInterpretSlashes() {
-        $this->assertSame("A\n\r\t\v\x1B\f\\ \"\177\x7Fz",Str::interpretSlashes('A\n\r\t\v\e\f\\\\ "\177\x7Fz'));
-        $this->assertSame('Q\\',Str::interpretSlashes('\\Q\\'),"Q is not an escape sequence, print it literally");
+    function testInterpretDoubleQuotedString() {
+        $this->assertEquals("A\n\r\t\v\x1B\f\\ \"\"\177\x7Fz",Str::interpretDoubleQuotedString('A\n\r\t\v\e\f\\\\ "\\"\177\x7Fz'));
+        $this->assertEquals('\Q\\',Str::interpretDoubleQuotedString('\Q\\'),"Q is not an escape sequence, print it literally");
     }
 
+    function testInterpretSingleQuotedString() {
+        $this->assertEquals('A\n\r\t\v\e\f\\ "\\"\'\'\177\x7Fz',Str::interpretSingleQuotedString('A\n\r\t\v\e\f\\\\ "\\"\'\\\'\177\x7Fz'));
+        $this->assertEquals('\Q\\',Str::interpretSingleQuotedString('\Q\\'));
+    }
+
+    /**
+     * @depends testAddSlashes
+     */
     function testExport() {
         $this->assertSame('"A\n\r\t\v\e\f\\\\ \$\xFFz"', Str::export("A\n\r\t\v\x1B\f\\ \$\xffz"));
         $this->assertSame('"p\x03d"',Str::export("\x70\x03\x64"));
@@ -127,9 +131,15 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('"\x005"',Str::export(hex2bin('0035')));
     }
 
+    /**
+     * @depends testInterpretDoubleQuotedString
+     * @depends testInterpretSingleQuotedString
+     */
     function testImport() {
-        $this->assertSame("A\n\r\t\v\x1B\f\\ '\$\xFFz", Str::import('"A\n\r\t\v\e\f\\\\ \\\'\$\xFFz"'));
+        $this->assertSame("A\n\r\t\v\x1B\f\\ \\'\$\xFFz", Str::import('"A\n\r\t\v\e\f\\\\ \\\'\$\xFFz"'));
         $this->assertSame('A\n\r\t\v\e\f\\ \'\$\xFFz', Str::import('\'A\n\r\t\v\e\f\\\\ \\\'\$\xFFz\''));
+        $this->assertSame('\Q',Str::import('"\\Q"'));
+        $this->assertSame('\Q',Str::import('\'\\Q\''));
         $this->assertSame("\x70\x03\x64",Str::import('"p\x03d"'));
         $this->assertSame('p\x03d',Str::import('\'p\x03d\''));
         $this->assertSame("\x1E\x02", Str::import('"\x1E\x02"'));
@@ -148,6 +158,10 @@ FAIL CASE:
 
  */
 
+    /**
+     * @depends testExport
+     * @depends testImport
+     */
     function testExportImport() {
         for($i=0; $i<250; ++$i) {
             $str = Bin::secureRandomBytes(Math::rand(1,250));

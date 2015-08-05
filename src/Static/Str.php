@@ -586,7 +586,7 @@ REGEX;
 //            var_dump($m);
             if(array_key_exists('fmt',$m)) {
                 switch($m['fmt']) {
-                    case 'T':
+                    case 'T': // todo: change to lowercase 't'
                         return V::getType($val);
                     case 'i':
                         if(!is_int($val)) $val = intval($val);
@@ -595,18 +595,18 @@ REGEX;
                         }
                         break;
                     case 'f':
-                    case 'F':
+                    case 'F': // todo: remove capital 'F'
                         if(!is_float($val)) $val = floatval($val);
                         if(array_key_exists('opt',$m)) {
                             return sprintf('%' . $m['opt'] . $m['fmt'], $val);
                         }
                         break;
-                    case 'V':
+                    case 'V': // todo: change to 'S' (for "Short" or "String")
                         return V::toString($val);
                     case 's':
                         if(!is_string($val)) $val = strval($val);
                         break;
-                    case 't':
+                    case 't': // todo: change to 'e' for export
                         return V::export($val);
                     case 'n':
                         if(array_key_exists('dec',$m)) {
@@ -624,6 +624,7 @@ REGEX;
                         return decoct($val);
                     case 'c':
                         return chr($val);
+                        // todo: add 'd' for ord()
                     case 'x':
                     case 'X':
                         if(is_int($val)) $hex = dechex($val);

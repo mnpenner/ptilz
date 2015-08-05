@@ -8,6 +8,8 @@ class VarTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('[1,2,3]',V::toString([1,2,3]));
         $this->assertSame('{a:1,2:"b"}',V::toString(['a'=>1,2=>'b']));
         $this->assertSame('b16,077F', V::toString("\x07\x7F"));
+        $this->assertSame('_Debuggable{x:1,y:"a"}', V::toString(new _Debuggable));
+        // todo: add some more tests
     }
 
     function testIsTruthy() {
@@ -43,4 +45,14 @@ class VarTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(V::isFalsey(0));
         $this->assertTrue(V::isFalsey(null));
     }
+}
+
+class _Debuggable {
+    function __debugInfo() {
+        return [
+            'x' => 1,
+            'y' => 'a',
+        ];
+    }
+
 }

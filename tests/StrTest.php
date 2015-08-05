@@ -86,7 +86,7 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('3.14000', Str::format('{:f.5}', 3.14));
         $this->assertSame('00003', Str::format('{:i05}', 3.14));
         $this->assertSame('1,235  1,234.560  1 234,56  1234.56', Str::format('{0:n}  {0:n3}  {0:n2, }  {0:n2.}', 1234.56));
-        $this->assertSame('17 410', Str::format('{:o} {:o}', 15, 264));
+        $this->assertSame('17 410', Str::format('{:o} {:o}', 15, 264), "octal");
         $this->assertSame('Az', Str::format('{:c}{:c}', 65, 122));
         $this->assertSame('Hello "world"', Str::format('{} {:V}', 'Hello', 'world'));
         $this->assertSame('b16,077F', Str::format('{}', "\x07\x7F"));

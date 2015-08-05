@@ -101,6 +101,8 @@ abstract class V {
     /**
      * Returns a short, legible representation of a variable.
      *
+     * The representation may be lossy; i.e. there may not be enough information to reconstruct the object.
+     *
      * @param mixed $var
      * @return string
      */
@@ -129,9 +131,21 @@ abstract class V {
             return '{'.implode(',',$out).'}';
         }
         if(is_null($var)) return 'null';
+        if(is_object($var)) {
+            $type = self::getType($var);
+            if(method_exists($var,'__debugInfo')) return $type . self::toString($var->__debugInfo());
+            if(method_exists($var,'__toString')) return $type . self::toString($var->__toString());
+            return $type;
+        }
         return self::getType($var);
     }
 
+    /**
+     * Export a variable. This returns syntactically valid PHP code.
+     *
+     * @param mixed $var
+     * @return string
+     */
     public static function export($var) {
         return is_string($var) ? Str::export($var) : var_export($var, true);
     }

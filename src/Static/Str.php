@@ -642,33 +642,54 @@ REGEX;
     }
 
     /**
-     * Adds backslashes before unprintable characters.
-     *
-     * Does not escape quotes or backslashes unless added to the "add" string.
+     * Escapes characters for use in a double-quoted string.
      *
      * @param $str String to escape
-     * @param string $add Additional characters to escape
-     * @return mixed
+     * @return string Escaped string
      * @see http://php.net/manual/en/language.types.string.php#language.types.string.syntax.double
      */
-    public static function addSlashes($str, $add='\\') {
-        $patt = '~[^\x20-\x7E]';
-        if($add !== '') $patt .= '|[' . preg_quote($add, '~') . ']';
-        $patt .= '~';
-        return preg_replace_callback($patt, function ($m) {
+    public static function addSlashes($str) {
+        return preg_replace_callback('#[^\x20-\x7E]|[\\\\"$]#', function ($m) {
             switch($m[0]) {
                 case "\n": return '\n';
                 case "\r": return '\r';
                 case "\t": return '\t';
-                case "\v": return '\v'; // since PHP 5.2.5
-                case "\x1B": return '\e'; // since PHP 5.4.4
-                case "\f": return '\f'; // since PHP 5.2.5
+                case "\x0B": return PHP_VERSION_ID >= 50205 ? '\v' : '\x0B';
+                case "\x1B": return PHP_VERSION_ID >= 50404 ? '\e' : '\x1B';
+                case "\x0C": return PHP_VERSION_ID >= 50205 ? '\f' : '\x0C';
                 case '$': return '\$';
                 case '"': return '\\"';
                 case "\0": return '\x00'; // can't export as \0 because if the next character is a digit 0-7, this will be misinterpreted!
                 case '\\': return '\\\\';
             }
             return '\\x' . strtoupper(bin2hex($m[0]));
+        }, $str);
+    }
+
+    /**
+     * Interpret backslash escape sequences the way PHP does inside a double-quoted string.
+     *
+     * @param string $str
+     * @return string
+     * @see http://php.net/manual/en/language.types.string.php#language.types.string.syntax.double
+     */
+    public static function interpretDoubleQuotedString($str) {
+        return preg_replace_callback('#\\\\([nrtvef\\\\$"]|[0-7]{1,3}|x[0-9A-Fa-f]{1,2})#', function($m) {
+            switch($m[1]) {
+                case 'n': return "\n";
+                case 'r': return "\r";
+                case 't': return "\t";
+                case 'v': return "\x0B"; // since PHP 5.2.5
+                case 'e': return "\x1B"; // since PHP 5.4.4
+                case 'f': return "\x0C"; // since PHP 5.2.5
+                case '\\': return '\\';
+                case '$': return '$';
+                case '"': return '"';
+            }
+            if($m[1][0] === 'x') {
+                return hex2bin(substr($m[1],1));
+            }
+            return chr(octdec($m[1]));
         }, $str);
     }
 
@@ -690,34 +711,18 @@ REGEX;
      * @return string
      */
     public static function export($str) {
-        return '"'.self::addSlashes($str,'"\\$').'"';
+        return '"'.self::addSlashes($str).'"';
     }
 
     /**
-     * Interpret backslash escape sequences the way PHP does.
+     * Interpret backslash escape sequences the way PHP does inside a single-quoted string.
      *
      * @param string $str
      * @return string
-     * @see http://php.net/manual/en/language.types.string.php#language.types.string.syntax.double
+     * @see http://php.net/manual/en/language.types.string.php#language.types.string.syntax.single
      */
-    public static function interpretSlashes($str) {
-        return preg_replace_callback('#\\\\(x[0-9A-Fa-f]{1,2}|[0-7]{1,3}|.)#', function($m) {
-            switch($m[1]) {
-                case 'n': return "\n";
-                case 'r': return "\r";
-                case 't': return "\t";
-                case 'v': return "\v"; // since PHP 5.2.5
-                case 'e': return "\x1B"; // since PHP 5.4.4
-                case 'f': return "\f"; // since PHP 5.2.5
-            }
-            if($m[1][0] === 'x') {
-                return hex2bin(substr($m[1],1));
-            }
-            if($m[1][0] >= '0' && $m[1][0] <= '7') {
-                return chr(octdec($m[1]));
-            }
-            return $m[1];
-        }, $str);
+    public static function interpretSingleQuotedString($str) {
+        return self::replace(['\\\\'=>'\\','\\\''=>"'"],$str);
     }
 
     public static function import($str) {
@@ -727,10 +732,10 @@ REGEX;
         $end = $str[strlen($str)-1];
         $inner = self::substrLen($str,1,-1);
         if($str[0] === '"' && $end === '"') {
-            return self::interpretSlashes($inner);
+            return self::interpretDoubleQuotedString($inner);
         }
         if($str[0] === "'" && $end === "'") {
-            return self::replace(['\\\\'=>'\\','\\\''=>"'"],$inner);
+            return self::interpretSingleQuotedString($inner);
         }
         throw new ArgumentFormatException('str',"String must be wrapped in single or double quotes");
     }

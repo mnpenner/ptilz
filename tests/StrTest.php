@@ -78,7 +78,7 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('adcb', Str::format('a{1}c{0}', 'b', 'd'));
         $this->assertSame('2 1 1 2', Str::format('{1} {} {0} {}', 1, 2));
 
-        $this->assertSame('a:string 0:integer 0.0:double []:array stdClass:stdClass null:NULL', Str::format('{0}:{0:t} {1}:{1:t} {2}:{2:t} {3}:{3:t} {4}:{4:t} {5}:{5:t}', 'a', 0, 0., [], new stdClass, null));
+        $this->assertSame('a:string 0:integer 0.:double []:array stdClass:stdClass null:NULL', Str::format('{0}:{0:t} {1}:{1:t} {2}:{2:t} {3}:{3:t} {4}:{4:t} {5}:{5:t}', 'a', 0, 0., [], new stdClass, null));
         $this->assertSame('#036CF0', Str::formatArgs('#{R:X2}{G:X2}{B:X2}', ['B' => 0xF0, 'G' => 0x6C, 'R' => 0x03]));
         $this->assertSame('0x00f0397c', Str::format('0x{:x8}', "\xF0\x39\x7C"));
         $this->assertSame('01000001:01000010:01000011', Str::format('{:b:}', 'ABC'));

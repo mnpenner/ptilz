@@ -645,7 +645,7 @@ REGEX;
                         return $hex;
                 }
             }
-            if(!is_string($val) || Str::isBinary($val)) return V::toString($val);
+            if(!is_string($val)) return V::toString($val);
             return $val;
         }, $format);
     }

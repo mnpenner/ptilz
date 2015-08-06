@@ -117,7 +117,7 @@ abstract class V {
         if(is_int($var)) return (string)$var;
         if(is_float($var)) {
             $str = (string)$var;
-            if(strpos($str,'.')===false) $str .= '.0';
+            if(strpos($str,'.')===false) $str .= '.';
             return $str;
         }
         if(is_array($var)) {

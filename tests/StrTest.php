@@ -78,7 +78,7 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('adcb', Str::format('a{1}c{0}', 'b', 'd'));
         $this->assertSame('2 1 1 2', Str::format('{1} {} {0} {}', 1, 2));
 
-        $this->assertSame('a:string 0:integer 0.0:double []:array stdClass:stdClass null:NULL', Str::format('{0}:{0:T} {1}:{1:T} {2}:{2:T} {3}:{3:T} {4}:{4:T} {5}:{5:T}', 'a', 0, 0., [], new stdClass, null));
+        $this->assertSame('a:string 0:integer 0.0:double []:array stdClass:stdClass null:NULL', Str::format('{0}:{0:t} {1}:{1:t} {2}:{2:t} {3}:{3:t} {4}:{4:t} {5}:{5:t}', 'a', 0, 0., [], new stdClass, null));
         $this->assertSame('#036CF0', Str::formatArgs('#{R:X2}{G:X2}{B:X2}', ['B' => 0xF0, 'G' => 0x6C, 'R' => 0x03]));
         $this->assertSame('0x00f0397c', Str::format('0x{:x8}', "\xF0\x39\x7C"));
         $this->assertSame('01000001:01000010:01000011', Str::format('{:b:}', 'ABC'));
@@ -87,9 +87,13 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('00003', Str::format('{:i05}', 3.14));
         $this->assertSame('1,235  1,234.560  1 234,56  1234.56', Str::format('{0:n}  {0:n3}  {0:n2, }  {0:n2.}', 1234.56));
         $this->assertSame('17 410', Str::format('{:o} {:o}', 15, 264), "octal");
-        $this->assertSame('Az', Str::format('{:c}{:c}', 65, 122));
-        $this->assertSame('Hello "world"', Str::format('{} {:V}', 'Hello', 'world'));
+        $this->assertSame('A-z', Str::format('{:c}-{:c}', 65, 122));
+        $this->assertSame('Hello "world"', Str::format('{} {:S}', 'Hello', 'world'));
         $this->assertSame('b16,077F', Str::format('{}', "\x07\x7F"));
+
+        $this->assertSame('xyz', Str::format('{:s}', new _toStringable));
+        $this->assertSame('3 3. "3"', Str::format('{:e} {:e} {:e}', 3, 3., '3'));
+        $this->assertSame('65-122', Str::format('{:d}-{:d}', 'A', 'z'));
     }
 
     function testLength() {
@@ -329,7 +333,7 @@ FAIL CASE:
             $min = (int)ceil($src_bits/ceil($alpha_bits));
             $max = (int)ceil($src_bits/floor($alpha_bits));
 
-            $msg = Str::format("Str::encode({:V}:{:V},{:V}) expect between {:n} and {:n}, got {:n}", $bin, $src_bits, $alpha, $min, $max, $outlen);
+            $msg = Str::format("Str::encode({:S}:{:S},{:S}) expect between {:n} and {:n}, got {:n}", $bin, $src_bits, $alpha, $min, $max, $outlen);
 
             $patt = '/['.preg_quote($alpha,'/').']{'.$min.','.$max.'}\z/A';
 
@@ -357,7 +361,7 @@ FAIL CASE:
             $b64 = base64_encode($bin);
             $enc = Str::encode($bin, Str::BASE64);
             $pad = str_pad($enc,(int)ceil($len/3)*4,'=',STR_PAD_RIGHT);
-            $this->assertSame($b64,$pad,Str::format("Base64 encode {:V}", $bin));
+            $this->assertSame($b64,$pad,Str::format("Base64 encode {:S}", $bin));
         }
 
         for($i=0; $i<50; ++$i) {
@@ -366,7 +370,7 @@ FAIL CASE:
             $b64 = base64_encode($bin);
             $enc = Str::encode($bin, Str::BASE64);
             $pad = str_pad($enc,(int)ceil($len/3)*4,'=',STR_PAD_RIGHT);
-            $this->assertSame($b64,$pad,Str::format("Base64 encode {:V}", $bin));
+            $this->assertSame($b64,$pad,Str::format("Base64 encode {:S}", $bin));
         }
     }
 
@@ -438,4 +442,11 @@ FAIL CASE:
         $this->assertSame(['a',' b ;; c ','d'],Str::smartSplit("a;;'' b ;; c '';;d",';;',"''"));
         $this->assertSame(['a','b'],Str::smartSplit(",a,, ,b,"));
     }
+}
+
+class _toStringable {
+    function __toString() {
+        return 'xyz';
+    }
+
 }

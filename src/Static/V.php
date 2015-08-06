@@ -147,6 +147,12 @@ abstract class V {
      * @return string
      */
     public static function export($var) {
-        return is_string($var) ? Str::export($var) : var_export($var, true);
+        if(is_string($var)) return Str::export($var);
+        $ret = var_export($var, true);
+        if(is_float($var) && strpos($ret,'.') === false) {
+            $ret .= '.';
+        }
+        return $ret;
+
     }
 }

@@ -33,11 +33,12 @@ if(!function_exists('value')) {
 }
 
 if(!defined('PHP_VERSION_ID')) {
-    $__version__ = explode('.', PHP_VERSION);
+    $_version_iF8dFt6W = explode('.', PHP_VERSION);
     /**
      * The current PHP version as an integer, useful for version comparisons (e.g., int(50207) from version "5.2.7-extra").
      */
-    define('PHP_VERSION_ID', ($__version__[0] * 10000 + $__version__[1] * 100 + $__version__[2]));
+    define('PHP_VERSION_ID', ($_version_iF8dFt6W[0] * 10000 + $_version_iF8dFt6W[1] * 100 + $_version_iF8dFt6W[2]));
+    unset($_version_iF8dFt6W);
 }
 
 if(!function_exists('intdiv')) {

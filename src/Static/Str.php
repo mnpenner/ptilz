@@ -568,7 +568,7 @@ abstract class Str {
                 (?:
                     :
                     (?:
-                        (?<fmt> [TVotsc] )
+                        (?<fmt> [TVotscSed] )
                         | (?<fmt> [Xx] ) (?<pad> \d+ )?
                         | (?<fmt> [b] ) (?<sep> [^}]* )
                         | (?<fmt> [fF] ) (?<opt> [^}]+ )?
@@ -586,7 +586,9 @@ REGEX;
 //            var_dump($m);
             if(array_key_exists('fmt',$m)) {
                 switch($m['fmt']) {
-                    case 'T': // todo: change to lowercase 't'
+                    case 'T':
+                        trigger_error('{:T} format option is deprecated; use {:t} instead',E_USER_DEPRECATED);
+                    case 't':
                         return V::getType($val);
                     case 'i':
                         if(!is_int($val)) $val = intval($val);
@@ -594,19 +596,24 @@ REGEX;
                             return sprintf('%' . $m['opt'] . 'd', $val);
                         }
                         break;
+                    case 'F':
+                        trigger_error('{:F} format option is deprecated; use {:f} instead',E_USER_DEPRECATED);
                     case 'f':
-                    case 'F': // todo: remove capital 'F'
                         if(!is_float($val)) $val = floatval($val);
                         if(array_key_exists('opt',$m)) {
                             return sprintf('%' . $m['opt'] . $m['fmt'], $val);
                         }
                         break;
-                    case 'V': // todo: change to 'S' (for "Short" or "String")
+                    case 'V':
+                        trigger_error('{:V} format option is deprecated; use {:S} instead',E_USER_DEPRECATED);
+                    case 'S':
                         return V::toString($val);
                     case 's':
                         if(!is_string($val)) $val = strval($val);
                         break;
-                    case 't': // todo: change to 'e' for export
+                    //case 't':
+                    //    trigger_error('{:t} format option is deprecated; use {:e} instead',E_USER_DEPRECATED);
+                    case 'e':
                         return V::export($val);
                     case 'n':
                         if(array_key_exists('dec',$m)) {
@@ -619,17 +626,18 @@ REGEX;
                     case 'b':
                         if(is_int($val)) return decbin($val);
                         if(is_string($val)) return self::binary($val,$m['sep']);
-                        throw new InvalidOperationException(Str::format("Cannot convert value of type {:T} to binary string", $val));
+                        throw new InvalidOperationException(Str::format("Cannot convert value of type {:t} to binary string", $val));
                     case 'o':
                         return decoct($val);
                     case 'c':
                         return chr($val);
-                        // todo: add 'd' for ord()
+                    case 'd':
+                        return ord($val);
                     case 'x':
                     case 'X':
                         if(is_int($val)) $hex = dechex($val);
                         elseif(is_string($val)) $hex = bin2hex($val);
-                        else throw new InvalidOperationException(Str::format("Cannot convert value of type {:T} to hexidecimal", $val));
+                        else throw new InvalidOperationException(Str::format("Cannot convert value of type {:t} to hexidecimal", $val));
                         if($m['fmt'] === 'X') $hex = strtoupper($hex);
                         if(array_key_exists('pad',$m)) {
                             $hex = str_pad($hex, (int)$m['pad'], '0', STR_PAD_LEFT);

@@ -82,14 +82,14 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('#036CF0', Str::formatArgs('#{R:X2}{G:X2}{B:X2}', ['B' => 0xF0, 'G' => 0x6C, 'R' => 0x03]));
         $this->assertSame('0x00f0397c', Str::format('0x{:x8}', "\xF0\x39\x7C"));
         $this->assertSame('01000001:01000010:01000011', Str::format('{:b:}', 'ABC'));
-        $this->assertSame('int:2 float:3.0', Str::format('int:{:i} float:{:f}', 2.9, 3));
+        $this->assertSame('int:2 float:3.', Str::format('int:{:i} float:{:f}', 2.9, 3));
         $this->assertSame('3.14000', Str::format('{:f.5}', 3.14));
         $this->assertSame('00003', Str::format('{:i05}', 3.14));
         $this->assertSame('1,235  1,234.560  1 234,56  1234.56', Str::format('{0:n}  {0:n3}  {0:n2, }  {0:n2.}', 1234.56));
         $this->assertSame('17 410', Str::format('{:o} {:o}', 15, 264), "octal");
         $this->assertSame('A-z', Str::format('{:c}-{:c}', 65, 122));
         $this->assertSame('Hello "world"', Str::format('{} {:S}', 'Hello', 'world'));
-        $this->assertSame('b16,077F', Str::format('{}', "\x07\x7F"));
+        //$this->assertSame('b16,077F', Str::format('{}', "\x07\x7F"));
 
         $this->assertSame('xyz', Str::format('{:s}', new _toStringable));
         $this->assertSame('3 3. "3"', Str::format('{:e} {:e} {:e}', 3, 3., '3'));
@@ -175,6 +175,21 @@ FAIL CASE:
             //dump($exp);
             //dump($imp);
             $this->assertEquals($str,$imp,$str);
+        }
+    }
+
+    /**
+     * @depends testExport
+     */
+    function testExportEval() {
+        for($i=0; $i<250; ++$i) {
+            $str = Bin::secureRandomBytes(Math::rand(1,250));
+            $exp = Str::export($str);
+            $imp = eval("return $exp;");
+            //dump(bin2hex($str));
+            //dump($exp);
+            //dump($imp);
+            $this->assertEquals($str,$imp,"Raw string: $str   Exported string: $exp");
         }
     }
 

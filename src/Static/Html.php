@@ -29,11 +29,11 @@ class Html {
     }
 
     private static function escAttrName($attrVal) {
-        return htmlspecialchars($attrVal, ENT_QUOTES|ENT_HTML5|ENT_DISALLOWED);
+        return htmlspecialchars($attrVal, ENT_QUOTES|ENT_HTML5|ENT_DISALLOWED|ENT_SUBSTITUTE);
     }
 
     private static function escAttrVal($attrVal) {
-        return htmlspecialchars($attrVal, ENT_COMPAT|ENT_HTML5|ENT_DISALLOWED);
+        return htmlspecialchars($attrVal, ENT_COMPAT|ENT_HTML5|ENT_DISALLOWED|ENT_SUBSTITUTE);
     }
 
     /**

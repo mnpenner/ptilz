@@ -117,6 +117,17 @@ class MathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(512,Math::nextPow2(512));
         $this->assertSame(1024,Math::nextPow2(513));
         $this->assertSame(2147483648,Math::nextPow2(2140000000));
-        //$this->assertSame(4294967296,Math::nextPow2(4290000000));
+        if(PHP_INT_SIZE >= 8) $this->assertSame(4294967296,Math::nextPow2(4290000000));
+    }
+
+    function testDivQR() {
+        $this->assertSame([2,1],Math::divQR(5,2));
+        $this->assertSame([3,0],Math::divQR(6,2));
+        $this->assertSame([6,0],Math::divQR(6,1));
+        $this->assertSame([2,0],Math::divQR(6,3));
+        $this->assertSame([1,2],Math::divQR(6,4));
+        $this->assertSame([-7,0],Math::divQR(7,-1));
+        $this->assertSame([-3,1],Math::divQR(7,-2));
+        $this->assertSame([-3,-1],Math::divQR(-7,2));
     }
 }

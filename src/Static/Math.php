@@ -158,9 +158,9 @@ abstract class Math {
     /**
      * Rounds a float to the nearest step.
      *
-     * @param float $val
-     * @param int $step
-     * @param int $mode
+     * @param float $val Value to round
+     * @param int|float $step Round to the nearest multiple of this
+     * @param int $mode PHP_ROUND_HALF_UP, PHP_ROUND_HALF_DOWN, PHP_ROUND_HALF_EVEN or PHP_ROUND_HALF_ODD
      * @return float
      */
     public static function round($val, $step = 1, $mode = PHP_ROUND_HALF_UP) {
@@ -181,7 +181,29 @@ abstract class Math {
         $v |= $v >> 4;
         $v |= $v >> 8;
         $v |= $v >> 16;
-        //$v |= $v >> 32;
+        if(PHP_INT_SIZE >= 8) $v |= $v >> 32;
         return $v + 1;
+    }
+
+
+    /**
+     * Divide numbers and get quotient and remainder
+     *
+     * @param int|\GMP $n
+     * @param int|\GMP $d
+     * @return array
+     */
+    public static function divQR($n, $d) {
+        if($d == 0) {
+            trigger_error("Division by zero", E_USER_WARNING);
+            return [false,false]; // is it better to return just false?
+        }
+        if(function_exists('gmp_div_qr')) {
+            return array_map('gmp_intval',gmp_div_qr($n,$d));
+        }
+        return [
+            (int)($n/$d),
+            $n % $d
+        ];
     }
 }

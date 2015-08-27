@@ -342,4 +342,8 @@ class File {
             throw new InvalidOperationException("Failed to read line");
         }
     }
+
+    // TODO:
+    // add this: https://www.npmjs.com/package/sanitize-filename
+    // and this: http://stackoverflow.com/a/1078898/65387
 }

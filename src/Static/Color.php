@@ -156,9 +156,9 @@ class Color {
     /**
      * Convert from HUSL colorspace to RGB.
      *
-     * @param float $h Hue [0-1]
-     * @param float $s Saturation [0-1]
-     * @param float $l Lightness [0-1]
+     * @param float $h Hue [0-360]
+     * @param float $s Saturation [0-100]
+     * @param float $l Lightness [0-100]
      * @return array [R,G,B] in [0-1]
      * @see http://www.husl-colors.org/
      */

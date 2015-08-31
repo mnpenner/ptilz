@@ -166,6 +166,34 @@ class Color {
         return self::conv_lch_rgb(self::conv_husl_lch([$h, $s, $l]));
     }
 
+    public static function huslToRgb255($args) {
+        return array_map(function ($x) {
+            return self::floatToInt($x);
+        }, self::huslToRgb(...$args));
+    }
+
+    /**
+     * Stretches a float value in [0-1] to [0-$max]
+     *
+     * @param float $val
+     * @param int|float $max
+     * @return int
+     */
+    public static function floatToInt($val, $max = 255) {
+        return (int)Math::clamp(round($val * $max), 0, $max);
+    }
+
+    /**
+     * Stretches an int value in [0-$max] to [0-1].
+     *
+     * @param int $val
+     * @param int|float $max
+     * @return float|int
+     */
+    public static function intToFloat($val, $max = 255) {
+        return Math::clamp($val / $max, 0, 1);
+    }
+
     private static function conv_lch_rgb($tuple) {
         return self::conv_xyz_rgb(self::conv_luv_xyz(self::conv_lch_luv($tuple)));
     }
@@ -232,9 +260,36 @@ class Color {
      * @return float[] [H[0-360], S[0-100], L[0-100]]
      */
     public static function rgbToHusl($r, $g, $b) {
-        return self::conv_rgb_husl([$r,$g,$b]);
+        return self::conv_rgb_husl([$r, $g, $b]);
     }
 
+    public static function rgb255ToHusl($args) {
+        return array_map(function ($x) {
+            return self::intToFloat($x);
+        }, self::rgbToHusl(...$args));
+    }
+
+    /**
+     * @param int $val 0xRRGGBB
+     * @return int[] [R[0-255], G[0-255], B[0-255]]
+     */
+    public static function intToRgb($val) {
+        return [
+            ($val >> 16) & 0xFF,
+            ($val >> 8) & 0xFF,
+            $val & 0xFF
+        ];
+    }
+
+    /**
+     * @param int $r Red [0-255]
+     * @param int $g Green [0-255]
+     * @param int $b Blue [0-255]
+     * @return int 0xRRGGBB
+     */
+    public static function rgbToInt($r, $g, $b) {
+        return $r + ($g << 8) + ($b << 16);
+    }
 
     /**
      * Convert HUSLp to RGB.
@@ -342,7 +397,7 @@ class Color {
 
     private static function toLinear($c) {
         $a = 0.055;
-        if ($c > 0.04045) {
+        if($c > 0.04045) {
             return (($c + $a) / (1 + $a)) ** 2.4;
         } else {
             return $c / 12.92;
@@ -359,7 +414,7 @@ class Color {
 
     private static function conv_lch_husl($tuple) {
         list($L, $C, $H) = $tuple;
-        if ($L > 99.9999999 || $L < 0.00000001) {
+        if($L > 99.9999999 || $L < 0.00000001) {
             $S = 0;
         } else {
             $max = self::maxChromaForLH($L, $H);
@@ -370,13 +425,31 @@ class Color {
 
     private static function conv_huslp_lch($tuple) {
         list($H, $S, $L) = $tuple;
-        if ($L > 99.9999999 || $L < 0.00000001) {
+        if($L > 99.9999999 || $L < 0.00000001) {
             $C = 0;
         } else {
             $max = self::maxSafeChromaForL($L);
             $C = $max / 100 * $S;
         }
         return [$L, $C, $H];
+    }
+
+    /**
+     * @param int $r Red [0-255]
+     * @param int $g Green [0-255]
+     * @param int $b Blue [0-255]
+     * @return string "#RRGGBB"
+     */
+    public static function rgbToHex($r, $g, $b) {
+        return sprintf('#%02x%02x%02x', $r, $g, $b);
+    }
+
+    /**
+     * @param int $val 0xRRGGBB
+     * @return string "#RRGGBB"
+     */
+    public static function intToHex($val) {
+        return sprintf('#%06x', $val);
     }
 
     #endregion

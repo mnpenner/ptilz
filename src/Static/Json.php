@@ -2,6 +2,7 @@
 namespace Ptilz;
 
 use JsonSerializable;
+use Ptilz\Exceptions\FileNotFoundException;
 use Ptilz\Exceptions\InvalidOperationException;
 use Ptilz\Internal\RawJson;
 
@@ -88,5 +89,21 @@ abstract class Json {
             throw new InvalidOperationException(json_last_error_msg(), $error_code);
         }
         return $result;
+    }
+
+    /**
+     * Loads a JSON file and decodes it.
+     *
+     * @param string $filename File to load
+     * @param bool $assoc When TRUE, returned objects will be converted into associative arrays.
+     * @param int $depth User specified recursion depth.
+     * @param int $options Bitmask of JSON decode options.
+     * @return mixed
+     * @throws \Ptilz\Exceptions\FileNotFoundException
+     */
+    public static function loadFile($filename, $assoc = true, $depth = 512, $options = 0) {
+        $data = @file_get_contents($filename);
+        if($data === false) throw new FileNotFoundException($filename);
+        return static::decode($data, $assoc, $depth, $options);
     }
 }

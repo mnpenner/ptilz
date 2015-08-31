@@ -166,10 +166,10 @@ class Color {
         return self::conv_lch_rgb(self::conv_husl_lch([$h, $s, $l]));
     }
 
-    public static function huslToRgb255($args) {
+    public static function huslToRgb255($h, $s, $l) {
         return array_map(function ($x) {
             return self::floatToInt($x);
-        }, self::huslToRgb(...$args));
+        }, self::huslToRgb($h, $s, $l));
     }
 
     /**
@@ -263,10 +263,10 @@ class Color {
         return self::conv_rgb_husl([$r, $g, $b]);
     }
 
-    public static function rgb255ToHusl($args) {
+    public static function rgb255ToHusl($r, $g, $b) {
         return array_map(function ($x) {
             return self::intToFloat($x);
-        }, self::rgbToHusl(...$args));
+        }, self::rgbToHusl($r, $g, $b));
     }
 
     /**

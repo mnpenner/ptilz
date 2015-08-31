@@ -180,7 +180,7 @@ class Color {
 
     private static function conv_luv_xyz($tuple) {
         list($l, $u, $v) = $tuple;
-        if($l === 0) {
+        if($l < 0.00000001) {
             return [0, 0, 0];
         }
         $varU = $u / (13 * $l) + self::$refU;
@@ -211,7 +211,7 @@ class Color {
         if($c <= 0.0031308) {
             return 12.92 * $c;
         } else {
-            return 1.055 * pow($c, 1 / 2.4) - 0.055;
+            return 1.055 * ($c ** (1 / 2.4)) - 0.055;
         }
     }
 
@@ -222,5 +222,162 @@ class Color {
         }
         return $ret;
     }
+
+    /**
+     * Convert RGB to HUSL.
+     *
+     * @param float $r Red [0-1]
+     * @param float $g Green [0-1]
+     * @param float $b Blue [0-1]
+     * @return float[] [H[0-360], S[0-100], L[0-100]]
+     */
+    public static function rgbToHusl($r, $g, $b) {
+        return self::conv_rgb_husl([$r,$g,$b]);
+    }
+
+
+    /**
+     * Convert HUSLp to RGB.
+     *
+     * @param float $H Hue [0-360]
+     * @param float $S Saturation [0-100]
+     * @param float $L Lightness [0-100]
+     * @return float[] [R[0-1], G[0-1], B[0-1]]
+     */
+    public static function huslpToRgb($H, $S, $L) {
+        return self::conv_xyz_rgb(self::conv_luv_xyz(self::conv_lch_luv(self::conv_huslp_lch([$H, $S, $L]))));
+    }
+
+    private static function conv_rgb_xyz($tuple) {
+        list($R, $G, $B) = $tuple;
+        $rgbl = [self::toLinear($R), self::toLinear($G), self::toLinear($B)];
+        $X = self::dotProduct(self::$m_inv['X'], $rgbl);
+        $Y = self::dotProduct(self::$m_inv['Y'], $rgbl);
+        $Z = self::dotProduct(self::$m_inv['Z'], $rgbl);
+        return [$X, $Y, $Z];
+    }
+
+    private static function conv_xyz_luv($tuple) {
+        list($X, $Y, $Z) = $tuple;
+
+        $L = self::Y_to_L($Y);
+
+        if($L < 0.00000001) {
+            return [0, 0, 0];
+        }
+
+        $W = $X + (15 * $Y) + (3 * $Z);
+        $varU = (4 * $X) / $W;
+        $varV = (9 * $Y) / $W;
+
+        $U = 13 * $L * ($varU - self::$refU);
+        $V = 13 * $L * ($varV - self::$refV);
+        return [$L, $U, $V];
+    }
+
+    private static function Y_to_L($Y) {
+        if($Y <= self::$epsilon) {
+            return ($Y / self::$refY) * self::$kappa;
+        } else {
+            return 116 * (($Y / self::$refY) ** (1 / 3)) - 16;
+        }
+    }
+
+    private static function conv_luv_lch($tuple) {
+        list($L, $U, $V) = $tuple;
+        $C = sqrt($U ** 2 + $V ** 2);
+        if($C < 0.00000001) {
+            $H = 0;
+        } else {
+            $Hrad = atan2($V, $U);
+            $H = $Hrad * 360 / 2 / M_PI;
+            if($H < 0) {
+                $H = 360 + $H;
+            }
+        }
+        return [$L, $C, $H];
+    }
+
+    /**
+     * Convert RGB to HUSL.
+     *
+     * @param float $r Red [0-1]
+     * @param float $g Green [0-1]
+     * @param float $b Blue [0-1]
+     * @return float[] [H[0-360], S[0-100], L[0-100]]
+     */
+    public static function rgbToHuslp($r, $g, $b) {
+        return self::conv_lch_huslp(self::conv_luv_lch(self::conv_xyz_luv(self::conv_rgb_xyz([$r, $g, $b]))));
+    }
+
+    private static function conv_lch_huslp($tuple) {
+        list($L, $C, $H) = $tuple;
+        if($L > 99.9999999 || $L < 0.00000001) {
+            $S = 0;
+        } else {
+            $max = self::maxSafeChromaForL($L);
+            $S = $C / $max * 100;
+        }
+        return [$H, $S, $L];
+    }
+
+    private static function maxSafeChromaForL($L) {
+        $lengths = [];
+        $ref = self::getBounds($L);
+        for($j = 0, $len1 = count($ref); $j < $len1; ++$j) {
+            list($m1, $b1) = $ref[$j];
+            $x = self::intersectLineLine([$m1, $b1], [-1 / $m1, 0]);
+            $lengths[] = self::distanceFromPole([$x, $b1 + $x * $m1]);
+        }
+        return min($lengths);
+    }
+
+    private static function intersectLineLine($line1, $line2) {
+        return ($line1[1] - $line2[1]) / ($line2[0] - $line1[0]);
+    }
+
+    private static function distanceFromPole($point) {
+        return sqrt($point[0] ** 2 + $point[1] ** 2);
+    }
+
+    private static function toLinear($c) {
+        $a = 0.055;
+        if ($c > 0.04045) {
+            return (($c + $a) / (1 + $a)) ** 2.4;
+        } else {
+            return $c / 12.92;
+        }
+    }
+
+    private static function conv_rgb_husl($tuple) {
+        return self::conv_lch_husl(self::conv_rgb_lch($tuple));
+    }
+
+    private static function conv_rgb_lch($tuple) {
+        return self::conv_luv_lch(self::conv_xyz_luv(self::conv_rgb_xyz($tuple)));
+    }
+
+    private static function conv_lch_husl($tuple) {
+        list($L, $C, $H) = $tuple;
+        if ($L > 99.9999999 || $L < 0.00000001) {
+            $S = 0;
+        } else {
+            $max = self::maxChromaForLH($L, $H);
+            $S = $C / $max * 100;
+        }
+        return [$H, $S, $L];
+    }
+
+    private static function conv_huslp_lch($tuple) {
+        list($H, $S, $L) = $tuple;
+        if ($L > 99.9999999 || $L < 0.00000001) {
+            $C = 0;
+        } else {
+            $max = self::maxSafeChromaForL($L);
+            $C = $max / 100 * $S;
+        }
+        return [$L, $C, $H];
+    }
+
     #endregion
 }

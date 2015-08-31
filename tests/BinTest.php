@@ -22,7 +22,9 @@ class BinTest extends PHPUnit_Framework_TestCase {
         }
 
         $this->assertEquals('HELO', Bin::unpack('str[4]', "HELO"));
-        $this->assertEquals(['11170778902352744348', '11170778902352744348'], Bin::unpack(['-uint64', '+uint64'], "\x9C\xCF\x29\xF3\x39\x94\x06\x9B\x9B\x06\x94\x39\xF3\x29\xCF\x9C"));
+        if(PHP_INT_SIZE >= 8) {
+            $this->assertEquals(['11170778902352744348', '11170778902352744348'], Bin::unpack(['-uint64', '+uint64'], "\x9C\xCF\x29\xF3\x39\x94\x06\x9B\x9B\x06\x94\x39\xF3\x29\xCF\x9C"));
+        }
 
         $this->assertEquals([1,2,3], Bin::unpack('byte{3}', "\x01\x02\x03"));
         $this->assertEquals([
@@ -83,11 +85,13 @@ class BinTest extends PHPUnit_Framework_TestCase {
             'test2.txt','','a 2nd test file'
         ]), "Repeat and flatten");
 
-        $this->assertSame("\x9C\xCF\x29\xF3\x39\x94\x06\x9B", Bin::pack('-uint64', '11170778902352744348'), "MS-FSSHTTPB request signature");
-        $this->assertSame("\x9B\x06\x94\x39\xF3\x29\xCF\x9C", Bin::pack('+uint64', '11170778902352744348'), "Big endian unsigned int64");
-        $this->assertSame("\xBC\x0A\x00\x00\x00\x00\x00\x00", Bin::pack('-uint64', 0xABC));
-        $this->assertSame("\x00\x00\x00\x00\x00\x00\x0A\xBC", Bin::pack('+uint64', 0xABC));
-        $this->assertSame("\xCA\xFE\xBA\xBE\xDE\xAD\xBE\xEF", Bin::pack(['-uint32', '+uint32'], ['3199925962', '3735928559']));
+        if(PHP_INT_SIZE >= 8) {
+            $this->assertSame("\x9C\xCF\x29\xF3\x39\x94\x06\x9B", Bin::pack('-uint64', '11170778902352744348'), "MS-FSSHTTPB request signature");
+            $this->assertSame("\x9B\x06\x94\x39\xF3\x29\xCF\x9C", Bin::pack('+uint64', '11170778902352744348'), "Big endian unsigned int64");
+            $this->assertSame("\xBC\x0A\x00\x00\x00\x00\x00\x00", Bin::pack('-uint64', 0xABC));
+            $this->assertSame("\x00\x00\x00\x00\x00\x00\x0A\xBC", Bin::pack('+uint64', 0xABC));
+            $this->assertSame("\xCA\xFE\xBA\xBE\xDE\xAD\xBE\xEF", Bin::pack(['-uint32', '+uint32'], ['3199925962', '3735928559']));
+        }
     }
 
     function testLength() {

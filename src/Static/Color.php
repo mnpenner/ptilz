@@ -121,9 +121,9 @@ class Color {
         'B' => [0.055630079696993609, -0.20397695888897657, 1.0569715142428786]
     ];
 
-    private static $refX = 0.95045592705167173;
+    //private static $refX = 0.95045592705167173;
     private static $refY = 1.0;
-    private static $refZ = 1.0890577507598784;
+    //private static $refZ = 1.0890577507598784;
     private static $refU = 0.19783000664283681;
     private static $refV = 0.468319994938791;
 

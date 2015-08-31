@@ -1,4 +1,5 @@
 <?php
+use Ptilz\IJavaScriptSerializable;
 use Ptilz\Json;
 
 class JsonTest extends PHPUnit_Framework_TestCase {
@@ -23,6 +24,7 @@ class JsonTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('"\u00c8"', Json::encode(chr(200), JSON_FORCE_UTF8), "JSON_FORCE_UTF8");
         $this->assertSame('"È"', Json::encode(chr(200), JSON_FORCE_UTF8 | JSON_UNESCAPED_UNICODE), "JSON_FORCE_UTF8 | JSON_UNESCAPED_UNICODE");
         $this->assertSame('"\\/<\\/script>\\/"', Json::encode("/</script>/", 0), 'No options');
+        $this->assertSame('new Dog("Bella", "bone")', Json::encode(new Dog('Bella', 'bone')), "IJavaScriptSerializable");
     }
 
     function testEncodeException() {
@@ -58,5 +60,19 @@ class Person implements JsonSerializable {
             'name' => $this->name,
             'gender' => $this->gender,
         ];
+    }
+}
+
+class Dog implements IJavaScriptSerializable {
+    protected $name;
+    protected $favToy;
+
+    function __construct($name, $favToy) {
+        $this->name = $name;
+        $this->favToy = $favToy;
+    }
+
+    function jsSerialize($options) {
+        return 'new Dog('.json_encode($this->name, $options).', '.json_encode($this->favToy, $options).')';
     }
 }

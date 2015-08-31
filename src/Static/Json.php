@@ -32,8 +32,8 @@ abstract class Json {
             }
         }
         if(is_object($var)) {
-            if($var instanceof RawJson) {
-                return (string)$var;
+            if($var instanceof IJavaScriptSerializable) {
+                return $var->jsSerialize($options);
             }
             if($var instanceof JsonSerializable) {
                 return self::encode($var->jsonSerialize(), $options);

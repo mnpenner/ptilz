@@ -4,6 +4,12 @@ use Ptilz\Math;
 
 class ColorTest extends PHPUnit_Framework_TestCase {
 
+    static $huslTests;
+
+    static function setUpBeforeClass() {
+        self::$huslTests = \Ptilz\Json::loadFile(__DIR__ . '/husl-rev4.json');
+    }
+
     function testRgbToHsl() {
         $this->assertSame([0., 0., 0.], Color::rgbToHsl(0, 0, 0));
         $this->assertSame([0., 0., 1.], Color::rgbToHsl(255, 255, 255));
@@ -461,11 +467,30 @@ class ColorTest extends PHPUnit_Framework_TestCase {
         }
     }
 
-    function testHuslToRgb() {
-        $tests = \Ptilz\Json::loadFile(__DIR__ . '/husl-rev4.json');
 
-        foreach($tests as $hex => $colorspaces) {
+
+    function testHuslToRgb() {
+        foreach(self::$huslTests as $hex => $colorspaces) {
             $this->assertEquals($colorspaces['rgb'], Color::huslToRgb(...$colorspaces['husl']), $hex);
+        }
+    }
+
+
+    function testRgbToHusl() {
+        foreach(self::$huslTests as $hex => $colorspaces) {
+            $this->assertEquals($colorspaces['husl'], Color::rgbToHusl(...$colorspaces['rgb']), $hex);
+        }
+    }
+
+    function testHuslpToRgb() {
+        foreach(self::$huslTests as $hex => $colorspaces) {
+            $this->assertEquals($colorspaces['rgb'], Color::huslpToRgb(...$colorspaces['huslp']), $hex);
+        }
+    }
+
+    function testRgbToHuslp() {
+        foreach(self::$huslTests as $hex => $colorspaces) {
+            $this->assertEquals($colorspaces['huslp'], Color::rgbToHuslp(...$colorspaces['rgb']), $hex);
         }
     }
 }

@@ -29,6 +29,15 @@ class Iter {
         return is_array($obj) || $obj instanceof Traversable;
     }
 
+    /**
+     * Checks if an object can be used with the count() function.
+     *
+     * @param mixed $obj
+     * @return bool
+     */
+    public static function isCountable($obj) {
+        return is_array($obj) || $obj instanceof \Countable;
+    }
 
     /**
      * Copy the iterator into an array

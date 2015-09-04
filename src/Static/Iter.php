@@ -15,7 +15,7 @@ class Iter {
      */
     public static function map($trav, callable $callback, $exclude_key=false) {
         foreach($trav as $k1 => $v1) {
-            yield $exclude_key ? $callback($v1) : $callback($v1, $k1);
+            yield $exclude_key ? call_user_func($callback, $v1) : call_user_func($callback, $v1, $k1);
         }
     }
 

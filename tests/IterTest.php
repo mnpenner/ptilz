@@ -43,4 +43,17 @@ class IterTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse(Iter::any(['what','does','the','fox','say'],'is_numeric'));
         $this->assertTrue(Iter::any(['yip','yiiiip','0xcafe'],'is_numeric'));
     }
+
+    function testCountable() {
+        $this->assertTrue(Iter::isCountable([]));
+        $this->assertTrue(Iter::isCountable(new _Countable));
+        $this->assertFalse(Iter::isCountable(5));
+        $this->assertFalse(Iter::isCountable('foo'));
+    }
+}
+
+class _Countable implements Countable {
+    public function count() {
+        return 1;
+    }
 }

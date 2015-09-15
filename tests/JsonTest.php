@@ -1,4 +1,5 @@
 <?php
+use Ptilz\Exceptions\InvalidOperationException;
 use Ptilz\IJavaScriptSerializable;
 use Ptilz\Json;
 
@@ -39,7 +40,7 @@ class JsonTest extends PHPUnit_Framework_TestCase {
     }
 
     function testDecodeException() {
-        $this->setExpectedException('Ptilz\Exceptions\InvalidOperationException', null, JSON_ERROR_SYNTAX);
+        $this->setExpectedException(InvalidOperationException::class, null, JSON_ERROR_SYNTAX);
         Json::decode("'str'"); // strings must be quoted with double-quotes in JSON
     }
 }

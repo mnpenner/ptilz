@@ -1,5 +1,6 @@
 <?php
 use Ptilz\BigMath;
+use Ptilz\Exceptions\ArgumentOutOfRangeException;
 use Ptilz\Math;
 
 class MathTest extends PHPUnit_Framework_TestCase {
@@ -129,5 +130,27 @@ class MathTest extends PHPUnit_Framework_TestCase {
         $this->assertSame([-7,0],Math::divQR(7,-1));
         $this->assertSame([-3,1],Math::divQR(7,-2));
         $this->assertSame([-3,-1],Math::divQR(-7,2));
+    }
+
+    function testMod() {
+        $this->assertSame(0,Math::mod(0,3));
+        $this->assertSame(1,Math::mod(1,3));
+        $this->assertSame(2,Math::mod(2,3));
+        $this->assertSame(0,Math::mod(3,3));
+        $this->assertSame(1,Math::mod(4,3));
+        $this->assertSame(2,Math::mod(-1,3));
+        $this->assertSame(1,Math::mod(-2,3));
+        $this->assertSame(0,Math::mod(-3,3));
+        $this->assertSame(2,Math::mod(-4,3));
+    }
+
+    function testMod2() {
+        $this->setExpectedException(ArgumentOutOfRangeException::class);
+        Math::mod(5,0);
+    }
+
+    function testMod3() {
+        $this->setExpectedException(ArgumentOutOfRangeException::class);
+        Math::mod(5,-1);
     }
 }

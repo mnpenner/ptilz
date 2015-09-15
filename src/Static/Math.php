@@ -206,4 +206,18 @@ abstract class Math {
             $n % $d
         ];
     }
+
+    /**
+     * Finds the remainder after division; a (mod) n. If the result is negative, wrap around.
+     *
+     * @param int $a Dividend
+     * @param int $n Divisor; must be positive
+     * @return int The remainder of the Euclidean division of a by n, constrained to [0,n).
+     * @throws \Exception
+     */
+    public static function mod($a, $n) {
+        if($n <= 0) throw new ArgumentOutOfRangeException('n','must be positive');
+        $m = $a % $n;
+        return $m < 0 ? $n + $m : $m;
+    }
 }

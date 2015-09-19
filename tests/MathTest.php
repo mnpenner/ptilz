@@ -80,10 +80,15 @@ class MathTest extends PHPUnit_Framework_TestCase {
     }
 
     function testRound() {
-        $this->assertSame(3.0,Math::round(2.6));
+        $this->assertSame(3,Math::round(2.6));
         $this->assertSame(2.5,Math::round(2.6,.5));
         $this->assertSame(2.5,Math::round(2.25,.5,PHP_ROUND_HALF_UP));
         $this->assertSame(2.0,Math::round(2.25,.5,PHP_ROUND_HALF_DOWN));
+        $this->assertSame(5,Math::round(4,2,PHP_ROUND_HALF_UP,1));
+        $this->assertSame(3,Math::round(4,2,PHP_ROUND_HALF_DOWN,1));
+        $this->assertSame(4.5,Math::round(4,2,PHP_ROUND_HALF_UP,.5));
+        $this->assertSame(4.5,Math::round(4,2,PHP_ROUND_HALF_DOWN,.5));
+        $this->assertSame(2.5,Math::round(3.5,2,PHP_ROUND_HALF_DOWN,.5));
     }
 
 

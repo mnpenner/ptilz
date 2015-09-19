@@ -161,10 +161,12 @@ abstract class Math {
      * @param float $val Value to round
      * @param int|float $step Round to the nearest multiple of this
      * @param int $mode PHP_ROUND_HALF_UP, PHP_ROUND_HALF_DOWN, PHP_ROUND_HALF_EVEN or PHP_ROUND_HALF_ODD
+     * @param int|float $offset Step offset
      * @return float
      */
-    public static function round($val, $step = 1, $mode = PHP_ROUND_HALF_UP) {
-        return round($val / $step, 0, $mode) * $step;
+    public static function round($val, $step = 1, $mode = PHP_ROUND_HALF_UP, $offset=0) {
+        $result = round(($val - $offset) / $step, 0, $mode) * $step + $offset;
+        return is_int($step) && is_int($offset) ? (int)$result : $result;
     }
 
     /**

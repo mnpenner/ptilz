@@ -11,6 +11,13 @@ define('JSON_FORCE_UTF8', 1073741824);
 /** Enable UNESCAPED_SLASHES but continue to escape </script>. Reduces output size slightly while maintaining compatibility inside <script> tags. */
 define('JSON_ESCAPE_SCRIPTS', 536870976);
 
+/**
+ * JSON and JavaScript encoder/decoder.
+ *
+ * Supports embedding JavaScript literals inside a JSON object via Json::raw.
+ *
+ * Json::encode and Json::decode throw exceptions instead of returning `false`.
+ */
 abstract class Json {
     /** All < and > are converted to \u003C and \u003E. Available since PHP 5.3.0. */
     const HEX_TAG = JSON_HEX_TAG;
@@ -53,7 +60,7 @@ abstract class Json {
     public static function encode($var, $options = 0) {
         $result = self::_encode($var, $options);
 
-        if(is_string($var) && Bin::hasFlag($options, self::ESCAPE_SCRIPTS)) {
+        if(Bin::hasFlag($options, self::ESCAPE_SCRIPTS)) {
             return str_replace('</script>', '<\/script>', $result);
         }
 
@@ -96,11 +103,10 @@ abstract class Json {
         } elseif(is_object($var)) {
             if($var instanceof IJavaScriptSerializable) {
                 $result .= $var->jsSerialize($options);
-            }
-            if($var instanceof JsonSerializable) {
+            } elseif($var instanceof JsonSerializable) {
                 $result .= self::_encode($var->jsonSerialize(), $options, $depth + 1);
             }
-        } else {
+        } else { // strings, ints and floats
             if(is_string($var) && Bin::hasFlag($options, self::FORCE_UTF8)) {
                 $var = Str::forceUtf8($var);
             }

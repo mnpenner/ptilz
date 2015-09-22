@@ -26,6 +26,10 @@ class JsonTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('"È"', Json::encode(chr(200), JSON_FORCE_UTF8 | JSON_UNESCAPED_UNICODE), "JSON_FORCE_UTF8 | JSON_UNESCAPED_UNICODE");
         $this->assertSame('"\\/<\\/script>\\/"', Json::encode("/</script>/", 0), 'No options');
         $this->assertSame('new Dog("Bella", "bone")', Json::encode(new Dog('Bella', 'bone')), "IJavaScriptSerializable");
+
+        $pretty = ['a'=>1,'b'=>[2,false,'c'=>[4,true]],null];
+        $this->assertSame(str_replace("\n",PHP_EOL,json_encode($pretty, JSON_PRETTY_PRINT)), Json::encode($pretty, JSON::PRETTY_PRINT), "PRETTY_PRINT");
+
     }
 
     function testEncodeException() {

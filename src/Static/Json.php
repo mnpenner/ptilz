@@ -6,15 +6,46 @@ use Ptilz\Exceptions\FileNotFoundException;
 use Ptilz\Exceptions\InvalidOperationException;
 use Ptilz\Internal\RawJson;
 
+/** Convert invalid UTF-8 byte sequences into valid UTF-8. For example, chr(200) will be converted to "\u00c8" (È) instead of throwing an error. */
 define('JSON_FORCE_UTF8', 1073741824);
+/** Enable UNESCAPED_SLASHES but continue to escape </script>. Reduces output size slightly while maintaining compatibility inside <script> tags. */
 define('JSON_ESCAPE_SCRIPTS', 536870976);
 
 abstract class Json {
+    /** All < and > are converted to \u003C and \u003E. Available since PHP 5.3.0. */
+    const HEX_TAG = JSON_HEX_TAG;
+    /** All &s are converted to \u0026. Available since PHP 5.3.0. */
+    const HEX_AMP = JSON_HEX_AMP;
+    /** All ' are converted to \u0027. Available since PHP 5.3.0. */
+    const HEX_APOS = JSON_HEX_APOS;
+    /** All " are converted to \u0022. Available since PHP 5.3.0. */
+    const HEX_QUOT = JSON_HEX_QUOT;
+    /** Outputs an object rather than an array when a non-associative array is used. Especially useful when the recipient of the output is expecting an object and the array is empty. Available since PHP 5.3.0. */
+    const FORCE_OBJECT = JSON_FORCE_OBJECT;
+    /** Encodes numeric strings as numbers. Available since PHP 5.3.3. */
+    const NUMERIC_CHECK = JSON_NUMERIC_CHECK;
+    /** Encodes large integers as their original string value. Available since PHP 5.4.0. */
+    const BIGINT_AS_STRING = JSON_BIGINT_AS_STRING;
+    /** Use whitespace in returned data to format it. Available since PHP 5.4.0. */
+    const PRETTY_PRINT = JSON_PRETTY_PRINT;
+    /** Don't escape /. Available since PHP 5.4.0. */
+    const UNESCAPED_SLASHES = JSON_UNESCAPED_SLASHES;
+    /** Encode multibyte Unicode characters literally (default is to escape as \uXXXX). Available since PHP 5.4.0. */
+    const UNESCAPED_UNICODE = JSON_UNESCAPED_UNICODE;
+    /** Substitute some unencodable values instead of failing. Available since PHP 5.5.0. */
+    const PARTIAL_OUTPUT_ON_ERROR = JSON_PARTIAL_OUTPUT_ON_ERROR;
+    /** Ensures that float values are always encoded as a float value. Available since PHP 5.6.6. */
+    const PRESERVE_ZERO_FRACTION = 1024;
+    /** Convert invalid UTF-8 byte sequences into valid UTF-8. For example, chr(200) will be converted to "\u00c8" (È) instead of throwing an error. */
+    const FORCE_UTF8 = JSON_FORCE_UTF8;
+    /** Enable UNESCAPED_SLASHES but continue to escape </script>. Reduces output size slightly while maintaining compatibility inside <script> tags. */
+    const ESCAPE_SCRIPTS = JSON_ESCAPE_SCRIPTS;
+
     /**
      * JSON-encodes a value. Escaping can be prevented on a sub-element via Json::literal.
      *
      * @param mixed $var The value being encoded. Can be any type except a resource.
-     * @param int $options Options passed to `json_encode`. Everything except `JSON_PRETTY_PRINT` should work. There is a new option JSON_FORCE_UTF8 which will convert invalid UTF-8 byte sequences into UTF-8; for example chr(200) will be converted to "\u00c8" (È) instead of erroring. JSON_ESCAPE_SCRIPTS will enable JSON_UNESCAPED_SLASHES but still escape </script> tags which makes it safe for outputting inside of a HTML <script> element.
+     * @param int $options Options passed to `json_encode`.
      * @throws InvalidOperationException
      * @return string
      * @see http://us3.php.net/manual/en/json.constants.php

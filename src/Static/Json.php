@@ -51,42 +51,69 @@ abstract class Json {
      * @see http://us3.php.net/manual/en/json.constants.php
      */
     public static function encode($var, $options = 0) {
+        $result = self::_encode($var, $options);
+
+        if(is_string($var) && Bin::hasFlag($options, self::ESCAPE_SCRIPTS)) {
+            return str_replace('</script>', '<\/script>', $result);
+        }
+
+        return $result;
+    }
+
+    private static function _encode($var, $options = 0, $depth = 0) {
+        $result = '';
+
+        $prettyPrint = Bin::hasFlag($options, self::PRETTY_PRINT);
+
+        if($depth && $prettyPrint) {
+            if($depth > 0) {
+                $result .= str_repeat('    ', $depth);
+            } else {
+                $depth = -$depth;
+            }
+        }
+
         if(is_array($var)) {
             if(Bin::hasFlag($options, JSON_FORCE_OBJECT) || Arr::isAssoc($var)) {
                 $bits = [];
                 foreach($var as $k => $v) {
-                    $bits[] = self::encode((string)$k, $options) . ':' . self::encode($v, $options);
+                    $bits[] = self::_encode((string)$k, $options, $depth + 1) . ($prettyPrint ? ': ' : ':') . self::_encode($v, $options, -($depth + 1));
                 }
-                return '{' . implode(',', $bits) . '}';
+                $result .= '{';
+                if($prettyPrint) $result .= PHP_EOL;
+                $result .= implode($prettyPrint ? ','.PHP_EOL : ',', $bits);
+                if($prettyPrint) $result .= PHP_EOL.str_repeat('    ', $depth);
+                $result .= '}';
             } else {
-                return '[' . implode(',', array_map(__METHOD__, $var)) . ']';
+                $result .= '[';
+                if($prettyPrint) $result .= PHP_EOL;
+                $result .= implode($prettyPrint ? ','.PHP_EOL : ',', array_map(function($x) use ($options, $depth) {
+                    return self::_encode($x, $options, $depth + 1);
+                }, $var));
+                if($prettyPrint) $result .= PHP_EOL.str_repeat('    ', $depth);
+                $result .= ']';
             }
-        }
-        if(is_object($var)) {
+        } elseif(is_object($var)) {
             if($var instanceof IJavaScriptSerializable) {
-                return $var->jsSerialize($options);
+                $result .= $var->jsSerialize($options);
             }
             if($var instanceof JsonSerializable) {
-                return self::encode($var->jsonSerialize(), $options);
+                $result .= self::_encode($var->jsonSerialize(), $options, $depth + 1);
             }
-        }
-
-        if(is_string($var) && Bin::hasFlag($options, JSON_FORCE_UTF8)) {
-            $var = Str::forceUtf8($var);
-        }
-
-        $result = json_encode($var, $options);
-        $error_code = json_last_error();
-        if($error_code !== JSON_ERROR_NONE) {
-            $message = json_last_error_msg();
-            if($error_code === JSON_ERROR_UTF8) {
-                $message .= " Consider using flag JSON_FORCE_UTF8.";
+        } else {
+            if(is_string($var) && Bin::hasFlag($options, self::FORCE_UTF8)) {
+                $var = Str::forceUtf8($var);
             }
-            throw new InvalidOperationException($message, $error_code);
-        }
 
-        if(is_string($var) && Bin::hasFlag($options, JSON_ESCAPE_SCRIPTS)) {
-            return str_replace('</script>', '<\/script>', $result);
+            $result .= json_encode($var, $options);
+            $error_code = json_last_error();
+            if($error_code !== JSON_ERROR_NONE) {
+                $message = json_last_error_msg();
+                if($error_code === JSON_ERROR_UTF8) {
+                    $message .= " Consider using flag JSON_FORCE_UTF8.";
+                }
+                throw new InvalidOperationException($message, $error_code);
+            }
         }
 
         return $result;

@@ -1524,9 +1524,18 @@ REGEX;
                     --$decimals;
                 }
             } elseif($u < $lastIndex && self::_wholeDigitCount(round($size)) > $digits) {
-                $size /= $thresh;
-                ++$u;
-                $decimals = $digits - 1;
+                $o1s = 10**$digits-1;
+                $o1 = $o1s * $thresh**$u;
+                $o2 = round($size/$thresh, $digits-1) * $thresh**($u+1);
+
+                if(abs($o1 - $bytes) < abs($o2 - $bytes)) {
+                    $decimals = 0;
+                    $size = $o1s;
+                } else {
+                    $size /= $thresh;
+                    ++$u;
+                    $decimals = $digits - 1;
+                }
             }
 
             $size = number_format($size, $decimals, null, '');

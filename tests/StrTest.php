@@ -461,57 +461,14 @@ FAIL CASE:
     /**
      * @dataProvider fileSizeTests
      */
-    public function testFileSize($size, $expected, $message='') {
-        $this->assertEquals($expected, Str::fileSize($size), $message);
+    public function testFileSize($size, $spec, $digits, $decimals, $trim, $expected, $message='') {
+        $this->assertEquals($expected, Str::fileSize($size, $spec, $digits, $decimals, $trim), $message);
     }
 
     public function fileSizeTests() {
         return [
-            [0, "0 B"],
-            [1, "1 B"],
-            [2, "2 B"],
-            [10, "10 B"],
-            [99, "99 B"],
-            [100, "100 B"],
-            [1000, "0.98 KB"],
-            [1023, "1.00 KB"],
-            [1024, "1.00 KB"],
-            [1025, "1.00 KB"],
-            [1029, "1.00 KB"],
-            [1030, "1.01 KB"],
-            [10240, "10.0 KB"],
-            [10239, "10.0 KB"],
-            [10241, "10.0 KB"],
-            [10229, "9.99 KB"],
-            [10230, "9.99 KB"],
-            [10234, "9.99 KB"],
-            [10235, "10.0 KB"],
-            [102400, "100 KB"],
-            [1024000, "0.98 MB"],
-            [1023999, "999 KB"], // 999 KB = 1022976 B which is off by 1023 B, 0.98 MB = 1027604.48 B (3605.48 B), 0.99 MB = 1038090.24 B (14091.24 B)
-            [1000000, "977 KB"],
-            [1024**2, "1.00 MB", "1024**2 bytes"],
-            [1024**3, "1.00 GB", "1024**3 bytes"],
-            [1024**4, "1.00 TB", "1024**4 bytes"],
-            [1024**5, "1.00 PB", "1024**5 bytes"],
-            [1024**6, "1.00 EB", "1024**6 bytes"],
-            [1024**7, "1.00 ZB", "1024**7 bytes"],
-            [1024**8, "1.00 YB", "1024**8 bytes"],
-            [1024**9, "1024 YB", "1024**9 bytes"],
-        ];
-    }
-
-    /**
-     * @dataProvider fileSizeTests2
-     */
-    public function testFileSize2($size, $spec, $digits, $decimals, $trim, $expected, $message='') {
-        $this->assertEquals($expected, Str::fileSize($size, $spec, $digits, $decimals, $trim), $message);
-    }
-
-    public function fileSizeTests2() {
-        return [
             [999, 'iec', 3, null, false, '999 B'],
-            [1000, 'iec', 3, null, false, '0.98 KiB'],
+            [1000, 'iec', 3, null, false, '1000 B'],
             [1024, 'iec', 3, null, false, '1.00 KiB'],
             [1024**2, 'iec', 3, null, false, '1.00 MiB'],
             [1024**3, 'iec', 3, null, false, '1.00 GiB'],
@@ -535,13 +492,13 @@ FAIL CASE:
             [1000**8, 'si', 3, null, false, '1.00 YB'],
             [1000**9, 'si', 3, null, false, '1000 YB'],
 
-            [1, 'jedec', 2, null, false, '1 B'],
-            [99, 'jedec', 2, null, false, '99 B'],
-            [100, 'jedec', 2, null, false, '0.1 KB'],
-            [972, 'jedec', 2, null, false, '0.9 KB'],
-            [973, 'jedec', 2, null, false, '1.0 KB'],
-            [999, 'jedec', 2, null, false, '1.0 KB'],
-            [1000, 'jedec', 2, null, false, '1.0 KB'],
+            [1, 'jedec', 2, null, false, '1 bytes'],
+            [99, 'jedec', 2, null, false, '99 bytes'],
+            [100, 'jedec', 2, null, false, '100 bytes'],
+            [972, 'jedec', 2, null, false, '972 bytes'],
+            [973, 'jedec', 2, null, false, '973 bytes'],
+            [999, 'jedec', 2, null, false, '999 bytes'],
+            [1000, 'jedec', 2, null, false, '1000 bytes'],
             [1024, 'jedec', 2, null, false, '1.0 KB'],
             [1075, 'jedec', 2, null, false, '1.0 KB'],
             [1076, 'jedec', 2, null, false, '1.1 KB'],
@@ -556,9 +513,11 @@ FAIL CASE:
             [10188, 'jedec', 2, null, false, '9.9 KB'],
             [10189, 'jedec', 2, null, false, '10 KB'],
 
-            [1, 'jedec', null, 1, false, '1 B'],
-            [999, 'jedec', null, 1, false, '999 B'],
-            [1000, 'jedec', null, 1, false, '1000 B'],
+
+            [1, 'jedec', null, 1, false, '1 bytes'],
+            [999, 'jedec', null, 1, false, '999 bytes'],
+            [1000, 'jedec', null, 1, false, '1000 bytes'],
+            [1023, 'jedec', null, 1, false, '1023 bytes'],
             [1024, 'jedec', null, 1, false, '1.0 KB'],
             [1024**2, 'jedec', null, 1, false, '1.0 MB'],
             [1024**3, 'jedec', null, 1, false, '1.0 GB'],
@@ -568,12 +527,41 @@ FAIL CASE:
             [1024**7, 'jedec', null, 1, false, '1.0 ZB'],
             [1024**8, 'jedec', null, 1, false, '1.0 YB'],
             [1024**9, 'jedec', null, 1, false, '1024.0 YB'],
-            [10188, 'jedec', null, 1, false, '9.9 KB'],
-            [10189, 'jedec', null, 1, false, '10.0 KB'],
+            [10188, 'jedec', null, 1, false, '9.9 KB', "9.94921875 KiB"],
+            [10189, 'jedec', null, 1, false, '10.0 KB', "9.9501953125 KiB"],
 
-            [1, 'jedec', null, 2, true, '1 B'],
-            [999, 'jedec', null, 2, true, '999 B'],
-            [1000, 'jedec', null, 2, true, '1000 B'],
+            [0, 'jedec', 3, null, false, "0 bytes"],
+            [1, 'jedec', 3, null, false, "1 bytes"],
+            [2, 'jedec', 3, null, false, "2 bytes"],
+            [10, 'jedec', 3, null, false, "10 bytes"],
+            [99, 'jedec', 3, null, false, "99 bytes"],
+            [100, 'jedec', 3, null, false, "100 bytes"],
+            [1000, 'jedec', 3, null, false, "1000 bytes"],
+            [1023, 'jedec', 3, null, false, "1023 bytes"],
+            [1024, 'jedec', 3, null, false, "1.00 KB"],
+            [1025, 'jedec', 3, null, false, "1.00 KB"],
+            [1029, 'jedec', 3, null, false, "1.00 KB"],
+            [1030, 'jedec', 3, null, false, "1.01 KB"],
+            [10240, 'jedec', 3, null, false, "10.0 KB"],
+            [10239, 'jedec', 3, null, false, "10.0 KB"],
+            [10241, 'jedec', 3, null, false, "10.0 KB"],
+            [10229, 'jedec', 3, null, false, "9.99 KB"],
+            [10230, 'jedec', 3, null, false, "9.99 KB"],
+            [10234, 'jedec', 3, null, false, "9.99 KB"],
+            [10235, 'jedec', 3, null, false, "10.0 KB"],
+            [102400, 'jedec', 3, null, false, "100 KB"],
+            [1000000, 'jedec', 3, null, false, "977 KB", "off by 448 B (0.045%)"], // Windows actually shows 976 KB! http://i.imgur.com/uHMof8f.png  i.e. Windows truncates
+            [1023999, 'jedec', 3, null, false, "999 KB", "off by 1023 B (0.10%)"], // 999 KB is off by 1023 B whereas 0.98 MB is off by 3605.48 bytes
+            [1024000, 'jedec', 3, null, false, "999 KB", "off by 1024 B (0.10%)"], // even though 1024000 is exactly 1000 KB, we're introducing a deliberate rounding error to fit the 3 digit limit
+            [1025290, 'jedec', 3, null, false, "999 KB", "off by 2314 B (0.23%)"], // 999 KB = 1,022,976 B (error = 2314 B); 0.98 MB = 1027604.48 B (2314.48 B) -- http://i.imgur.com/Cr1ZZKF.png
+            // 0.97 MB should never show because that's 993.28 KB, still within our 3 digit limit and 1000 KB is closer to 0.98 MB than 0.97 MB but actually closest to 999 KB
+            [1025291, 'jedec', 3, null, false, "0.98 MB", "off by 2313.48 B (0.23%)"], // 999 KB = 1,022,976 B (error = 2315 B); 0.98 MB = 1027604.48 B (2313.48 B)
+            [1027604, 'jedec', 3, null, false, "0.98 MB", "off by 0.48 B (~0%)"], // 999 KB = 1,022,976 B (error = 4628 B); 0.98 MB = 1027604.48 B (0.48 B) -- http://i.imgur.com/HlY3UsE.png
+            [1027605, 'jedec', 3, null, false, "0.98 MB", "off by 0.52 B (~0%)"], // Microsoft *still* rounds down to 0.97 even though 1027605 B is strictly greater than 0.98 MB http://i.imgur.com/vorddWc.png
+
+            [1, 'jedec', null, 2, true, '1 bytes'],
+            [999, 'jedec', null, 2, true, '999 bytes'],
+            [1000, 'jedec', null, 2, true, '1000 bytes'],
             [1024, 'jedec', null, 2, true, '1 KB'],
             [1024**2, 'jedec', null, 2, true, '1 MB'],
             [1024**3, 'jedec', null, 2, true, '1 GB'],
@@ -592,9 +580,9 @@ FAIL CASE:
             [10585374, 'jedec', null, 2, true, '10.09 MB'],
             [10585375, 'jedec', null, 2, true, '10.1 MB'],
 
-            [-1, 'jedec', null, 2, true, '-1 B'],
-            [-999, 'jedec', null, 2, true, '-999 B'],
-            [-1000, 'jedec', null, 2, true, '-1000 B'],
+            [-1, 'jedec', null, 2, true, '-1 bytes'],
+            [-999, 'jedec', null, 2, true, '-999 bytes'],
+            [-1000, 'jedec', null, 2, true, '-1000 bytes'],
             [-1024, 'jedec', null, 2, true, '-1 KB'],
             [-1024**2, 'jedec', null, 2, true, '-1 MB'],
             [-1024**3, 'jedec', null, 2, true, '-1 GB'],
@@ -627,11 +615,11 @@ FAIL CASE:
             [999999, 'si', null, 4, false, '999.9990 kB'],
             [999999, 'si', null, 4, true, '999.999 kB'],
 
-            [999, 'iec', 3, null, false, '999 B', "Should move up a unit to make it fit within 3 digit limit"],
-            [1000, 'iec', 3, null, false, '0.98 KiB'],
-            [1012, 'iec', 3, null, false, '0.99 KiB'],
-            [1018, 'iec', 3, null, false, '0.99 KiB'],
-            [1019, 'iec', 3, null, false, '1.00 KiB'],
+            [999, 'iec', 3, null, false, '999 B'],
+            [1000, 'iec', 3, null, false, '1000 B'],
+            [1012, 'iec', 3, null, false, '1012 B'],
+            [1018, 'iec', 3, null, false, '1018 B'],
+            [1019, 'iec', 3, null, false, '1019 B'],
             [1024, 'iec', 3, null, false, '1.00 KiB'],
         ];
     }

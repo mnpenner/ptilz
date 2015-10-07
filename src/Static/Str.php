@@ -1,5 +1,6 @@
 <?php
 namespace Ptilz;
+use Ptilz\Exceptions\ArgumentException;
 use Ptilz\Exceptions\ArgumentFormatException;
 use Ptilz\Exceptions\ArgumentOutOfRangeException;
 use Ptilz\Exceptions\InvalidOperationException;
@@ -1471,18 +1472,22 @@ REGEX;
     }
 
     /**
-     * Format a file size.
+     * Format a file size. Default behaviour is similar to Windows except with a smaller margin of error.
      *
-     * @param int $bytes Number of bytes
+     * @param int $bytes Size, in bytes
      * @param string $spec One of "iec", "si" or "jedec"
      * @param int $digits Total number of digits (before and after decimal place)
-     * @param int $decimals Number of digits after decimal place if $digits is null
-     * @param bool $trim
+     * @param int $decimals Number of digits after decimal place
+     * @param bool $trim Trim excess zeroes left over from rounding
      * @return string
      * @throws \Exception
      */
     public static function fileSize($bytes, $spec='jedec', $digits=3, $decimals=null, $trim=false) {
-        switch($spec) {
+        if($digits !== null && $decimals !== null) {
+            throw new \BadMethodCallException('Cannot set both $digits and $decimals');
+        }
+
+        switch(strtolower(trim($spec))) {
             case 'si':
                 $thresh = 1000;
                 $units = ['B','kB','MB','GB','TB','PB','EB','ZB','YB'];
@@ -1493,43 +1498,53 @@ REGEX;
                 break;
             case 'jedec':
                 $thresh = 1024;
-                $units = ['B','KB','MB','GB','TB','PB','EB','ZB','YB'];
+                $units = ['bytes','KB','MB','GB','TB','PB','EB','ZB','YB'];
                 break;
             default:
                 throw new \Exception("Unknown spec: $spec");
         }
 
-        $size = $bytes;
-        $last = count($units) - 1;
+        if(abs($bytes) < $thresh) {
+            return $bytes.' '.$units[0];
+        }
 
-        for($u=0; $u<$last && abs($size) >= $thresh; ++$u) {
+        $size = $bytes;
+        $lastIndex = count($units) - 1;
+
+        for($u=0; $u<$lastIndex && abs($size) >= $thresh; ++$u) {
             $size /= $thresh;
         }
 
         if($digits !== null) {
-            $wnl = self::_wholeDigits($size);
-
-            if($digits >= 2 && $wnl > $digits && $u < $last) {
+            $wd = self::_wholeDigits($size);
+            $decimals = max(0, $digits - $wd);
+            if(self::_doesRoundUp($size, $decimals)) {
+                if($decimals > 0) {
+                    --$decimals;
+                } elseif($u < $lastIndex) {
+                    $size /= $thresh;
+                    ++$u;
+                    $decimals = $digits - 1;
+                }
+            } elseif($u < $lastIndex && self::_wholeDigits($size) > $digits) {
                 $size /= $thresh;
                 ++$u;
-                $wnl = self::_wholeDigits($size);
+                $decimals = $digits - 1;
+            }
+            $size = number_format($size, $decimals, null, '');
+        } elseif($decimals !== null) {
+            if($u < $lastIndex && abs(round($size, $decimals)) >= $thresh) {
+                $size /= $thresh;
+                ++$u;
             }
 
-            $decimals = max(0, $digits - $wnl);
-
-            if($decimals && self::_roundsUp($size, $decimals)) {
-                --$decimals;
-            }
-        }
-
-        if($decimals !== null && $u > 0) {
             $size = number_format($size, $decimals, null, '');
         } else {
             $size = (string)$size;
         }
 
         if($trim) {
-            $size = self::trimTrailingZeroes($size);
+            $size = self::trimExcessZeroes($size);
         }
 
         return $size.' '.$units[$u];
@@ -1542,7 +1557,7 @@ REGEX;
      * @param  int $d
      * @return bool
      */
-    private static function _roundsUp($n, $d) {
+    private static function _doesRoundUp($n, $d) {
         return self::_wholeDigits(number_format($n, $d, null, '')) > self::_wholeDigits($n);
     }
 
@@ -1562,7 +1577,7 @@ REGEX;
      * @param string $nbr Number to format
      * @return string Number with trailing zeroes removed
      */
-    public static function trimTrailingZeroes($nbr) {
+    public static function trimExcessZeroes($nbr) {
         if(strpos($nbr,'.')!==false) $nbr = rtrim($nbr,'0');
         return rtrim($nbr,'.');
     }

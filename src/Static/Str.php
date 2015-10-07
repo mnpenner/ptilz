@@ -1469,4 +1469,101 @@ REGEX;
         }
         return $out;
     }
+
+    /**
+     * Format a file size.
+     *
+     * @param int $bytes Number of bytes
+     * @param string $spec One of "iec", "si" or "jedec"
+     * @param int $digits Total number of digits (before and after decimal place)
+     * @param int $decimals Number of digits after decimal place if $digits is null
+     * @param bool $trim
+     * @return string
+     * @throws \Exception
+     */
+    public static function fileSize($bytes, $spec='jedec', $digits=3, $decimals=null, $trim=false) {
+        switch($spec) {
+            case 'si':
+                $thresh = 1000;
+                $units = ['B','kB','MB','GB','TB','PB','EB','ZB','YB'];
+                break;
+            case 'iec':
+                $thresh = 1024;
+                $units = ['B','KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+                break;
+            case 'jedec':
+                $thresh = 1024;
+                $units = ['B','KB','MB','GB','TB','PB','EB','ZB','YB'];
+                break;
+            default:
+                throw new \Exception("Unknown spec: $spec");
+        }
+
+        $size = $bytes;
+        $last = count($units) - 1;
+
+        for($u=0; $u<$last && abs($size) >= $thresh; ++$u) {
+            $size /= $thresh;
+        }
+
+        if($digits !== null) {
+            $wnl = self::_wholeDigits($size);
+
+            if($digits >= 2 && $wnl > $digits && $u < $last) {
+                $size /= $thresh;
+                ++$u;
+                $wnl = self::_wholeDigits($size);
+            }
+
+            $decimals = max(0, $digits - $wnl);
+
+            if($decimals && self::_roundsUp($size, $decimals)) {
+                --$decimals;
+            }
+        }
+
+        if($decimals !== null && $u > 0) {
+            $size = number_format($size, $decimals, null, '');
+        } else {
+            $size = (string)$size;
+        }
+
+        if($trim) {
+            $size = self::trimTrailingZeroes($size);
+        }
+
+        return $size.' '.$units[$u];
+    }
+
+    /**
+     * Returns true if $n rounds up to an extra digit when rounded to $d decimal places
+     *
+     * @param  float $n
+     * @param  int $d
+     * @return bool
+     */
+    private static function _roundsUp($n, $d) {
+        return self::_wholeDigits(number_format($n, $d, null, '')) > self::_wholeDigits($n);
+    }
+
+    /**
+     * Find the number of digits to the left of the decimal place.
+     *
+     * @param  float $n
+     * @return int
+     */
+    private static function _wholeDigits($n) {
+        return strlen(abs((int)$n));
+    }
+
+    /**
+     * Trims trailing zeroes off a floating-point/decimal string number. Will also remove the decimal place if it is at the end.
+     * e.g., 1.50 -> 1.5, 1.00 -> 1, 100 -> 100
+     * @param string $nbr Number to format
+     * @return string Number with trailing zeroes removed
+     */
+    public static function trimTrailingZeroes($nbr) {
+        if(strpos($nbr,'.')!==false) $nbr = rtrim($nbr,'0');
+        return rtrim($nbr,'.');
+    }
 }

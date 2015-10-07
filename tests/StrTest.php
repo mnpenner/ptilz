@@ -457,6 +457,184 @@ FAIL CASE:
         $this->assertSame(['a',' b ;; c ','d'],Str::smartSplit("a;;'' b ;; c '';;d",';;',"''"));
         $this->assertSame(['a','b'],Str::smartSplit(",a,, ,b,"));
     }
+
+    /**
+     * @dataProvider fileSizeTests
+     */
+    public function testFileSize($size, $expected, $message='') {
+        $this->assertEquals($expected, Str::fileSize($size), $message);
+    }
+
+    public function fileSizeTests() {
+        return [
+            [0, "0 B"],
+            [1, "1 B"],
+            [2, "2 B"],
+            [10, "10 B"],
+            [99, "99 B"],
+            [100, "100 B"],
+            [1000, "0.98 KB"],
+            [1023, "1.00 KB"],
+            [1024, "1.00 KB"],
+            [1025, "1.00 KB"],
+            [1029, "1.00 KB"],
+            [1030, "1.01 KB"],
+            [10240, "10.0 KB"],
+            [10239, "10.0 KB"],
+            [10241, "10.0 KB"],
+            [10229, "9.99 KB"],
+            [10230, "9.99 KB"],
+            [10234, "9.99 KB"],
+            [10235, "10.0 KB"],
+            [102400, "100 KB"],
+            [1024000, "0.98 MB"],
+            [1023999, "999 KB"], // 999 KB = 1022976 B which is off by 1023 B, 0.98 MB = 1027604.48 B (3605.48 B), 0.99 MB = 1038090.24 B (14091.24 B)
+            [1000000, "977 KB"],
+            [1024**2, "1.00 MB", "1024**2 bytes"],
+            [1024**3, "1.00 GB", "1024**3 bytes"],
+            [1024**4, "1.00 TB", "1024**4 bytes"],
+            [1024**5, "1.00 PB", "1024**5 bytes"],
+            [1024**6, "1.00 EB", "1024**6 bytes"],
+            [1024**7, "1.00 ZB", "1024**7 bytes"],
+            [1024**8, "1.00 YB", "1024**8 bytes"],
+            [1024**9, "1024 YB", "1024**9 bytes"],
+        ];
+    }
+
+    /**
+     * @dataProvider fileSizeTests2
+     */
+    public function testFileSize2($size, $spec, $digits, $decimals, $trim, $expected, $message='') {
+        $this->assertEquals($expected, Str::fileSize($size, $spec, $digits, $decimals, $trim), $message);
+    }
+
+    public function fileSizeTests2() {
+        return [
+            [999, 'iec', 3, null, false, '999 B'],
+            [1000, 'iec', 3, null, false, '0.98 KiB'],
+            [1024, 'iec', 3, null, false, '1.00 KiB'],
+            [1024**2, 'iec', 3, null, false, '1.00 MiB'],
+            [1024**3, 'iec', 3, null, false, '1.00 GiB'],
+            [1024**4, 'iec', 3, null, false, '1.00 TiB'],
+            [1024**5, 'iec', 3, null, false, '1.00 PiB'],
+            [1024**6, 'iec', 3, null, false, '1.00 EiB'],
+            [1024**7, 'iec', 3, null, false, '1.00 ZiB'],
+            [1024**8, 'iec', 3, null, false, '1.00 YiB'],
+            [1024**9, 'iec', 3, null, false, '1024 YiB'],
+
+            [1, 'si', 3, null, false, '1 B'],
+            [999, 'si', 3, null, false, '999 B'],
+            [1000, 'si', 3, null, false, '1.00 kB'],
+            [1024, 'si', 3, null, false, '1.02 kB'],
+            [1000**2, 'si', 3, null, false, '1.00 MB'],
+            [1000**3, 'si', 3, null, false, '1.00 GB'],
+            [1000**4, 'si', 3, null, false, '1.00 TB'],
+            [1000**5, 'si', 3, null, false, '1.00 PB'],
+            [1000**6, 'si', 3, null, false, '1.00 EB'],
+            [1000**7, 'si', 3, null, false, '1.00 ZB'],
+            [1000**8, 'si', 3, null, false, '1.00 YB'],
+            [1000**9, 'si', 3, null, false, '1000 YB'],
+
+            [1, 'jedec', 2, null, false, '1 B'],
+            [99, 'jedec', 2, null, false, '99 B'],
+            [100, 'jedec', 2, null, false, '0.1 KB'],
+            [972, 'jedec', 2, null, false, '0.9 KB'],
+            [973, 'jedec', 2, null, false, '1.0 KB'],
+            [999, 'jedec', 2, null, false, '1.0 KB'],
+            [1000, 'jedec', 2, null, false, '1.0 KB'],
+            [1024, 'jedec', 2, null, false, '1.0 KB'],
+            [1075, 'jedec', 2, null, false, '1.0 KB'],
+            [1076, 'jedec', 2, null, false, '1.1 KB'],
+            [1024**2, 'jedec', 2, null, false, '1.0 MB'],
+            [1024**3, 'jedec', 2, null, false, '1.0 GB'],
+            [1024**4, 'jedec', 2, null, false, '1.0 TB'],
+            [1024**5, 'jedec', 2, null, false, '1.0 PB'],
+            [1024**6, 'jedec', 2, null, false, '1.0 EB'],
+            [1024**7, 'jedec', 2, null, false, '1.0 ZB'],
+            [1024**8, 'jedec', 2, null, false, '1.0 YB'],
+            [1024**9, 'jedec', 2, null, false, '1024 YB', "No choice, can't fit inside 2 digits"],
+            [10188, 'jedec', 2, null, false, '9.9 KB'],
+            [10189, 'jedec', 2, null, false, '10 KB'],
+
+            [1, 'jedec', null, 1, false, '1 B'],
+            [999, 'jedec', null, 1, false, '999 B'],
+            [1000, 'jedec', null, 1, false, '1000 B'],
+            [1024, 'jedec', null, 1, false, '1.0 KB'],
+            [1024**2, 'jedec', null, 1, false, '1.0 MB'],
+            [1024**3, 'jedec', null, 1, false, '1.0 GB'],
+            [1024**4, 'jedec', null, 1, false, '1.0 TB'],
+            [1024**5, 'jedec', null, 1, false, '1.0 PB'],
+            [1024**6, 'jedec', null, 1, false, '1.0 EB'],
+            [1024**7, 'jedec', null, 1, false, '1.0 ZB'],
+            [1024**8, 'jedec', null, 1, false, '1.0 YB'],
+            [1024**9, 'jedec', null, 1, false, '1024.0 YB'],
+            [10188, 'jedec', null, 1, false, '9.9 KB'],
+            [10189, 'jedec', null, 1, false, '10.0 KB'],
+
+            [1, 'jedec', null, 2, true, '1 B'],
+            [999, 'jedec', null, 2, true, '999 B'],
+            [1000, 'jedec', null, 2, true, '1000 B'],
+            [1024, 'jedec', null, 2, true, '1 KB'],
+            [1024**2, 'jedec', null, 2, true, '1 MB'],
+            [1024**3, 'jedec', null, 2, true, '1 GB'],
+            [1024**4, 'jedec', null, 2, true, '1 TB'],
+            [1024**5, 'jedec', null, 2, true, '1 PB'],
+            [1024**6, 'jedec', null, 2, true, '1 EB'],
+            [1024**7, 'jedec', null, 2, true, '1 ZB'],
+            [1024**8, 'jedec', null, 2, true, '1 YB'],
+            [1024**9, 'jedec', null, 2, true, '1024 YB'],
+            [10188, 'jedec', null, 2, true, '9.95 KB'],
+            [10189, 'jedec', null, 2, true, '9.95 KB'],
+            [10491002, 'jedec', null, 2, true, '10 MB'],
+            [10491003, 'jedec', null, 2, true, '10.01 MB'],
+            [10591000, 'jedec', null, 2, true, '10.1 MB'],
+            [10591000, 'jedec', null, 2, true, '10.1 MB'],
+            [10585374, 'jedec', null, 2, true, '10.09 MB'],
+            [10585375, 'jedec', null, 2, true, '10.1 MB'],
+
+            [-1, 'jedec', null, 2, true, '-1 B'],
+            [-999, 'jedec', null, 2, true, '-999 B'],
+            [-1000, 'jedec', null, 2, true, '-1000 B'],
+            [-1024, 'jedec', null, 2, true, '-1 KB'],
+            [-1024**2, 'jedec', null, 2, true, '-1 MB'],
+            [-1024**3, 'jedec', null, 2, true, '-1 GB'],
+            [-1024**4, 'jedec', null, 2, true, '-1 TB'],
+            [-1024**5, 'jedec', null, 2, true, '-1 PB'],
+            [-1024**6, 'jedec', null, 2, true, '-1 EB'],
+            [-1024**7, 'jedec', null, 2, true, '-1 ZB'],
+            [-1024**8, 'jedec', null, 2, true, '-1 YB'],
+            [-1024**9, 'jedec', null, 2, true, '-1024 YB'],
+            [-10188, 'jedec', null, 2, true, '-9.95 KB'],
+            [-10189, 'jedec', null, 2, true, '-9.95 KB'],
+            [-10491002, 'jedec', null, 2, true, '-10 MB'],
+            [-10491003, 'jedec', null, 2, true, '-10.01 MB'],
+            [-10591000, 'jedec', null, 2, true, '-10.1 MB'],
+            [-10591000, 'jedec', null, 2, true, '-10.1 MB'],
+            [-10585374, 'jedec', null, 2, true, '-10.09 MB'],
+            [-10585375, 'jedec', null, 2, true, '-10.1 MB'],
+
+            [1048575, 'jedec', null, null, false, '1023.9990234375 KB'],
+            [1048575, 'jedec', null, null, true, '1023.9990234375 KB'],
+            [1048575, 'jedec', null, 10, false, '1023.9990234375 KB'],
+            [1048575, 'jedec', null, 15, false, '1023.999023437500000 KB'],
+            [1048575, 'jedec', null, 15, true, '1023.9990234375 KB'],
+
+            [999999, 'si', null, null, false, '999.999 kB'],
+            [999999, 'si', null, null, true, '999.999 kB'],
+            [999999, 'si', null, 2, false, '1.00 MB'],
+            [999999, 'si', 3, null, false, '1.00 MB'],
+            [999999, 'si', null, 3, false, '999.999 kB'],
+            [999999, 'si', null, 4, false, '999.9990 kB'],
+            [999999, 'si', null, 4, true, '999.999 kB'],
+
+            [999, 'iec', 3, null, false, '999 B', "Should move up a unit to make it fit within 3 digit limit"],
+            [1000, 'iec', 3, null, false, '0.98 KiB'],
+            [1012, 'iec', 3, null, false, '0.99 KiB'],
+            [1018, 'iec', 3, null, false, '0.99 KiB'],
+            [1019, 'iec', 3, null, false, '1.00 KiB'],
+            [1024, 'iec', 3, null, false, '1.00 KiB'],
+        ];
+    }
 }
 
 class _toStringable {

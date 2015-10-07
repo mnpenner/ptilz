@@ -1516,21 +1516,19 @@ REGEX;
         }
 
         if($digits !== null) {
-            $wd = self::_wholeDigits($size);
-            $decimals = max(0, $digits - $wd);
-            if(self::_doesRoundUp($size, $decimals)) {
-                if($decimals > 0) {
+            $wd = self::_wholeDigitCount($size);
+            $decimals = $digits - $wd;
+
+            if($decimals > 0) {
+                if(self::_doesRoundUp($size, $decimals)) {
                     --$decimals;
-                } elseif($u < $lastIndex) {
-                    $size /= $thresh;
-                    ++$u;
-                    $decimals = $digits - 1;
                 }
-            } elseif($u < $lastIndex && self::_wholeDigits($size) > $digits) {
+            } elseif($u < $lastIndex && self::_wholeDigitCount(round($size)) > $digits) {
                 $size /= $thresh;
                 ++$u;
                 $decimals = $digits - 1;
             }
+
             $size = number_format($size, $decimals, null, '');
         } elseif($decimals !== null) {
             if($u < $lastIndex && abs(round($size, $decimals)) >= $thresh) {
@@ -1558,7 +1556,7 @@ REGEX;
      * @return bool
      */
     private static function _doesRoundUp($n, $d) {
-        return self::_wholeDigits(number_format($n, $d, null, '')) > self::_wholeDigits($n);
+        return self::_wholeDigitCount(number_format($n, $d, null, '')) > self::_wholeDigitCount($n);
     }
 
     /**
@@ -1567,7 +1565,7 @@ REGEX;
      * @param  float $n
      * @return int
      */
-    private static function _wholeDigits($n) {
+    private static function _wholeDigitCount($n) {
         return strlen(abs((int)$n));
     }
 

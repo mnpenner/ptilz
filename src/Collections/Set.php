@@ -3,9 +3,9 @@ namespace Ptilz\Collections;
 
 use ArrayIterator;
 use IteratorAggregate;
-use Ptilz\Dbg;
 use Ptilz\Exceptions\ArgumentTypeException;
-use Traversable;
+use Ptilz\Iter;
+use Ptilz\V;
 
 class Set implements IteratorAggregate {
     private $set;
@@ -15,14 +15,14 @@ class Set implements IteratorAggregate {
             if($iter instanceof Set) {
                 $this->set = $iter->set;
             } elseif(is_array($iter)) {
-                $this->set = self::flip($iter);
-            } elseif(self::isIter($iter)) {
+                $this->set = self::fill($iter);
+            } elseif(Iter::isIterable($iter)) {
                 $this->set = array();
                 foreach($iter as $i) {
                     $this->set[$i] = true;
                 }
             } else {
-                throw new ArgumentTypeException(__CLASS__ . ' must be initialized with an array or iterable; ' . Dbg::getType($iter) . ' provided');
+                throw new ArgumentTypeException(__CLASS__ . ' must be initialized with an array or iterable; ' . V::getType($iter) . ' provided');
             }
         } else {
             $this->set = array();
@@ -37,6 +37,7 @@ class Set implements IteratorAggregate {
         $this->set[$x] = true;
     }
 
+    // todo: rename to unionWith? https://msdn.microsoft.com/en-us/library/bb342097.aspx
     public function addRange($x) {
         foreach($x as $i) {
             $this->set[$i] = true;
@@ -47,12 +48,8 @@ class Set implements IteratorAggregate {
         unset($this->set[$x]);
     }
 
-    private static function flip($a) {
+    private static function fill($a) {
         return array_fill_keys($a, true);
-    }
-
-    private static function isIter($x) {
-        return is_array($x) || $x instanceof Traversable;
     }
 
     private static function merge() {
@@ -70,18 +67,18 @@ class Set implements IteratorAggregate {
         if($x instanceof Set) {
             return new Set(array_keys(array_intersect_key($this->set, $x->set)));
         } elseif(is_array($x)) {
-            return new Set(array_keys(array_intersect_key($this->set, self::flip($x))));
+            return new Set(array_keys(array_intersect_key($this->set, self::fill($x))));
         }
-        throw new ArgumentTypeException('Cannot intersect set with object of type ' . Dbg::getType($x));
+        throw new ArgumentTypeException('Cannot intersect set with object of type ' . V::getType($x));
     }
 
     public function union($x) {
         if($x instanceof Set) {
             return new Set(array_keys(self::merge($this->set, $x->set)));
         } elseif(is_array($x)) {
-            return new Set(array_keys(self::merge($this->set, self::flip($x))));
+            return new Set(array_keys(self::merge($this->set, self::fill($x))));
         }
-        throw new ArgumentTypeException('Cannot union set with object of type ' . Dbg::getType($x));
+        throw new ArgumentTypeException('Cannot union set with object of type ' . V::getType($x));
     }
 
     public function count() {
@@ -99,4 +96,10 @@ class Set implements IteratorAggregate {
     public function __toString() {
         return '{' . implode(', ', array_keys($this->set)) . '}';
     }
+
+    function __debugInfo() {
+        return $this->set;
+    }
+
+
 }

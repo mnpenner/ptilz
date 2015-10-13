@@ -33,19 +33,25 @@ class Set implements IteratorAggregate {
         return isset($this->set[$x]);
     }
 
-    public function add($x) {
-        $this->set[$x] = true;
-    }
-
-    // todo: rename to unionWith? https://msdn.microsoft.com/en-us/library/bb342097.aspx
-    public function addRange($x) {
-        foreach($x as $i) {
-            $this->set[$i] = true;
+    public function add(...$value) {
+        foreach($value as $v) {
+            $this->set[$v] = true;
         }
     }
 
-    public function remove($x) {
-        unset($this->set[$x]);
+    // todo: rename to unionWith? https://msdn.microsoft.com/en-us/library/bb342097.aspx
+    public function addRange(...$range) {
+        foreach($range as $values) {
+            foreach ($values as $v) {
+                $this->set[$v] = true;
+            }
+        }
+    }
+
+    public function remove(...$value) {
+        foreach($value as $v) {
+            unset($this->set[$v]);
+        }
     }
 
     private static function fill($a) {

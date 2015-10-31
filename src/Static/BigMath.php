@@ -58,20 +58,42 @@ abstract class BigMath {
      * @return string
      */
     public static function ln($n, $scale = 10) {
-        $iscale = $scale + 3;
-        $result = '0.0';
-        $i = 0;
+        return self::log($n) / 0.43429448190325182765112891891660508229439700580367;
+    }
 
-        do {
-            $pow = (1 + (2 * $i++));
-            $mul = bcdiv('1', $pow, $iscale);
-            $fraction = bcmul($mul, bcpow(bcsub($n, '1', $iscale) / bcadd($n, '1', $iscale), $pow, $iscale), $iscale);
-            $lastResult = $result;
-            $result = bcadd($fraction, $result, $iscale);
-        } while($result !== $lastResult);
-//        echo "$i iterations\n";
-
-        return bcmul('2', $result, $scale);
+    /**
+     * @param $n
+     * @return float
+     * @throws \Exception
+     * @license Matthew Slyman @aaabit.com//CC-BY-SA-3.0
+     * @see http://stackoverflow.com/a/33441820/65387
+     */
+    private static function log10($n) {
+        $m = [];
+        preg_match('/^(-)?0*([1-9][0-9]*)?\.?(0*)([1-9][0-9]*)?$/', $n, $m);
+        if(!isset($m[1])) {
+            throw new \Exception('Argument: not decimal number string!');
+        }
+        $sgn = $m[1];
+        if($sgn === '-') {
+            throw new \Exception('Cannot compute: log(<⁺0)!');
+        }
+        $abs = $m[2];
+        $pos = strlen($abs);
+        $fre = $m[3];
+        $neg = strlen($fre);
+        if(isset($m[4])) {
+            $frc = $m[4];
+        } else {
+            $frc = '';
+        }
+        if($pos === 0) {
+            $dec_frac = '.' . substr($frc, 0, 30);
+            $pos = -1 * $neg;
+        } else {
+            $dec_frac = '.' . substr($abs . $fre . $frc, 0, 30);
+        }
+        return log10((float)$dec_frac) + (float)$pos;
     }
 
     /**
@@ -83,7 +105,9 @@ abstract class BigMath {
      * @return string
      */
     public static function log($n, $base = 10, $scale = 10) {
-        return bcdiv(self::ln($n, $scale), self::ln($base, $scale), $scale);
+        if($base === 10) return self::log10($n);
+        if($base === M_E) return self::ln($n);
+        return self::log($n) / self::log10($base);
     }
 
     /**

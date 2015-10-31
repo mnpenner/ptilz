@@ -87,7 +87,7 @@ class Iter {
     /**
      * Generates numbers from the Fibonacci sequence
      *
-     * @return \Generator 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...
+     * @return \Generator 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...
      */
     public static function fibonacci() {
         $a = 0;
@@ -132,4 +132,6 @@ class Iter {
             }
         }
     }
+
+    // TODO: wrap all Iterators and Generators in a new IEnumerable class that implements some methods from LINQ: https://msdn.microsoft.com/en-us/library/9eekhta0(v=vs.110).aspx
 }

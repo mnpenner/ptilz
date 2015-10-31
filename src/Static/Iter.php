@@ -83,4 +83,53 @@ class Iter {
         }
         return false;
     }
+
+    /**
+     * Generates numbers from the Fibonacci sequence
+     *
+     * @return \Generator 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...
+     */
+    public static function fibonacci() {
+        $a = 0;
+        $b = 1;
+        while(true) {
+            yield $a;
+            $tmp = $a + $b;
+            $a = $b;
+            $b = $tmp;
+            unset($tmp);
+        }
+    }
+
+    /**
+     * Returns a specified number of contiguous elements from the start of a sequence.
+     *
+     * @param \Traversable $iter The sequence to return elements from.
+     * @param int $count The number of elements to return.
+     * @return \Generator
+     */
+    public static function take($iter, $count) {
+        foreach($iter as $k=>$v) {
+            if($count <= 0) return;
+            yield $k => $v;
+            --$count;
+        }
+    }
+
+    /**
+     * Bypasses a specified number of elements in a sequence and then returns the remaining elements.
+     *
+     * @param \Traversable $iter The sequence on which to advance.
+     * @param int $count The number of elements to skip before returning the remaining elements.
+     * @return \Iterator
+     */
+    public static function skip($iter, $count) {
+        foreach($iter as $k=>$v) {
+            if($count > 0) {
+                --$count;
+            } else {
+                yield $k => $v;
+            }
+        }
+    }
 }

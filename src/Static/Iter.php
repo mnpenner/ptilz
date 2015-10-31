@@ -2,6 +2,7 @@
 namespace Ptilz;
 
 use Generator;
+use Ptilz\Exceptions\NotImplementedException;
 use Traversable;
 
 class Iter {
@@ -132,6 +133,17 @@ class Iter {
             }
         }
     }
+
+    /**
+     * @param int|float $start
+     * @param int|float $end
+     * @param int|float $step
+     * @return \Generator
+     */
+    public static function xrange($start, $end, $step = null) {
+        throw new NotImplementedException;
+    }
+
 
     // TODO: wrap all Iterators and Generators in a new IEnumerable class that implements some methods from LINQ: https://msdn.microsoft.com/en-us/library/9eekhta0(v=vs.110).aspx
 }

@@ -68,6 +68,7 @@ abstract class BigMath {
      * @see http://stackoverflow.com/a/33441820/65387
      */
     private static function log10($n) {
+        // TODO: try a Taylor Series instead, starting with strlen($n) as the starting guess: http://stackoverflow.com/a/27180100/65387
         $m = [];
         preg_match('/^(-)?0*([1-9][0-9]*)?\.?(0*)([1-9][0-9]*)?$/', $n, $m);
         if(!isset($m[1])) {

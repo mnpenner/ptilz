@@ -53,16 +53,15 @@ abstract class BigMath {
     /**
      * Computes the natural logarithm of a number.
      *
-     * @param int|string|float $n
-     * @param int        $scale This optional parameter is used to set the number of digits after the decimal place in the result.
+     * @param int|string|float $n An arbitrarily large number
      * @return string
      */
-    public static function ln($n, $scale = 10) {
-        return self::log($n) / 0.43429448190325182765112891891660508229439700580367;
+    public static function ln($n) {
+        return self::log10($n) / 0.43429448190325182765112891891660508229439700580367;
     }
 
     /**
-     * @param $n
+     * @param int|string|float $n An arbitrarily large number
      * @return float
      * @throws \Exception
      * @license Matthew Slyman @aaabit.com//CC-BY-SA-3.0
@@ -88,10 +87,10 @@ abstract class BigMath {
             $frc = '';
         }
         if($pos === 0) {
-            $dec_frac = '.' . substr($frc, 0, 30);
+            $dec_frac = '.' . substr($frc, 0, 15);
             $pos = -1 * $neg;
         } else {
-            $dec_frac = '.' . substr($abs . $fre . $frc, 0, 30);
+            $dec_frac = '.' . substr($abs . $fre . $frc, 0, 15);
         }
         return log10((float)$dec_frac) + (float)$pos;
     }
@@ -99,15 +98,15 @@ abstract class BigMath {
     /**
      * Computes the logarithm of a number.
      *
-     * @param int|string|float $n
+     * @param int|string|float $n An arbitrarily large number
      * @param int $base
-     * @param int $scale This optional parameter is used to set the number of digits after the decimal place in the result.
      * @return string
      */
-    public static function log($n, $base = 10, $scale = 10) {
+    public static function log($n, $base = 10) {
         if($base === 10) return self::log10($n);
-        if($base === M_E) return self::ln($n);
-        return self::log($n) / self::log10($base);
+        if($base === M_E) return self::log10($n) / 0.43429448190325182765112891891660508229439700580367;
+        if($base === 2) return self::log10($n) / 0.30102999566398119521373889472449302676818988146211;
+        return self::log10($n) / self::log10($base);
     }
 
     /**

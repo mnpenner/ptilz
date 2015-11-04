@@ -15,10 +15,13 @@ class PrettyPrinter {
     private $newLine = true;
     /** @var string */
     private $lineSep = PHP_EOL;
+    /** @var bool */
+    private $wordWrap;
 
     function __construct($stream = STDOUT) {
         $this->stream = $stream;
         $this->colorize = $stream === STDOUT;
+        $this->wordWrap = Env::isCli();
     }
 
     /**
@@ -80,6 +83,12 @@ class PrettyPrinter {
      * @param string $str
      */
     public function write($str) {
+        if($this->wordWrap) {
+            $width = Cli::width(100) - ($this->indentLevel * strlen($this->indentStr)) - 1;
+            if($width > 0) {
+                $str = wordwrap($str, $width);
+            }
+        }
         $endsWithNl = (bool)preg_match('#\R\z#',$str);
         if($this->indentLevel > 0) {
             $lines = preg_split('#\R#', $str);
@@ -105,7 +114,7 @@ class PrettyPrinter {
      *
      * @param string $str
      */
-    public function writeLine($str) {
+    public function writeLine($str='') {
         $this->write($str.$this->lineSep);
     }
 }

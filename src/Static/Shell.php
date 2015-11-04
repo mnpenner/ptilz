@@ -49,21 +49,19 @@ abstract class Shell {
      *
      * @param string|array $cmd
      * @param array $args
-     * @param string $stdout
-     * @param string $stderr
-     * @throws ArgumentTypeException
+     * @param string[] $stdouts
      * @return int
      */
-    public static function status($cmd, $args=[], &$stdout=null, &$stderr=null) {
-        // TODO: change remaining args to ...$pipes
-        $proc = proc_open(self::escape($cmd, $args),[
-            1 => ['pipe','w'],
-            2 => ['pipe','w'],
-        ],$pipes);
-        $stdout = stream_get_contents($pipes[1]);
-        fclose($pipes[1]);
-        $stderr = stream_get_contents($pipes[2]);
-        fclose($pipes[2]);
+    public static function status($cmd, $args=[], &...$stdouts) {
+        $proc = proc_open(self::escape($cmd, $args), array_fill(1, count($stdouts), ['pipe', 'w']), $pipes);
+        if($pipes) {
+            $p = 1;
+            foreach($stdouts as &$out) {
+                $out = stream_get_contents($pipes[$p]);
+                fclose($pipes[$p]);
+                ++$p;
+            } unset($out);
+        }
         return proc_close($proc);
     }
 

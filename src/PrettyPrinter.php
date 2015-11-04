@@ -83,12 +83,13 @@ class PrettyPrinter {
      * @param string $str
      */
     public function write($str) {
-        if($this->wordWrap) {
+        if($this->wordWrap) { // FIXME: need to de-color before wrapping
             $width = Cli::width(100) - ($this->indentLevel * strlen($this->indentStr)) - 1;
             if($width > 0) {
                 $str = wordwrap($str, $width);
             }
         }
+        // TODO: add support for printing tables?
         $endsWithNl = (bool)preg_match('#\R\z#',$str);
         if($this->indentLevel > 0) {
             $lines = preg_split('#\R#', $str);

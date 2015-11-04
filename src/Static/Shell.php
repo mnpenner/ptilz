@@ -16,28 +16,7 @@ abstract class Shell {
      * @return string
      */
     public static function escape($cmd, $args=[]) {
-        $cmdArr = [escapeshellcmd($cmd)];
-        if($args) {
-            if(!Iter::isIterable($args)) {
-                throw new ArgumentTypeException('args', 'array|Traversable');
-            }
-            foreach($args as $k => $v) {
-                if(is_int($k)) {
-                    $cmdArr[] = escapeshellarg($v);
-                } elseif($v !== false) {
-                    // there's no standard, so who knows what format we should use?
-                    if(strlen($k) === 1) {
-                        $cmdArr[] = '-' . escapeshellarg($k);
-                    } else {
-                        $cmdArr[] = '--' . escapeshellarg($k);
-                    }
-                    if(!in_array($v, [true, null], true)) {
-                        $cmdArr[] = escapeshellarg($v);
-                    }
-                }
-            }
-        }
-        return implode(' ', $cmdArr);
+        return escapeshellcmd($cmd).self::escapeArgs($args);
     }
 
     /**
@@ -136,29 +115,69 @@ abstract class Shell {
     /**
      * Builds a properly escaped string of shell args.
      *
+     * Returns an empty string if no args provided, otherwise begins with a space followed by the escaped args.
+     *
      * @param array $args
      * @return string
+     * @throws ArgumentTypeException
      */
-    public static function escapeArgs(array $args) {
+    public static function escapeArgs($args) {
+        if(!Iter::isIterable($args)) {
+            throw new ArgumentTypeException('args', 'array|Traversable');
+        }
         $out = [];
         foreach($args as $opt => $val) {
-            if(!is_array($val)) {
-                $val = [$val];
-            }
-            foreach($val as $v) {
-                if(is_int($opt)) {
-                    $out[] = escapeshellarg($v);
-                } elseif($v !== false) {
-                    $shortOpt = strlen($opt) === 1;
-                    $arg = ($shortOpt ? '-' : '--').escapeshellcmd($opt);
-                    if($v !== true && $v !== null) {
+            if(is_int($opt)) {
+                $out[] = self::escapeArg($val);
+            } elseif($val !== false) {
+                $shortOpt = strlen($opt) === 1;
+                $arg = ($shortOpt ? '-' : '--').self::escapeArg($opt);
+                if($val !== true && $val !== null) {
+                    if(is_array($val)) {
+                        $arg .= self::escapeSubArg($val);
+                    } else {
                         if(!$shortOpt) $arg .= ' ';
-                        $arg .= escapeshellarg($v);
+                        $arg .= self::escapeArg($val);
                     }
-                    $out[] = $arg;
                 }
+                $out[] = $arg;
             }
         }
         return $out ?  ' '.implode(' ', $out) : '';
+    }
+
+    /**
+     * Escape a string to be used as a shell argument.
+     *
+     * @param string $str The argument that will be escaped.
+     * @return string The escaped string.
+     */
+    public static function escapeArg($str) {
+        if(preg_match('#[A-Za-z0-9_][A-Za-z0-9_.-]*\z#A',$str)) {
+            return $str;
+        }
+        return escapeshellarg($str);
+    }
+
+    /**
+     * This copies UglifyJS (https://github.com/mishoo/UglifyJS2) syntax.
+     *
+     * @param array $args
+     * @return string
+     */
+    private static function escapeSubArg(array $args) {
+        $out = [];
+        foreach($args as $key => $val) {
+            if(is_int($key)) {
+                $out[] = $val;
+            } elseif($val === true) {
+                $out[] = "$key=true";
+            } elseif($val === false) {
+                $out[] = "$key=false";
+            } else {
+                $out[] = "$key=$val";
+            }
+        }
+        return $out ?  ' '. self::escapeArg(implode(',', $out)) : '';
     }
 }

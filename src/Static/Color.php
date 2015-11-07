@@ -4,6 +4,8 @@ namespace Ptilz;
 
 // https://gist.github.com/mnpenner/6513318
 
+use Ptilz\Exceptions\NotImplementedException;
+
 class Color {
     #region RGB-HSL
     /**
@@ -453,4 +455,57 @@ class Color {
     }
 
     #endregion
+
+
+    /**
+     * @param string $str CSS color string
+     * @return int
+     * @throws NotImplementedException
+     * @throws \Exception
+     */
+    public static function cssToInt($str) {
+        $str = preg_replace('~\s+~', '', $str);
+        if(preg_match('~#[0-9a-f]{6}\z~Ai', $str, $m)) {
+            return sscanf($str, '#%06x')[0];
+        } elseif(preg_match('~#[0-9a-f]{3}\z~Ai', $str, $m)) {
+            return hexdec($str[1] . $str[1] . $str[2] . $str[2] . $str[3] . $str[3]);  // RRGGBB
+        } elseif(preg_match('~#[0-9a-f]{4}\z~Ai', $str, $m)) {
+            return hexdec($str[1] . $str[1] . $str[2] . $str[2] . $str[3] . $str[3] . $str[4] . $str[4]); // AARRGGBB
+        } elseif(preg_match('~#[0-9a-f]{8}\z~Ai', $str, $m)) {
+            return sscanf($str, '#%08x')[0];
+        } elseif(preg_match('~rgb\((?P<r>\d+),(?P<g>\d+),(?P<b>\d+)\)\z~Ai', $str, $m)) {
+            return ((int)$m['r'] << 16)
+            + ((int)$m['g'] << 8)
+            + (int)$m['b'];
+        } elseif(preg_match('~rgba\((?P<r>\d+),(?P<g>\d+),(?P<b>\d+),(?P<a>\d+(?:\.\d*)?|\.\d+)\)\z~Ai', $str, $m)) {
+            return ((int)$m['r'] << 16)
+            + ((int)$m['g'] << 8)
+            + (int)$m['b']
+            + ((int)round($m['a'] * 255) << 24);
+        } elseif(preg_match('~hsl\((?P<h>\d+),(?P<s>\d+)%,(?P<l>\d+)%\)\z~Ai', $str, $m)) {
+            throw new NotImplementedException("HSL color space not implemented");
+        } elseif(preg_match('~hsla\((?P<h>\d+),(?P<s>\d+)%,(?P<l>\d+)%,(?P<a>\d+(?:\.\d*)?|\.\d+)\)\z~Ai', $str, $m)) {
+            throw new NotImplementedException("HSLA color space not implemented");
+        } elseif(preg_match('~[a-z]+\z~Ai', $str, $m)) {
+            throw new NotImplementedException("Color names not implemented");
+        } else {
+            throw new \Exception("Could not parse CSS color: $str");
+        }
+    }
+
+    /**
+     * @param int $int Color integer
+     * @return string
+     */
+    public static function intToCss($int) {
+        if($int > 0xFFFFFF) {
+            $r = ($int >> 16) & 0xff;
+            $g = ($int >> 8) & 0xff;
+            $b = $int & 0xff;
+            $a = round((($int >> 24) & 0xff)/0xff,3);
+            return "rgba($r,$g,$b,$a)";
+        } else {
+            return sprintf('#%06x', $int);
+        }
+    }
 }

@@ -493,4 +493,50 @@ class ColorTest extends PHPUnit_Framework_TestCase {
             $this->assertEquals($colorspaces['huslp'], Color::rgbToHuslp(...$colorspaces['rgb']), $hex);
         }
     }
+
+    function testCssToInt() {
+        $this->assertEquals(0x000000,Color::cssToInt('#000000'));
+        $this->assertEquals(0xFF0000,Color::cssToInt('#FF0000'));
+        $this->assertEquals(0x00FF00,Color::cssToInt('#00FF00'));
+        $this->assertEquals(0x0000FF,Color::cssToInt('#0000FF'));
+        $this->assertEquals(0xFFFF00,Color::cssToInt('#FFFF00'));
+        $this->assertEquals(0x4080C0,Color::cssToInt('#4080C0'));
+
+        $this->assertEquals(0x000000,Color::cssToInt('#000'));
+        $this->assertEquals(0xFFFFFF,Color::cssToInt('#fff'));
+        $this->assertEquals(0x4488CC,Color::cssToInt('#48c'));
+
+        $this->assertEquals(0x4080C0,Color::cssToInt('rgb(64, 128, 192)'));
+        $this->assertEquals(0x4080FF,Color::cssToInt('rgb(64, 128, 300)'));
+        $this->assertEquals(0x64C832,Color::cssToInt('RgB( 100,200,  50 )'));
+
+        $this->assertEquals(0x33336699,Color::cssToInt('rgba(51,102,153,0.8)'));
+        if(PHP_INT_SIZE >= 8) {
+            $this->assertEquals(0xCC336699, Color::cssToInt('rgba(51,102,153,0.2)'));
+        }
+
+        $this->assertEquals(0x14B814,Color::cssToInt('hsl(120,80%,40%)'));
+        $this->assertEquals(0xDDDFF3,Color::cssToInt('hsl(237,46%,91%)'));
+
+        $this->assertEquals(0x40DDDFF3,Color::cssToInt('hsla(237,46%,91%,0.75)'));
+    }
+
+    function testIntToCss() {
+        $this->assertEquals('#000000',Color::intToCss(0x000000));
+        $this->assertEquals('#ff0000',Color::intToCss(0xFF0000));
+        $this->assertEquals('#00ff00',Color::intToCss(0x00FF00));
+        $this->assertEquals('#0000ff',Color::intToCss(0x0000FF));
+        $this->assertEquals('#ffff00',Color::intToCss(0xFFFF00));
+        $this->assertEquals('#4080c0',Color::intToCss(0x4080C0));
+        $this->assertEquals('rgba(255,255,255,0.502)',Color::intToCss(0x7fffffff));
+    }
+
+    function testIntToCssAndBack() {
+        for($i=0; $i<1000; ++$i) {
+            $in = mt_rand(0, min(PHP_INT_MAX, 0xFFffFFff));
+            $css = Color::intToCss($in);
+            $out = Color::cssToInt($css);
+            $this->assertEquals($out,$in,sprintf('in: #%08X, out: #%08X', $in, $out));
+        }
+    }
 }

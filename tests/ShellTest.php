@@ -1,4 +1,5 @@
 <?php
+use Ptilz\Env;
 use Ptilz\Shell;
 
 class ShellTest extends PHPUnit_Framework_TestCase {
@@ -9,12 +10,13 @@ class ShellTest extends PHPUnit_Framework_TestCase {
     }
 
     function testEscapeArgs() {
+        $quo = Env::isWindows() ? '"' : "'";
         $this->assertSame(' foo bar f b', Shell::escapeArgs(['foo', 'bar', 'f', 'b']));
-        $this->assertSame(" '--foo' '-b'", Shell::escapeArgs(['--foo', '-b']));
+        $this->assertSame(" {$quo}--foo{$quo} {$quo}-b{$quo}", Shell::escapeArgs(['--foo', '-b']));
         $this->assertSame(' --foo -b', Shell::escapeArgs(['foo' => true, 'bar' => false, 'f' => false, 'b' => true]));
         $this->assertSame('', Shell::escapeArgs([]));
         $this->assertSame(' compress --mangle sort', Shell::escapeArgs(['compress', 'mangle' => 'sort']));
-        $this->assertSame(" -ofoo.min.js --source-map foo.min.js.map --compress 'sequences,properties=true,dead_code=false' -p5 -c", Shell::escapeArgs(['o' => 'foo.min.js', 'source-map' => 'foo.min.js.map', 'compress' => [
+        $this->assertSame(" -ofoo.min.js --source-map foo.min.js.map --compress {$quo}sequences,properties=true,dead_code=false{$quo} -p5 -c", Shell::escapeArgs(['o' => 'foo.min.js', 'source-map' => 'foo.min.js.map', 'compress' => [
             'sequences',
             'properties' => true,
             'dead_code' => false,
@@ -22,8 +24,9 @@ class ShellTest extends PHPUnit_Framework_TestCase {
     }
 
     function testEscape() {
+        $quo = Env::isWindows() ? '"' : "'";
         $this->assertSame('uglifyjs', Shell::escape('uglifyjs'));
-        $this->assertSame("uglifyjs -ofoo.min.js --source-map foo.min.js.map --compress 'sequences,properties=true,dead_code=false' -p5 -c", Shell::escape('uglifyjs', ['o' => 'foo.min.js', 'source-map' => 'foo.min.js.map', 'compress' => [
+        $this->assertSame("uglifyjs -ofoo.min.js --source-map foo.min.js.map --compress {$quo}sequences,properties=true,dead_code=false{$quo} -p5 -c", Shell::escape('uglifyjs', ['o' => 'foo.min.js', 'source-map' => 'foo.min.js.map', 'compress' => [
             'sequences',
             'properties' => true,
             'dead_code' => false,

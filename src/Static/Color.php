@@ -186,7 +186,7 @@ class Color {
     }
 
     /**
-     * Stretches an int value in [0-$max] to [0-1].
+     * Compresses an int value in [0-$max] to [0-1].
      *
      * @param int $val
      * @param int|float $max
@@ -194,6 +194,16 @@ class Color {
      */
     public static function intToFloat($val, $max = 255) {
         return Math::clamp($val / $max, 0, 1);
+    }
+
+    /**
+     * Clamps an RGB value to 0-255
+     *
+     * @param int $val
+     * @return float|int
+     */
+    private static function clampRgb($val) {
+        return (int)Math::clamp(round($val), 0, 255);
     }
 
     private static function conv_lch_rgb($tuple) {
@@ -464,29 +474,31 @@ class Color {
      * @throws \Exception
      */
     public static function cssToInt($str) {
-        $str = preg_replace('~\s+~', '', $str);
-        if(preg_match('~#[0-9a-f]{6}\z~Ai', $str, $m)) {
+        $str = strtolower(preg_replace('~\s+~', '', $str));
+        if(preg_match('~#[0-9a-f]{6}\z~A', $str, $m)) {
             return sscanf($str, '#%06x')[0];
-        } elseif(preg_match('~#[0-9a-f]{3}\z~Ai', $str, $m)) {
+        } elseif(preg_match('~#[0-9a-f]{3}\z~A', $str, $m)) {
             return hexdec($str[1] . $str[1] . $str[2] . $str[2] . $str[3] . $str[3]);  // RRGGBB
-        } elseif(preg_match('~#[0-9a-f]{4}\z~Ai', $str, $m)) {
-            return hexdec($str[1] . $str[1] . $str[2] . $str[2] . $str[3] . $str[3] . $str[4] . $str[4]); // AARRGGBB
-        } elseif(preg_match('~#[0-9a-f]{8}\z~Ai', $str, $m)) {
-            return sscanf($str, '#%08x')[0];
-        } elseif(preg_match('~rgb\((?P<r>\d+),(?P<g>\d+),(?P<b>\d+)\)\z~Ai', $str, $m)) {
-            return ((int)$m['r'] << 16)
-            + ((int)$m['g'] << 8)
-            + (int)$m['b'];
-        } elseif(preg_match('~rgba\((?P<r>\d+),(?P<g>\d+),(?P<b>\d+),(?P<a>\d+(?:\.\d*)?|\.\d+)\)\z~Ai', $str, $m)) {
-            return ((int)$m['r'] << 16)
-            + ((int)$m['g'] << 8)
-            + (int)$m['b']
-            + ((int)round($m['a'] * 255) << 24);
-        } elseif(preg_match('~hsl\((?P<h>\d+),(?P<s>\d+)%,(?P<l>\d+)%\)\z~Ai', $str, $m)) {
-            throw new NotImplementedException("HSL color space not implemented");
-        } elseif(preg_match('~hsla\((?P<h>\d+),(?P<s>\d+)%,(?P<l>\d+)%,(?P<a>\d+(?:\.\d*)?|\.\d+)\)\z~Ai', $str, $m)) {
-            throw new NotImplementedException("HSLA color space not implemented");
-        } elseif(preg_match('~[a-z]+\z~Ai', $str, $m)) {
+        //} elseif(preg_match('~#[0-9a-f]{4}\z~A', $str, $m)) {
+        //    return hexdec($str[1] . $str[1] . $str[2] . $str[2] . $str[3] . $str[3] . $str[4] . $str[4]); // AARRGGBB
+        //} elseif(preg_match('~#[0-9a-f]{8}\z~A', $str, $m)) {
+        //    return sscanf($str, '#%08x')[0];
+        } elseif(preg_match('~rgb\((?P<r>\d+),(?P<g>\d+),(?P<b>\d+)\)\z~A', $str, $m)) {
+            return (self::clampRgb($m['r']) << 16)
+                + (self::clampRgb($m['g']) << 8)
+                + self::clampRgb($m['b']);
+        } elseif(preg_match('~rgba\((?P<r>\d+),(?P<g>\d+),(?P<b>\d+),(?P<a>\d+(?:\.\d*)?|\.\d+)\)\z~A', $str, $m)) {
+            return (self::clampRgb($m['r']) << 16)
+                + (self::clampRgb($m['g']) << 8)
+                + self::clampRgb($m['b'])
+                + (self::floatToInt(1-$m['a']) << 24); // store transparency instead of opacity so that when the upper bits are 0, this means fully opaque which is the default when alpha is omitted
+        } elseif(preg_match('~hsl\((?P<h>\d+),(?P<s>\d+)%,(?P<l>\d+)%\)\z~A', $str, $m)) {
+            list($r,$g,$b) = self::hslToRgb(self::intToFloat($m['h'],360),self::intToFloat($m['s'],100),self::intToFloat($m['l'],100));
+            return ($r << 16) + ($g << 8) + $b;
+        } elseif(preg_match('~hsla\((?P<h>\d+),(?P<s>\d+)%,(?P<l>\d+)%,(?P<a>\d+(?:\.\d*)?|\.\d+)\)\z~A', $str, $m)) {
+            list($r,$g,$b) = self::hslToRgb(self::intToFloat($m['h'],360),self::intToFloat($m['s'],100),self::intToFloat($m['l'],100));
+            return ($r << 16) + ($g << 8) + $b + (self::floatToInt(1-$m['a']) << 24);
+        } elseif(preg_match('~[a-z]+\z~A', $str, $m)) {
             throw new NotImplementedException("Color names not implemented");
         } else {
             throw new \Exception("Could not parse CSS color: $str");
@@ -502,7 +514,7 @@ class Color {
             $r = ($int >> 16) & 0xff;
             $g = ($int >> 8) & 0xff;
             $b = $int & 0xff;
-            $a = round((($int >> 24) & 0xff)/0xff,3);
+            $a = round(1-((($int >> 24) & 0xff)/0xff),3);
             return "rgba($r,$g,$b,$a)";
         } else {
             return sprintf('#%06x', $int);

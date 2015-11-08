@@ -519,6 +519,10 @@ class ColorTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(0xDDDFF3,Color::cssToInt('hsl(237,46%,91%)'));
 
         $this->assertEquals(0x40DDDFF3,Color::cssToInt('hsla(237,46%,91%,0.75)'));
+
+        $this->assertEquals(0x663399,Color::cssToInt('Rebecca Purple'));
+        $this->assertEquals(0xFA8072,Color::cssToInt('SalMon'));
+        $this->assertEquals(0xEEE8AA,Color::cssToInt('PaleGoldenrod'));
     }
 
     function testIntToCss() {

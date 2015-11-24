@@ -88,11 +88,11 @@ class Iter {
     /**
      * Generates numbers from the Fibonacci sequence
      *
-     * @return \Generator 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...
+     * @param int $a First number
+     * @param int $b Second number
+     * @return Generator 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...
      */
-    public static function fibonacci() {
-        $a = 0;
-        $b = 1;
+    public static function fibonacci($a=0, $b=1) {
         while(true) {
             yield $a;
             $tmp = $a + $b;

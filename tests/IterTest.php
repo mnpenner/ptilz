@@ -270,6 +270,24 @@ class IterTest extends PHPUnit_Framework_TestCase {
         for($i = 0; $i < count($fib) && $fib[$i] <= PHP_INT_MAX; ++$i, $gen->next()) {
             $this->assertSame($fib[$i], $gen->current());
         }
+
+        $fib2 = [
+            10,
+            10,
+            20,
+            30,
+            50,
+            80,
+            130,
+            210,
+            300,
+            300,
+            300,
+        ];
+        $gen2 = Iter::fibonacci(10,10,300);
+        for($i = 0; $i < count($fib2) && $fib2[$i] <= PHP_INT_MAX; ++$i, $gen2->next()) {
+            $this->assertSame($fib2[$i], $gen2->current());
+        }
     }
 }
 

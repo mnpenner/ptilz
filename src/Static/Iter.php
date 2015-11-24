@@ -90,15 +90,24 @@ class Iter {
      *
      * @param int $a First number
      * @param int $b Second number
+     * @param int $max This number will be repeated forever once it's reached
      * @return Generator 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...
      */
-    public static function fibonacci($a=0, $b=1) {
+    public static function fibonacci($a=0, $b=1, $max=null) {
         while(true) {
+            if($max !== null && $a > $max) {
+                break;
+            }
             yield $a;
             $tmp = $a + $b;
             $a = $b;
             $b = $tmp;
             unset($tmp);
+        }
+        unset($a);
+        unset($b);
+        while(true) {
+            yield $max;
         }
     }
 

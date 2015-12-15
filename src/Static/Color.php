@@ -627,6 +627,8 @@ class Color {
             return sscanf($str, '#%06x')[0];
         } elseif(preg_match('~#[0-9a-f]{3}\z~A', $str, $m)) {
             return hexdec($str[1] . $str[1] . $str[2] . $str[2] . $str[3] . $str[3]);  // RRGGBB
+        // TODO: implement 4 and 8 digit hex notation from spec: https://drafts.csswg.org/css-color/#hex-notation
+        // n.b. this will differ from integer notation that will need to store it as TTRRGGBB
         //} elseif(preg_match('~#[0-9a-f]{4}\z~A', $str, $m)) {
         //    return hexdec($str[1] . $str[1] . $str[2] . $str[2] . $str[3] . $str[3] . $str[4] . $str[4]); // AARRGGBB
         //} elseif(preg_match('~#[0-9a-f]{8}\z~A', $str, $m)) {

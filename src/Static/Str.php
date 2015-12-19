@@ -606,7 +606,7 @@ REGEX;
                         }
                         break;
                     case 'V':
-                        trigger_error('{:V} format option is deprecated; use {:S} instead',E_USER_DEPRECATED);
+                        //trigger_error('{:V} format option is deprecated; use {:S} instead',E_USER_DEPRECATED);
                     case 'S':
                         return V::toString($val);
                     case 's':

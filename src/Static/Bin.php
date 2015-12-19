@@ -311,6 +311,20 @@ abstract class Bin {
     }
 
     /**
+     * Set or clear a bit.
+     *
+     * @param int $int Input number.
+     * @param int $bit Bit to set.
+     * @param int $state Value to set bit to: 0 or 1.
+     * @return int
+     */
+    public static function setBit($int, $bit, $state = 1) {
+        return $state
+            ? $int | (1 << $bit)
+            : $int & ~(1 << $bit);
+    }
+
+    /**
      * Generate a pseudo-random string of bytes
      *
      * @param int $length

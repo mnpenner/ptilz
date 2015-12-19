@@ -2,6 +2,7 @@
 
 // TODO: make this implement IteratorAggregate ... or rather Iterator (http://php.net/manual/en/class.iterator.php) since this class *is* the bit stream iterator, and the string itself is the aggregate
 // also.. implement a writeable version
+// implement PSR7 stream
 
 class BitStream {
     /** @var string */

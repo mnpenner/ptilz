@@ -756,11 +756,16 @@ REGEX;
      * @param string $string String to add quotes to.
      * @param string $lquo Left quote
      * @param string|null $rquo Right quote. Defaults to same as left.
+     * @param string $esc Escape internal right quotes with this
      * @return string
      */
-    public static function quote($string, $lquo = '"', $rquo = null) {
+    public static function quote($string, $lquo = '"', $rquo = null, $esc = null) {
         if($rquo === null) $rquo = $lquo;
+        if(strlen($esc)) {
+            $string = str_replace($rquo, $esc.$rquo, $string);
+        }
         return $lquo.$string.$rquo;
+
     }
 
     /**
@@ -769,14 +774,16 @@ REGEX;
      * @param string $string String to remove quotes from.
      * @param string $lquo Left quote
      * @param string|null $rquo Right quote. Defaults to same as left.
+     * @param string $esc Unescape internal right quotes that are preceded by this
      * @return string
      */
-    public static function unquote($string, $lquo = '"', $rquo = null) {
+    public static function unquote($string, $lquo = '"', $rquo = null, $esc = null) {
         if($rquo === null) $rquo = $lquo;
-        $startLen = strlen($lquo);
-        $endLen = strlen($rquo);
-        if(strlen($string) >= ($startLen + $endLen) && self::startsWith($string,$lquo) && self::endsWith($string,$rquo)) {
-            return substr($string, $startLen, -$endLen);
+        $llen = strlen($lquo);
+        $rlen = strlen($rquo);
+        if(strlen($string) >= ($llen + $rlen) && self::startsWith($string,$lquo) && self::endsWith($string,$rquo)) {
+            $ret = substr($string, $llen, -$rlen);
+            return str_replace($esc.$rquo, $rquo, $ret);
         }
         return $string;
     }

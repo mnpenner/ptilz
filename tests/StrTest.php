@@ -421,10 +421,13 @@ FAIL CASE:
         $this->assertSame("'bar'",Str::quote('bar',"'"));
         $this->assertSame("«baz»",Str::quote('baz','«','»'));
         $this->assertSame("[[quux]]",Str::quote('quux','[[',']]'));
+        $this->assertSame('"foo\\"bar"',Str::quote('foo"bar','"',null,'\\'));
+        $this->assertSame('"foo"bar"',Str::quote('foo"bar','"'));
     }
 
     function testUnquote() {
         $this->assertSame('foo',Str::unquote('"foo"'));
+        $this->assertSame('foo',Str::unquote('foo'));
         $this->assertSame('"',Str::unquote('"'));
         $this->assertSame('',Str::unquote(''));
         $this->assertSame('bar',Str::unquote("'bar'","'"));
@@ -432,6 +435,8 @@ FAIL CASE:
         $this->assertSame("«baz»",Str::unquote("«baz»",'«'));
         $this->assertSame('quux',Str::unquote("[[quux]]",'[[',']]'));
         $this->assertSame('[[quux]',Str::unquote("[[quux]",'[[',']]'));
+        $this->assertSame('foo"bar',Str::unquote('"foo\\"bar"','"',null,'\\'));
+        $this->assertSame('foo\\"bar',Str::unquote('"foo\\"bar"'));
     }
 
     function testContains() {

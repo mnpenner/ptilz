@@ -168,6 +168,15 @@ class Color {
         return self::conv_lch_rgb(self::conv_husl_lch([$h, $s, $l]));
     }
 
+    /**
+     * Convert from HUSL colorspace to RGB.
+     *
+     * @param float $h Hue [0-360]
+     * @param float $s Saturation [0-100]
+     * @param float $l Lightness [0-100]
+     * @return array [R,G,B] in [0-255]
+     * @return array
+     */
     public static function huslToRgb255($h, $s, $l) {
         return array_map(function ($x) {
             return self::floatToInt($x);

@@ -2,6 +2,7 @@
 namespace Ptilz;
 
 use Generator;
+use Ptilz\Exceptions\ArgumentTypeException;
 use Ptilz\Exceptions\NotImplementedException;
 use Traversable;
 
@@ -15,8 +16,45 @@ class Iter {
      * @return Generator
      */
     public static function map($trav, callable $callback, $exclude_key=false) {
-        foreach($trav as $k1 => $v1) {
-            yield $exclude_key ? call_user_func($callback, $v1) : call_user_func($callback, $v1, $k1);
+        foreach($trav as $k => $v) {
+            yield $exclude_key ? call_user_func($callback, $v) : call_user_func($callback, $v, $k);
+        }
+    }
+
+    const RETURN_KEY = 1;
+    const RETURN_VALUE = 2;
+    const RETURN_BOTH = 3;
+    const CALL_VALUE = 4;
+    const CALL_KEY = 8;
+    const CALL_BOTH = 12;
+
+    public static function filter($trav, callable $callback=null, $flags=7) {
+        if($callback === null) {
+            $callback = [V::class,'isTruthy'];
+        }
+
+        foreach($trav as $k=>$v) {
+            if(Bin::hasFlag($flags, self::CALL_BOTH)) {
+                $result = call_user_func($callback, $v, $k);
+            } elseif(Bin::hasFlag($flags, self::CALL_VALUE)) {
+                $result = call_user_func($callback, $v);
+            } elseif(Bin::hasFlag($flags, self::CALL_KEY)) {
+                $result = call_user_func($callback, $k);
+            } else {
+                throw new \BadMethodCallException("Call flag not specified");
+            }
+
+            if($result) {
+                if(Bin::hasFlag($flags, self::RETURN_BOTH)) {
+                    yield $k => $v;
+                } elseif(Bin::hasFlag($flags, self::RETURN_VALUE)) {
+                    yield $v;
+                } elseif(Bin::hasFlag($flags, self::RETURN_KEY)) {
+                    yield $k;
+                } else {
+                    throw new \BadMethodCallException("Return flag not specified");
+                }
+            }
         }
     }
 
@@ -28,6 +66,20 @@ class Iter {
      */
     public static function isIterable($obj) {
         return is_array($obj) || $obj instanceof Traversable;
+    }
+
+    /**
+     * Asserts that the argument is foreachable. If not, an exception will be thrown.
+     *
+     * @param mixed $obj
+     * @param null|string $name
+     * @throws \Ptilz\Exceptions\ArgumentTypeException
+     */
+    public static function assert($obj, $name=null) {
+        if(!self::isIterable($obj)) {
+            // TODO: parse debug_backtrace to get variable name
+            throw new ArgumentTypeException($name,['array',Traversable::class]);
+        }
     }
 
     /**
@@ -44,11 +96,21 @@ class Iter {
      * Copy the iterator into an array
      *
      * @param array|Traversable $iter The iterator being copied.
-     * @param bool $use_keys Whether to use the iterator element keys as index.
+     * @param bool $include_keys Whether to use the iterator element keys as index.
      * @return array
      */
-    public static function toArray($iter, $use_keys=true) {
-        return is_array($iter) ? $iter : iterator_to_array($iter, $use_keys);
+    public static function toArray($iter, $include_keys=true) {
+        return is_array($iter)
+            ? ($include_keys ? $iter : array_values($iter))
+            : iterator_to_array($iter, $include_keys);
+    }
+
+    /**
+     * @param array|Traversable $iter
+     * @return \ArrayIterator|\IteratorIterator
+     */
+    public static function toIterator($iter) {
+        return is_array($iter) ? new \ArrayIterator($iter) : new \IteratorIterator($iter);
     }
 
     /**
@@ -148,8 +210,9 @@ class Iter {
      * @param int|float $end
      * @param int|float $step
      * @return \Generator
+     * @throws \Ptilz\Exceptions\NotImplementedException
      */
-    public static function xrange($start, $end, $step = null) {
+    public static function range($start, $end, $step = null) {
         throw new NotImplementedException;
     }
 

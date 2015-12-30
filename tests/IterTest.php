@@ -289,6 +289,47 @@ class IterTest extends PHPUnit_Framework_TestCase {
             $this->assertSame($fib2[$i], $gen2->current());
         }
     }
+
+    /**
+     * @dataProvider filterTests
+     * @param $trav
+     * @param $cb
+     * @param $flags
+     * @param $exp
+     * @param string $msg
+     */
+    function testFilter($trav, $cb, $flags, $exp, $msg='') {
+        $this->assertSame($exp,iterator_to_array(Iter::filter($trav,$cb,$flags)),$msg);
+    }
+
+
+    function filterTests() {
+        $odd = function ($var) {
+            return ($var & 1);
+        };
+        $even = function ($var) {
+            return (!($var & 1));
+        };
+        $oddInput = ["a" => 1, "b" => 2, "c" => 3, "d" => 4, "e" => 5];
+        $evenInput = [7, 8, 9, 10, 11, 12, 13];
+        return [
+            [$oddInput, $odd, 7, ['a' => 1, 'c' => 3, 'e' => 5]],
+            [$evenInput, $even, 7, [1 => 8, 3 => 10, 5 => 12]],
+
+            [$oddInput, $odd, Iter::CALL_BOTH|Iter::RETURN_BOTH, ['a' => 1, 'c' => 3, 'e' => 5]],
+            [$oddInput, $odd, Iter::CALL_BOTH|Iter::RETURN_VALUE, [1,3,5]],
+            [$oddInput, $odd, Iter::CALL_BOTH|Iter::RETURN_KEY, ['a','c','e']],
+            [$oddInput, $odd, Iter::CALL_VALUE|Iter::RETURN_BOTH, ['a' => 1, 'c' => 3, 'e' => 5]],
+            [$oddInput, $odd, Iter::CALL_VALUE|Iter::RETURN_VALUE, [1,3,5]],
+            [$oddInput, $odd, Iter::CALL_VALUE|Iter::RETURN_KEY, ['a','c','e']],
+
+            [$evenInput, $even, Iter::CALL_KEY|Iter::RETURN_KEY, [0,2,4,6]],
+            [$evenInput, $even, Iter::CALL_KEY|Iter::RETURN_VALUE, [7,9,11,13]],
+            [$evenInput, $even, Iter::CALL_VALUE|Iter::RETURN_KEY, [1,3,5]],
+            [$evenInput, $even, Iter::CALL_VALUE|Iter::RETURN_VALUE, [8,10,12]],
+            [$evenInput, $even, Iter::CALL_BOTH|Iter::RETURN_VALUE, [8,10,12]],
+        ];
+    }
 }
 
 class _Countable implements Countable {

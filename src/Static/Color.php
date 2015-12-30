@@ -616,6 +616,11 @@ class Color {
 
 
     /**
+     * Converts a CSS color string to a 32-bit unsigned integer.
+     *
+     * Output is in the format 0xAARRGGBB where AA is (1-alpha), i.e. 0x00 is fully opaque and 0xFF is fully transparent.
+     * Since only 8 bits are used to store alpha, some rounding may occur.
+     *
      * @param string $str CSS color string
      * @return int
      * @throws NotImplementedException

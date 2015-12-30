@@ -302,12 +302,12 @@ abstract class Bin {
     /**
      * Determines if an integer value contains a flag, i.e., has that bit set.
      *
-     * @param int $val  Value
-     * @param int $flag Flag
+     * @param int $flags Integer value
+     * @param int $bit Bit(s) to check
      * @return bool
      */
-    public static function hasFlag($val, $flag) {
-        return ($val & $flag) === $flag;
+    public static function hasFlag($flags, $bit) {
+        return ($flags & $bit) === $bit;
     }
 
     /**

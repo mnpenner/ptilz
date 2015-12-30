@@ -168,6 +168,15 @@ class Color {
         return self::conv_lch_rgb(self::conv_husl_lch([$h, $s, $l]));
     }
 
+    /**
+     * Convert from HUSL colorspace to RGB.
+     *
+     * @param float $h Hue [0-360]
+     * @param float $s Saturation [0-100]
+     * @param float $l Lightness [0-100]
+     * @return array [R,G,B] in [0-255]
+     * @return array
+     */
     public static function huslToRgb255($h, $s, $l) {
         return array_map(function ($x) {
             return self::floatToInt($x);
@@ -616,6 +625,11 @@ class Color {
 
 
     /**
+     * Converts a CSS color string to a 32-bit unsigned integer.
+     *
+     * Output is in the format 0xAARRGGBB where AA is (1-alpha), i.e. 0x00 is fully opaque and 0xFF is fully transparent.
+     * Since only 8 bits are used to store alpha, some rounding may occur.
+     *
      * @param string $str CSS color string
      * @return int
      * @throws NotImplementedException

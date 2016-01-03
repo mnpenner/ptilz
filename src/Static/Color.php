@@ -687,4 +687,6 @@ class Color {
             return sprintf('#%06x', $int);
         }
     }
+
+    // TODO: start a "Color" namespace and make HUSL, HSL, HSV, RGB and CSS all separate classes
 }

@@ -57,7 +57,7 @@ abstract class Arr {
             $rem = explode('[', str_replace(']', '', $rem));
             while(($k = array_shift($rem)) !== null) {
                 if(!isset($ret[$k])) {
-                    if($k === '') { // empty brackets[]
+                    if($k === '') { // empty brackets[] -- TODO: stop and return result as an array with any remaining keys passed to pluck?
                         continue;
                     }
                     return $default;
@@ -103,6 +103,7 @@ abstract class Arr {
      * @return array Rekeyed array
      */
     public static function rekey(array $arr, $key, $unset = false) {
+        // TODO: consider rename to "keyBy" and allow callable for $key, like \Illuminate\Support\Collection::keyBy
         $ret = array();
         foreach($arr as $a) {
             $k = $a[$key];
@@ -237,6 +238,7 @@ abstract class Arr {
      * @return array    Regrouped array
      */
     public static function regroup(array $arr, $keys, $unset = false, $flatten = false) {
+        // TODO: rename to groupBy? \Illuminate\Support\Collection::groupBy
         if(!is_array($keys)) {
             $keys = [$keys];
         }

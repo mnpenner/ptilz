@@ -15,7 +15,7 @@ class Color {
      * @param int $r The red color value [0-255]
      * @param int $g The green color value [0-255]
      * @param int $b The blue color value [0-255]
-     * @return array The HSL representation in [H, S, L] format, where each value is in [0-1]
+     * @return float[] The HSL representation in [H, S, L] format, where each value is in [0-1]
      * @link http://stackoverflow.com/a/9493060/65387
      */
     public static function rgbToHsl($r, $g, $b) {
@@ -161,7 +161,7 @@ class Color {
      * @param float $h Hue [0-360]
      * @param float $s Saturation [0-100]
      * @param float $l Lightness [0-100]
-     * @return array [R,G,B] in [0-1]
+     * @return float[] [R,G,B] in [0-1]
      * @see http://www.husl-colors.org/
      */
     public static function huslToRgb($h, $s, $l) {
@@ -174,8 +174,7 @@ class Color {
      * @param float $h Hue [0-360]
      * @param float $s Saturation [0-100]
      * @param float $l Lightness [0-100]
-     * @return array [R,G,B] in [0-255]
-     * @return array
+     * @return int[] [R,G,B] in [0-255]
      */
     public static function huslToRgb255($h, $s, $l) {
         return array_map(function ($x) {

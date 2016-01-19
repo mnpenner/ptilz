@@ -10,7 +10,11 @@ use Ptilz\Arr;
  */
 class ArgumentTypeException extends ArgumentException {
     public function __construct($paramName, $expectedType = null, $code = 0, Exception $previous = null) {
-        $message = "Argument `$paramName` was not of the expected type";
+        $message = "Argument ";
+        if(strlen($paramName)) {
+            $message .= "`$paramName` ";
+        }
+        $message .= "was not of the expected type";
         if($expectedType) {
             if(is_array($expectedType)) {
                 $types = $expectedType;

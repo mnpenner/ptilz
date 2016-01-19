@@ -2,12 +2,13 @@
 namespace Ptilz\Collections;
 
 use ArrayIterator;
+use Countable;
 use IteratorAggregate;
 use Ptilz\Exceptions\ArgumentTypeException;
 use Ptilz\Iter;
 use Ptilz\V;
 
-class Set implements IteratorAggregate {
+class Set implements IteratorAggregate, Countable {
     private $set;
 
     public function __construct($iter = null) {

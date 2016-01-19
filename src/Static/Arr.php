@@ -157,19 +157,24 @@ abstract class Arr {
 
     /**
      * "Pops" an element out of an array and returns it. `null` key will return the last element.
+     * If the key is not found or the array is empty, return $default instead.
      *
      * @param array $array
-     * @param string $key
+     * @param string|int|null $key
+     * @param null $default
      * @return mixed
      */
-    public static function pop(array &$array, $key = null) {
+    public static function pop(array &$array, $key = null, $default=null) {
         if($key !== null) {
-            $ret = $array[$key];
-            unset($array[$key]);
-            return $ret;
-        } else {
+            if(array_key_exists($key, $array)) {
+                $ret = $array[$key];
+                unset($array[$key]);
+                return $ret;
+            }
+        } elseif(count($array)) {
             return array_pop($array);
         }
+        return $default;
     }
 
     /**

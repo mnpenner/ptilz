@@ -159,6 +159,15 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $arr = [1,2,3,4,5,6];
         $this->assertSame(6,Arr::pop($arr));
         $this->assertSame([1,2,3,4,5],$arr);
+        $this->assertSame(5,Arr::pop($arr,null,7));
+        $this->assertSame([1,2,3,4],$arr);
+        $this->assertSame(4,Arr::pop($arr,null,7));
+        $this->assertSame(3,Arr::pop($arr,null,7));
+        $this->assertSame(2,Arr::pop($arr,null,7));
+        $this->assertSame(1,Arr::pop($arr,null,7));
+        $this->assertSame([],$arr);
+        $this->assertSame(7,Arr::pop($arr,null,7));
+        $this->assertSame([],$arr);
 
         $arr = [
             'a' => 1,
@@ -173,6 +182,18 @@ class ArrTest extends PHPUnit_Framework_TestCase {
             'b' => 2,
             'c' => 3,
             'e' => 5,
+        ],$arr);
+        $this->assertSame(5,Arr::pop($arr,null,7));
+        $this->assertSame([
+            'a' => 1,
+            'b' => 2,
+            'c' => 3,
+        ],$arr);
+        $this->assertSame(7,Arr::pop($arr,'f',7));
+        $this->assertSame([
+            'a' => 1,
+            'b' => 2,
+            'c' => 3,
         ],$arr);
     }
 

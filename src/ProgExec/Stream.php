@@ -18,7 +18,7 @@ abstract class Stream {
     public function close() {
         if($this->handle) {
             $ret = fclose($this->handle);
-            unset($this->handle);
+            $this->handle = null;
             return $ret;
         }
         return false;

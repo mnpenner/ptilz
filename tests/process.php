@@ -1,10 +1,6 @@
 #!/usr/bin/env php
 <?php
-error_reporting(E_ALL);
-ini_set('memory_limit', '512M');
-date_default_timezone_set('America/Vancouver');
-
-require '/usr/local/webenginex/www/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 $timer = microtime(true);
 $composerInfo = new \Ptilz\ProgExec\Process('composer info');
@@ -13,6 +9,9 @@ dump(microtime(true) - $timer);
 
 $timer = microtime(true);
 $composerInfo->stdout->read();
+dump(microtime(true) - $timer);
+
+$timer = microtime(true);
 $npmInfo->stdout->read();
 dump(microtime(true) - $timer);
 

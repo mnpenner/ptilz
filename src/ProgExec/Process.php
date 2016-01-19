@@ -55,9 +55,11 @@ class Process {
      */
     public function close() {
         if($this->proc) {
-            unset($this->stdin, $this->stdout, $this->stderr);
+            $this->stdin = null;
+            $this->stdout = null;
+            $this->stderr = null;
             $ret = proc_close($this->proc);
-            unset($this->proc);
+            $this->proc = null;
             return $ret;
         }
         return -1;

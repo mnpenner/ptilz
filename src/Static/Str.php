@@ -864,7 +864,7 @@ REGEX;
      * @return string Filtered string with replaced "nice" characters.
      * @credit https://core.trac.wordpress.org/browser/tags/3.9/src/wp-includes/formatting.php#L682
      */
-    public static function removeDiacritics($string) {
+    public static function removeDiacritics($string) { // TODO: aka "deburr" (https://lodash.com/docs#deburr)
         if(!preg_match('/[\x80-\xff]/', $string))
             return $string;
 
@@ -1226,11 +1226,12 @@ REGEX;
     /**
      * Transform text into a URL slug. Removes accents and replaces whitespaces with dashes.
      *
-     * @param string $str
+     * @param string $str String to slugify
+     * @param string $replacementChar Replace invalid characters with this
      * @return string
      */
-    public static function slugify($str) {
-        return trim(preg_replace('~[^a-z0-9]+~','-',strtolower(str_replace("'",'',self::removeDiacritics($str)))),'-');
+    public static function slugify($str, $replacementChar='-') {
+        return trim(preg_replace('~[^a-z0-9]+~',$replacementChar,strtolower(str_replace("'",'',self::removeDiacritics($str)))),$replacementChar);
     }
 
     /**

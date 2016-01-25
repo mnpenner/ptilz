@@ -206,6 +206,8 @@ FAIL CASE:
         $this->assertSame('MyLittleCamelClassName', Str::classify("myLittleCamel.class.name"));
         $this->assertSame('123', Str::classify(123));
         $this->assertSame('', Str::classify(''));
+        $this->assertSame('AddUserTable', Str::classify('Add user table'));
+        $this->assertSame('AddUserTable', Str::classify('AddUserTable'));
     }
 
     function testUnderscored() {
@@ -257,6 +259,7 @@ FAIL CASE:
         $this->assertSame('i-know-latin-characters-a-i-o-u-c-a-o-n-u-a-s-t', Str::slugify('I know latin characters: á í ó ú ç ã õ ñ ü ă ș ț'));
         $this->assertSame('i-am-a-word-too-even-though-i-am-but-a-single-letter-i', Str::slugify('I am a word too, even though I am but a single letter: i!'));
         $this->assertSame('', Str::slugify(''));
+        $this->assertSame('add_user_table', Str::slugify('Add user table','_'));
     }
 
     function testTruncate() {

@@ -818,12 +818,16 @@ REGEX;
     /**
      * Converts string to camelized class name. First letter is always upper case
      *
-     * @param string $str
-     * @throws NotImplementedException
+     * @param string $str String to turn into a class name
+     * @param string|null $prefix Prefix to use if string begins with a number
      * @return string
      */
-    public static function classify($str) {
-        return implode('',array_map('ucfirst',self::splitCodeWords($str)));
+    public static function classify($str, $prefix=null) {
+        $name = implode('',array_map('ucfirst',self::splitCodeWords($str)));
+        if(strlen($prefix) && preg_match('#\d#A',$name)) {
+            $name = '_'.$name;
+        }
+        return $name;
     }
 
     /**

@@ -208,6 +208,7 @@ FAIL CASE:
         $this->assertSame('Foo123', Str::classify('foo123'));
         $this->assertSame('Foo123', Str::classify('foo 123'));
         $this->assertSame('_123', Str::classify(123,'_'));
+        $this->assertSame('i123', Str::classify(123,'i'));
         $this->assertSame('', Str::classify(''));
         $this->assertSame('AddUserTable', Str::classify('Add user table'));
         $this->assertSame('AddUserTable', Str::classify('AddUserTable'));

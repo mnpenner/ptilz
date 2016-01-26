@@ -825,7 +825,7 @@ REGEX;
     public static function classify($str, $prefix=null) {
         $name = implode('',array_map('ucfirst',self::splitCodeWords($str)));
         if(strlen($prefix) && preg_match('#\d#A',$name)) {
-            $name = '_'.$name;
+            $name = $prefix.$name;
         }
         return $name;
     }

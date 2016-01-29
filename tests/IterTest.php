@@ -33,14 +33,14 @@ class IterTest extends PHPUnit_Framework_TestCase {
     function testAll() {
         $this->assertTrue(Iter::all([1, 2, 'a', '0', 'b', ['c']]));
         $this->assertFalse(Iter::all([1, 2, 'a', 0, 'b', ['c']]));
-        $this->assertTrue(Iter::all([1, '2', 3.14, '4e5', '0xDEADBEEF'], 'is_numeric'));
+        $this->assertTrue(Iter::all([1, '2', 3.14, '4e5'], 'is_numeric')); // '0xDEADBEEF' is *not* numeric as of PHP 7
     }
 
     function testAny() {
         $this->assertTrue(Iter::any([0, false, true, null]));
         $this->assertFalse(Iter::any([0, false, []]));
         $this->assertFalse(Iter::any(['what', 'does', 'the', 'fox', 'say'], 'is_numeric'));
-        $this->assertTrue(Iter::any(['yip', 'yiiiip', '0xcafe'], 'is_numeric'));
+        $this->assertTrue(Iter::any(['yip', 'yiiiip', '2.718281828459'], 'is_numeric')); // '0xcafe' is *not* numeric as of PHP 7
     }
 
     function testCountable() {

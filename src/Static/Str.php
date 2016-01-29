@@ -545,11 +545,11 @@ abstract class Str {
 
     /**
      * @param string $format
-     * @param mixed  ...$args
+     * @param mixed[]  ...$args
      * @return string
      */
-    public static function format($format) {
-        return self::formatArgs($format, array_slice(func_get_args(), 1));
+    public static function format($format, ...$args) {
+        return self::formatArgs($format, $args);
     }
 
     /**

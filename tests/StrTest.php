@@ -92,7 +92,7 @@ class StrTest extends PHPUnit_Framework_TestCase {
         //$this->assertSame('b16,077F', Str::format('{}', "\x07\x7F"));
 
         $this->assertSame('xyz', Str::format('{:s}', new _toStringable));
-        $this->assertSame('3 3. "3"', Str::format('{:e} {:e} {:e}', 3, 3., '3'));
+        $this->assertSame('3 3.0 "3"', Str::format('{:e} {:e} {:e}', 3, 3., '3'));
         $this->assertSame('65-122', Str::format('{:d}-{:d}', 'A', 'z'));
     }
 

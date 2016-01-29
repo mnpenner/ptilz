@@ -150,7 +150,7 @@ abstract class V {
         if(is_string($var)) return Str::export($var);
         $ret = var_export($var, true);
         if(is_float($var) && strpos($ret,'.') === false) {
-            $ret .= '.';
+            $ret .= '.0'; // PHP 7 now adds returns "3.0" for `var_export(3.)` instead of "3"
         }
         return $ret;
 

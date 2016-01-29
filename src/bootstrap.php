@@ -45,18 +45,24 @@ if(!function_exists('intdiv')) {
     /**
      * Integer division
      *
-     * @param int $numerator Number to be divide.
-     * @param int $divisor   Number which divides the numerator
-     * @return int The integer division of numerator by divisor. If divisor is zero, it throws an E_WARNING and returns FALSE.
+     * @param int $dividend Number to be divided.
+     * @param int $divisor Number which divides the dividend.
+     * @return int The integer quotient of the division of dividend by divisor.
+     * @throws ArithmeticError
+     * @throws DivisionByZeroError
      * @see https://wiki.php.net/rfc/intdiv
      * @see http://php.net/intdiv
      */
-    function intdiv($numerator, $divisor) {
-        if($divisor == 0) {
-            trigger_error("Division by zero", E_USER_WARNING);
-            return false;
+    function intdiv($dividend, $divisor) {
+        $dividend = (int)$dividend;
+        $divisor = (int)$divisor;
+        if($divisor === 0) {
+            throw new DivisionByZeroError("Division by zero");
         }
-        return (int)($numerator/$divisor);
+        if($dividend === PHP_INT_MIN && $divisor === -1) {
+            throw new ArithmeticError("Division of PHP_INT_MIN by -1 is not an integer");
+        }
+        return (int)($dividend/$divisor);
     }
 }
 
@@ -67,5 +73,26 @@ if(!interface_exists('Throwable')) {
      * @link http://php.net/manual/en/class.throwable.php
      * @since 7.0
      */
-    class Throwable extends \Exception {}
+    class Throwable extends \Exception {} // technically, Exception should extend Throwable, not the other way around, but I can't make that happen :D
+}
+
+if(!class_exists('Error')) {
+    /**
+     * Error is the base class for all internal PHP errors.
+     */
+    class Error extends \Throwable {}
+}
+
+if(!class_exists('ArithmeticError')) {
+    /**
+     * ArithmeticError is thrown when an error occurs while performing mathematical operations. In PHP 7.0, these errors include attempting to perform a bitshift by a negative amount, and any call to intdiv() that would result in a value outside the possible bounds of an integer.
+     */
+    class ArithmeticError extends \Error {}
+}
+
+if(!class_exists('DivisionByZeroError')) {
+    /**
+     * DivisionByZeroError is thrown when an attempt is made to divide a number by zero.
+     */
+    class DivisionByZeroError extends \ArithmeticError {}
 }

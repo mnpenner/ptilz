@@ -15,11 +15,12 @@ class BootstrapTest extends PHPUnit_Framework_TestCase {
 
 
     function testInddiv0() {
-        try {
-            $this->assertFalse(@intdiv(1, 0));
-//            $this->fail("Expected DivisionByZeroError exception");
-        } catch(\Throwable $ex) {
+        $this->setExpectedException(DivisionByZeroError::class);
+        $this->assertFalse(intdiv(1, 0));
+    }
 
-        }
+    function testInddiv1() {
+        $this->setExpectedException(ArithmeticError::class);
+        $this->assertFalse(intdiv(PHP_INT_MIN, -1));
     }
 }

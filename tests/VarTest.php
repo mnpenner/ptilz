@@ -8,7 +8,7 @@ class VarTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('[1,2,3]',V::toString([1,2,3]));
         $this->assertSame('{a:1,2:"b"}',V::toString(['a'=>1,2=>'b']));
         $this->assertSame('b16,077F', V::toString("\x07\x7F"));
-        $this->assertSame('_Debuggable{x:1,y:"a"}', V::toString(new _Debuggable));
+        $this->assertSame('Debuggable_1454626696{x:1,y:"a"}', V::toString(new Debuggable_1454626696));
         // todo: add some more tests
     }
 
@@ -45,14 +45,40 @@ class VarTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(V::isFalsey(0));
         $this->assertTrue(V::isFalsey(null));
     }
+
+    function testIsEmpty() {
+        $this->assertTrue(V::isEmpty([]));
+        $this->assertTrue(V::isEmpty(''));
+        $this->assertTrue(V::isEmpty(new Countable_1454626667(0)));
+
+        $this->assertFalse(V::isEmpty(0));
+        $this->assertFalse(V::isEmpty('0'));
+        $this->assertFalse(V::isEmpty(1));
+        $this->assertFalse(V::isEmpty(-1));
+        $this->assertFalse(V::isEmpty(0.0000001));
+        $this->assertFalse(V::isEmpty(new Countable_1454626667(1)));
+    }
 }
 
-class _Debuggable {
+class Debuggable_1454626696 {
     function __debugInfo() {
         return [
             'x' => 1,
             'y' => 'a',
         ];
     }
+}
 
+class Countable_1454626667 implements Countable {
+    /** @var int */
+    private $count;
+
+    public function __construct($count) {
+        $this->count = $count;
+    }
+
+
+    public function count() {
+        return $this->count;
+    }
 }

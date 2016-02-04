@@ -59,6 +59,30 @@ abstract class V {
     }
 
     /**
+     * Checks if a collection is empty.
+     *
+     * Numbers and booleans are *not* considered empty.
+     *
+     * @param mixed $collection
+     * @return bool
+     */
+    public static function isEmpty($collection) {
+        if($collection === null || $collection === '' || $collection === []) {
+            return true;
+        }
+        if($collection instanceof \Countable) {
+            return count($collection) === 0;
+        }
+        if($collection instanceof \Traversable) {
+            foreach($collection as $_) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Returns the first truthy argument (according to V::isTruthy)
      * @return mixed
      */

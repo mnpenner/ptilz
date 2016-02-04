@@ -45,7 +45,7 @@ class IterTest extends PHPUnit_Framework_TestCase {
 
     function testCountable() {
         $this->assertTrue(Iter::isCountable([]));
-        $this->assertTrue(Iter::isCountable(new _Countable));
+        $this->assertTrue(Iter::isCountable(new Countable_1454626764));
         $this->assertFalse(Iter::isCountable(5));
         $this->assertFalse(Iter::isCountable('foo'));
     }
@@ -332,7 +332,7 @@ class IterTest extends PHPUnit_Framework_TestCase {
     }
 }
 
-class _Countable implements Countable {
+class Countable_1454626764 implements Countable {
     public function count() {
         return 1;
     }

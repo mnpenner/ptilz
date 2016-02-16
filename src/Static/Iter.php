@@ -21,13 +21,39 @@ class Iter {
         }
     }
 
+    /**
+     * Return just the keys from $callback
+     */
     const RETURN_KEY = 1;
+    /**
+     * Return just the values from $callback
+     */
     const RETURN_VALUE = 2;
+    /**
+     * Return both the keys and values from $callback
+     */
     const RETURN_BOTH = 3;
+    /**
+     * Call $callback with value only
+     */
     const CALL_VALUE = 4;
+    /**
+     * Call $callback with key only
+     */
     const CALL_KEY = 8;
+    /**
+     * Call callback with value and key
+     */
     const CALL_BOTH = 12;
 
+    /**
+     * Filters an iterable to contain just the keys/values that pass the callback.
+     *
+     * @param array|\Traversable $trav Traversable
+     * @param callable|null $callback Function to call for each element
+     * @param int $flags Affects what's passed to $callback and what's returned (yielded)
+     * @return Generator
+     */
     public static function filter($trav, callable $callback=null, $flags=7) {
         if($callback === null) {
             $callback = [V::class,'isTruthy'];

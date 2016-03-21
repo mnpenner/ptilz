@@ -30,11 +30,11 @@ function crockford32_encode($data) {
     $remainder = 0;
     $remainderSize = 0;
 
-    for($i = 0; $i < $dataSize; $i++) {
+    for($i = 0; $i < $dataSize; ++$i) {
         $b = ord($data[$i]);
         $remainder = ($remainder << 8) | $b;
         $remainderSize += 8;
-        while($remainderSize > 4) {
+        while($remainderSize >= 5) {
             $remainderSize -= 5;
             $c = $remainder & ($mask << $remainderSize);
             $c >>= $remainderSize;
@@ -114,13 +114,13 @@ function crockford32_decode($data) {
         'z' => 31,
     ];
 
-    $data = strtolower($data);
+    $data .= "0";
     $dataSize = strlen($data);
     $buf = 0;
     $bufSize = 0;
     $res = '';
 
-    for($i = 0; $i < $dataSize; $i++) {
+    for($i = 0; $i < $dataSize; ++$i) {
         $c = $data[$i];
         if(!isset($map[$c])) {
             throw new \Exception("Unsupported character $c (0x".bin2hex($c).") at position $i");
@@ -128,12 +128,16 @@ function crockford32_decode($data) {
         $b = $map[$c];
         $buf = ($buf << 5) | $b;
         $bufSize += 5;
-        if($bufSize > 7) {
+        if($bufSize >= 8) {
             $bufSize -= 8;
             $b = ($buf & (0xff << $bufSize)) >> $bufSize;
             $res .= chr($b);
         }
     }
+
+//    dump(decbin($b));
+//    dump(decbin($buf));
+//    dump($bufSize);
 
     return $res;
 }
@@ -154,6 +158,7 @@ function crockford32_decode($data) {
 function uuid($raw_output=false) {
     $bytes = openssl_random_pseudo_bytes(16);
     $bytes[15] = chr(ord($bytes) & 0b11111000); // chop off 3 bits to make 125 bits total
+//    return $raw_output ? $bytes : crockford32_encode($bytes);
     return $raw_output ? $bytes : substr(crockford32_encode($bytes),0,-1);
 }
 
@@ -165,12 +170,24 @@ function uuid($raw_output=false) {
 //}
 
 for($i=0; $i<10; ++$i) {
-    $uuid = uuid();
-    $raw = crockford32_decode($uuid);
-    dump(strlen($raw)); // fixme: wtf?? where'd the last byte go?
-//    $uuid = openssl_random_pseudo_bytes(16);
-    dump('base64 '.base64_encode($raw));
-    dump('base32 '.$uuid);
-    dump('base16 '.bin2hex($raw));
+    dump(uuid());
+//    $uuid = uuid();
+//    $raw = crockford32_decode($uuid);
+////    dump(strlen($uuid));
+////    dump(strlen($raw)); // fixme: wtf?? where'd the last byte go?
+////    $uuid = openssl_random_pseudo_bytes(16);
+//    dump('uuid   '.$uuid);
+//    dump('base32 '.crockford32_encode($raw));
+//    dump('base64 '.base64_encode($raw));
+//    dump('base16 '.bin2hex($raw));
 }
 
+
+
+//dump(crockford32_encode("A"));
+//dump(crockford32_decode("A"));
+//dump(crockford32_decode("AA"));
+//dump(crockford32_decode("AAA"));
+//dump(crockford32_decode("AAAA"));
+//dump(crockford32_decode("AAAAA"));
+//dump(crockford32_decode("AAAAAA"));

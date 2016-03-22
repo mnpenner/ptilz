@@ -191,3 +191,88 @@ for($i=0; $i<10; ++$i) {
 //dump(crockford32_decode("AAAA"));
 //dump(crockford32_decode("AAAAA"));
 //dump(crockford32_decode("AAAAAA"));
+
+
+
+
+__halt_compiler();
+
+
+http://codegolf.stackexchange.com/a/75950/23090
+
+var f = (a, n, b = 0, t = 0, r = []) =>
+		b < n
+			? a.length
+				? f(a.slice(1), n, b + 8, t * 256 + a[0], r)
+				: b
+					? [...r, t << n - b]
+					: r
+			: f(a, n, b -= n, t & (1 << b) - 1, [...r, t >> b]);
+
+
+
+function bits(a, n, b=0,t=0, r=[]) {
+	if(b < n) {
+		if(a.length) {
+			return bits(a.slice(1), n, b+8, t*256 + a[0], r);
+		} else {
+			return b ? [...r, t << n - b] : r;
+		}
+	} else {
+		b -= n;
+		return bits(a, n, b, t & (1 << b) - 1, [...r, t >> b]);
+	}
+}
+
+
+
+function bits(a, n, b, t, r) {
+	b = b || 0;
+	t = t || 0;
+	r = r || [];
+
+	if (b < n) {
+		if (a.length) {
+			return bits(a.slice(1), n, b + 8, t * 256 + a[0], r);
+		} else {
+			return b ? Array.prototype.concat(r, [t << n - b]) : r;
+		}
+	} else {
+		b -= n;
+		return bits(a, n, b, t & (1 << b) - 1, Array.prototype.concat(r, [t >> b]));
+	}
+}
+
+
+/////////////////
+
+
+function regroupBits(a, n, b=0,t=0, r=[]) {
+	if(b < n) {
+		if(a.length) {
+			return regroupBits(a.slice(1), n, b+8, t*256 + a[0], r);
+		} else {
+			return b ? [...r, t << n - b] : r;
+		}
+	} else {
+		b -= n;
+		return regroupBits(a, n, b, t & (1 << b) - 1, [...r, t >> b]);
+	}
+}
+
+console.log(regroupBits([102,48,111,66,97,82],5));
+
+function regroupBuffer(buf, n) {
+    return regroupBits([...buf].map(ch => ch.codePointAt(0)), n);
+}
+
+console.log(regroupBuffer("f0oBaR", 5));
+
+function uuid() {
+  const alphabet = '0123456789abcdefghjkmnpqrstvwxyz';
+  let bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return regroupBits(bytes, 5).slice(0,-1).map(i => alphabet[i]).join('');
+}
+
+console.log(uuid());

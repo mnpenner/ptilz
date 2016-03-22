@@ -1,6 +1,8 @@
 <?php
 
 // https://en.wikipedia.org/wiki/Base32#Crockford.27s_Base32
+use Ptilz\Bin;
+
 require __DIR__ . '/../vendor/autoload.php';
 
 
@@ -22,44 +24,17 @@ require __DIR__ . '/../vendor/autoload.php';
 //}
 
 function crockford32_encode($data) {
-    $chars = '0123456789abcdefghjkmnpqrstvwxyz';
-    $mask = 0b11111;
-
-    $dataSize = strlen($data);
-    $res = '';
-    $remainder = 0;
-    $remainderSize = 0;
-
-    for($i = 0; $i < $dataSize; ++$i) {
-        $b = ord($data[$i]);
-        $remainder = ($remainder << 8) | $b;
-        $remainderSize += 8;
-        while($remainderSize >= 5) {
-            $remainderSize -= 5;
-            $c = $remainder & ($mask << $remainderSize);
-            $c >>= $remainderSize;
-            $res .= $chars[$c];
-        }
-    }
-    if($remainderSize > 0) {
-        $remainder <<= (5 - $remainderSize);
-        $c = $remainder & $mask;
-        $res .= $chars[$c];
-    }
-
-    return $res;
+    return implode('', array_map(function ($d) {
+        return '0123456789abcdefghjkmnpqrstvwxyz'[$d];
+    }, array_map('bindec', str_split(str_pad(implode('', array_map(function ($s) {
+        return str_pad($s, 8, '0', STR_PAD_LEFT);
+    }, array_map('decbin', array_map('ord', str_split($data))))),ceil(strlen($data)*8/5)*5,'0',STR_PAD_RIGHT), 5))));
 }
 
 function crockford32_decode($data) {
     $map = [
-        '0' => 0,
-        'O' => 0,
-        'o' => 0,
-        '1' => 1,
-        'I' => 1,
-        'i' => 1,
-        'L' => 1,
-        'l' => 1,
+        '0' => 0, 'O' => 0, 'o' => 0,
+        '1' => 1, 'I' => 1, 'i' => 1, 'L' => 1, 'l' => 1,
         '2' => 2,
         '3' => 3,
         '4' => 4,
@@ -68,78 +43,46 @@ function crockford32_decode($data) {
         '7' => 7,
         '8' => 8,
         '9' => 9,
-        'A' => 10,
-        'a' => 10,
-        'B' => 11,
-        'b' => 11,
-        'C' => 12,
-        'c' => 12,
-        'D' => 13,
-        'd' => 13,
-        'E' => 14,
-        'e' => 14,
-        'F' => 15,
-        'f' => 15,
-        'G' => 16,
-        'g' => 16,
-        'H' => 17,
-        'h' => 17,
-        'J' => 18,
-        'j' => 18,
-        'K' => 19,
-        'k' => 19,
-        'M' => 20,
-        'm' => 20,
-        'N' => 21,
-        'n' => 21,
-        'P' => 22,
-        'p' => 22,
-        'Q' => 23,
-        'q' => 23,
-        'R' => 24,
-        'r' => 24,
-        'S' => 25,
-        's' => 25,
-        'T' => 26,
-        't' => 26,
-        'V' => 27,
-        'v' => 27,
-        'W' => 28,
-        'w' => 28,
-        'X' => 29,
-        'x' => 29,
-        'Y' => 30,
-        'y' => 30,
-        'Z' => 31,
-        'z' => 31,
+        'A' => 10, 'a' => 10,
+        'B' => 11, 'b' => 11,
+        'C' => 12, 'c' => 12,
+        'D' => 13, 'd' => 13,
+        'E' => 14, 'e' => 14,
+        'F' => 15, 'f' => 15,
+        'G' => 16, 'g' => 16,
+        'H' => 17, 'h' => 17,
+        'J' => 18, 'j' => 18,
+        'K' => 19, 'k' => 19,
+        'M' => 20, 'm' => 20,
+        'N' => 21, 'n' => 21,
+        'P' => 22, 'p' => 22,
+        'Q' => 23, 'q' => 23,
+        'R' => 24, 'r' => 24,
+        'S' => 25, 's' => 25,
+        'T' => 26, 't' => 26,
+        'V' => 27, 'v' => 27,
+        'W' => 28, 'w' => 28,
+        'X' => 29, 'x' => 29,
+        'Y' => 30, 'y' => 30,
+        'Z' => 31, 'z' => 31,
     ];
 
-    $data .= "0";
-    $dataSize = strlen($data);
-    $buf = 0;
-    $bufSize = 0;
-    $res = '';
-
-    for($i = 0; $i < $dataSize; ++$i) {
+    $buf = array_fill(0, count($data), 0);
+    $len = strlen($data);
+    for($i=0; $i<$len; ++$i) {
         $c = $data[$i];
         if(!isset($map[$c])) {
-            throw new \Exception("Unsupported character $c (0x".bin2hex($c).") at position $i");
+            throw new \Exception("Unsupported character '$c' (0x".bin2hex($c).") at position $i");
         }
-        $b = $map[$c];
-        $buf = ($buf << 5) | $b;
-        $bufSize += 5;
-        if($bufSize >= 8) {
-            $bufSize -= 8;
-            $b = ($buf & (0xff << $bufSize)) >> $bufSize;
-            $res .= chr($b);
-        }
+        $buf[$i] = $map[$c];
     }
 
-//    dump(decbin($b));
-//    dump(decbin($buf));
-//    dump($bufSize);
+    //dump($buf);
+    //dump(str_split(substr(implode('',array_map(function($x) { return str_pad($x,5,'0',STR_PAD_LEFT); }, array_map('decbin', $buf))),0,floor($len*5/8)*8),8));
+    //dump(implode('',array_map(function($x) { return str_pad($x,5,'0',STR_PAD_LEFT); }, array_map('decbin', $buf))));
+    //dump(str_split(str_pad(implode('',array_map(function($x) { return str_pad($x,5,'0',STR_PAD_LEFT); }, array_map('decbin', $buf))),ceil($len*5/8)*8,'0',STR_PAD_RIGHT),8));
 
-    return $res;
+    return implode('',array_map('chr',array_map('bindec',str_split(substr(implode('',array_map(function($x) { return str_pad($x,5,'0',STR_PAD_LEFT); }, array_map('decbin', $buf))),0,floor($len*5/8)*8),8))));
 }
 
 /**
@@ -169,19 +112,28 @@ function uuid($raw_output=false) {
 //    }
 //}
 
-for($i=0; $i<10; ++$i) {
-    dump(uuid());
-//    $uuid = uuid();
-//    $raw = crockford32_decode($uuid);
-////    dump(strlen($uuid));
-////    dump(strlen($raw)); // fixme: wtf?? where'd the last byte go?
-////    $uuid = openssl_random_pseudo_bytes(16);
-//    dump('uuid   '.$uuid);
-//    dump('base32 '.crockford32_encode($raw));
-//    dump('base64 '.base64_encode($raw));
-//    dump('base16 '.bin2hex($raw));
+for($i=0; $i<1; ++$i) {
+    //$bytes = Bin::secureRandomBytes(mt_rand(1, 100));
+    //if(crockford32_decode(crockford32_encode($bytes)) !== $bytes) {
+    //    dump($bytes);
+    //    exit;
+    //}
+//    dump(crockford32_encode($bytes));
+//    dump(uuid());
+    $uuid = uuid();
+    $raw = crockford32_decode($uuid);
+//    dump(strlen($uuid));
+//    dump(strlen($raw)); // fixme: wtf?? where'd the last byte go?
+//    $uuid = openssl_random_pseudo_bytes(16);
+    dump('uuid   '.$uuid);
+    dump('base32 '.crockford32_encode($raw));
+    dump('base64 '.base64_encode($raw));
+    dump('base16 '.bin2hex($raw));
 }
 
+
+//dump(crockford32_encode('Mark'));
+//dump(crockford32_decode('9ngq4tr'));
 
 
 //dump(crockford32_encode("A"));
@@ -191,3 +143,9 @@ for($i=0; $i<10; ++$i) {
 //dump(crockford32_decode("AAAA"));
 //dump(crockford32_decode("AAAAA"));
 //dump(crockford32_decode("AAAAAA"));
+
+__halt_compiler();
+
+"uuid   x6xc2d4xh5fwczt94e4xz90vx0"
+"uuid   e195kkce43qx94dz9wc8ntmge"
+"base32 e195kkce43qx94dz9wc8ntmg"

@@ -9,6 +9,8 @@ class ProgressBar {
     private $width;
     private $start_time;
     private $last_str_length;
+    private $last_render_time;
+    private $last_line;
 
 
     /**
@@ -48,8 +50,7 @@ class ProgressBar {
      * Increment the progressbar and re-render.
      */
     public function increment() {
-        ++$this->current;
-        $this->render();
+        $this->update($this->current+1);
     }
 
     /**
@@ -57,6 +58,11 @@ class ProgressBar {
      */
     public function render() {
         $percent = min($this->current/$this->max,1);
+        $now = microtime(true);
+        if($percent < 1 && $this->last_render_time !== null && ($now - $this->last_render_time) < 0.033333) {
+            return; // rate-limit to 30 FPS
+        }
+        $this->last_render_time = $now;
         $inner_width = $this->width;
         $dt = microtime(true) - $this->start_time;
         if($dt >= 5 && $percent >= 0.03 && $percent < 1) {
@@ -74,7 +80,12 @@ class ProgressBar {
             $filler .= Str::substr($sub, $rem-1, 1);
         }
         $bar_str = '<bg:dark-grey;fg:bright-green>'.Str::pad($filler,$inner_width," ").'</>';
-        $this->writeline("$percent_str $bar_str$suffix");
+        $full_line = "$percent_str $bar_str$suffix";
+        if($full_line === $this->last_line) {
+            return;
+        }
+        $this->last_line = $full_line;
+        $this->writeline($full_line);
     }
 
     /**

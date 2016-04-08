@@ -36,6 +36,7 @@ abstract class Cli { // fixme: rename to Console:: ? Or Term::?
                     switch(strtok($attr,':')) {
                         case 'fg': $codes[] = 39; break;
                         case 'bg': $codes[] = 49; break;
+                        case '': $codes[] = 0; break;
                         case 'all': $codes[] = 0; break;
                         case 'b': $codes[] = 22; break;
                         case 'bright': $codes[] = 22; break;
@@ -154,7 +155,7 @@ abstract class Cli { // fixme: rename to Console:: ? Or Term::?
             return implode(';',$codes);
         };
 
-        return htmlspecialchars_decode(preg_replace_callback('~<(?<tag>/?[a-z0-9:;-]+)>~', function ($m) use ($replaceMatch) {
+        return htmlspecialchars_decode(preg_replace_callback('~<(?<tag>/?[a-z0-9:;-]*)>~', function ($m) use ($replaceMatch) {
             $code = $replaceMatch($m[1]);
             return $code === null ? $m[0] : "\033[{$code}m";
         }, $str), ENT_QUOTES|ENT_HTML5);

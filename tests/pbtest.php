@@ -6,9 +6,9 @@ use Ptilz\ProgressBar;
 require __DIR__ . '/../vendor/autoload.php';
 
 
-$count = mt_rand(10,10000);
+$count = mt_rand(10,100000);
 
-echo "Processing $count items...\n";
+echo "Processing ".number_format($count)." items...\n";
 
 $pb = new ProgressBar($count);
 

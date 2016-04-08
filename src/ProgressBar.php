@@ -57,7 +57,7 @@ class ProgressBar {
      */
     public function render() {
         $percent = min($this->current/$this->max,1);
-        $inner_width = $this->width-2;
+        $inner_width = $this->width;
         $dt = microtime(true) - $this->start_time;
         if($dt >= 5 && $percent >= 0.03 && $percent < 1) {
             $eta = (1-$percent)/$percent*$dt;
@@ -73,7 +73,7 @@ class ProgressBar {
         if($rem > 0) {
             $filler .= Str::substr($sub, $rem-1, 1);
         }
-        $bar_str = '<fg:white>║</><bg:dark-grey;fg:bright-green>'.Str::pad($filler,$inner_width," ").'</><fg:white>║</>';
+        $bar_str = '<bg:dark-grey;fg:bright-green>'.Str::pad($filler,$inner_width," ").'</>';
         $this->writeline("$percent_str $bar_str$suffix");
     }
 

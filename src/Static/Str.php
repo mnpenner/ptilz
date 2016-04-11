@@ -1623,12 +1623,12 @@ REGEX;
     /**
      * Pad a string to a certain length with another string
      *
-     * @param string $input The input string.
+     * @param string $input The input string
      * @param int $pad_length If the value of pad_length is negative, less than, or equal to the length of the input string, no padding takes place, and input will be returned.
-     * @param string $pad_string
-     * @param int $pad_type
-     * @param null|string $encoding
-     * @return string
+     * @param string $pad_string The string to be repeated and used as padding
+     * @param int $pad_type Can be STR_PAD_RIGHT, STR_PAD_LEFT, or STR_PAD_BOTH.
+     * @param null|string $encoding Character encoding
+     * @return string The padded string
      * @throws NotImplementedException
      */
     public static function pad($input, $pad_length, $pad_string=' ', $pad_type=STR_PAD_RIGHT, $encoding=null) {

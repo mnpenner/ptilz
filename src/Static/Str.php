@@ -1620,19 +1620,35 @@ REGEX;
         return rtrim($nbr,'.');
     }
 
+    /**
+     * Pad a string to a certain length with another string
+     *
+     * @param string $input The input string.
+     * @param int $pad_length If the value of pad_length is negative, less than, or equal to the length of the input string, no padding takes place, and input will be returned.
+     * @param string $pad_string
+     * @param int $pad_type
+     * @param null|string $encoding
+     * @return string
+     * @throws NotImplementedException
+     */
     public static function pad($input, $pad_length, $pad_string=' ', $pad_type=STR_PAD_RIGHT, $encoding=null) {
         if($encoding === null) $encoding = mb_internal_encoding();
         $input_length = self::length($input, $encoding);
-        $pad_chars = (int)ceil(($pad_length - $input_length)/self::length($pad_string));
-        if($pad_chars > 0) {
+        $pad_times = (int)ceil(($pad_length - $input_length)/self::length($pad_string));
+        if($pad_times > 0) {
+            $full_pad_string = str_repeat($pad_string, $pad_times);
             switch($pad_type) {
                 case STR_PAD_RIGHT:
-                    $padding = str_repeat($pad_string, $pad_chars);
-                    return $input. self::substr($padding, $input_length+self::length($padding)-$pad_length, null, $encoding);
+                    return $input. self::substr($full_pad_string, $input_length+self::length($full_pad_string)-$pad_length, null, $encoding);
                 case STR_PAD_LEFT:
-                    return self::substr(str_repeat($pad_string, $pad_chars), 0, $pad_length - $input_length, $encoding) .$input;
+                    return self::substr($full_pad_string, 0, $pad_length - $input_length, $encoding) .$input;
+                case STR_PAD_BOTH:
+                    $pad_chars = ($pad_length-$input_length)/2;
+                    $left_pad = (int)floor($pad_chars);
+                    $right_pad = (int)ceil($pad_chars);
+                    return self::substr($full_pad_string, 0, $left_pad, $encoding).$input.self::substr($full_pad_string, self::length($full_pad_string)-$right_pad, null, $encoding);
                 default:
-                    throw new NotImplementedException();
+                    throw new NotImplementedException("\$pad_type=$pad_type");
             }
         }
         return $input;

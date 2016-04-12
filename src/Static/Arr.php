@@ -388,14 +388,32 @@ abstract class Arr {
     /**
      * Determines if an array is "associative" (like a dictionary or hash map). True if at least one index is "out of place".
      *
-     * @param array $arr
+     * @param array $arr Array to test
+     * @param bool $quick Perform a quick test (does not check every single key)
      * @return bool
      */
-    public static function isAssoc(array $arr) {
-        $i = 0;
-        foreach($arr as $k => $v) {
-            if($k !== $i) return true;
-            ++$i;
+    public static function isAssoc(array $arr, $quick=false) {
+        if($quick && count($arr) > 10) {
+            $i = 0;
+            foreach($arr as $k => $v) {
+                if($k !== $i) return true;
+                if($i >= 4) break;
+                ++$i;
+            }
+
+            $i = count($arr) - 1;
+            $end = $i - 4;
+            for(end($arr),$k=key($arr); $k!==null; prev($arr),$k=key($arr)){
+                if($k !== $i) return true;
+                if($k <= $end) break;
+                --$i;
+            }
+        } else {
+            $i = 0;
+            foreach($arr as $k => $v) {
+                if($k !== $i) return true;
+                ++$i;
+            }
         }
         return false;
     }
@@ -403,16 +421,12 @@ abstract class Arr {
     /**
      * Determines if an array is "real" -- that is, contains only sequential integer indices starting with 0.
      *
-     * @param array $arr
+     * @param array $arr Array to test
+     * @param bool $quick Perform a quick test (does not check every single key)
      * @return bool
      */
-    public static function isNumeric(array $arr) {
-        $i = 0;
-        foreach($arr as $k => $v) {
-            if($k !== $i) return false;
-            ++$i;
-        }
-        return true;
+    public static function isNumeric(array $arr, $quick=false) {
+        return !static::isAssoc($arr, $quick);
     }
 
     /**

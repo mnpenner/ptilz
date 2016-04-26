@@ -9,6 +9,8 @@ class ProgressBar {
     private $width;
     private $start_time;
     private $last_str_length;
+    private $last_render_time;
+    private $last_line;
 
 
     /**
@@ -48,8 +50,7 @@ class ProgressBar {
      * Increment the progressbar and re-render.
      */
     public function increment() {
-        ++$this->current;
-        $this->render();
+        $this->update($this->current+1);
     }
 
     /**
@@ -57,13 +58,34 @@ class ProgressBar {
      */
     public function render() {
         $percent = min($this->current/$this->max,1);
-        $bar_width = $this->width-2;
+        $now = microtime(true);
+        if($percent < 1 && $this->last_render_time !== null && ($now - $this->last_render_time) < 0.033333) {
+            return; // rate-limit to 30 FPS
+        }
+        $this->last_render_time = $now;
+        $inner_width = $this->width;
         $dt = microtime(true) - $this->start_time;
         if($dt >= 5 && $percent >= 0.03 && $percent < 1) {
             $eta = (1-$percent)/$percent*$dt;
             $suffix = ' '.self::sec2time($eta);
         } else $suffix = '';
-        $this->writeline(str_pad(floor($percent*100),4,' ',STR_PAD_LEFT).'% ['.str_pad(str_repeat('=',round($percent*$bar_width)),$bar_width,'.').']'.$suffix);
+
+        $percent_str = Str::pad(floor($percent*100+.25),4,' ',STR_PAD_LEFT).'%';
+        $bar_length = $percent*$inner_width;
+        $full_bars = (int)floor($bar_length);
+        $sub = "▏▎▍▌▋▊▉█";
+        $rem = (int)round(($bar_length - $full_bars)*Str::length($sub));
+        $filler = str_repeat('█',$full_bars);
+        if($rem > 0) {
+            $filler .= Str::substr($sub, $rem-1, 1);
+        }
+        $bar_str = '<bg:dark-grey;fg:bright-green>'.Str::pad($filler,$inner_width," ").'</>';
+        $full_line = "$percent_str $bar_str$suffix";
+        if($full_line === $this->last_line) {
+            return;
+        }
+        $this->last_line = $full_line;
+        $this->writeline($full_line);
     }
 
     /**
@@ -88,8 +110,16 @@ class ProgressBar {
      * @param string $str String to print
      */
     private function writeline($str) {
-        echo str_pad("\r".$str, $this->last_str_length, ' '); // pad with spaces so there's no residue left at the end
-        $this->last_str_length = strlen($str)+1;
+        $len = Str::length(strip_tags($str));
+        if($this->last_str_length) {
+            echo "\r".Cli::colorize($str);
+            $pad = $this->last_str_length - $len;
+            if($pad > 0) {
+                echo str_repeat(' ', $pad);
+            }
+//            echo Str::pad("\r".$str, $this->last_str_length, ' '); // pad with spaces so there's no residue left at the end
+        }
+        $this->last_str_length = $len;
     }
 
     /**

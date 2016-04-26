@@ -27,23 +27,47 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $arr3 = ['icanbe'=>[''=>'emptystr']];
         $this->assertSame('emptystr', Arr::getDeep($arr3, 'icanbe[]', ''));
     }
-
-    function testIsNumeric() {
-        $this->assertTrue(Arr::isNumeric(['a', 'b']));
-        $this->assertTrue(Arr::isNumeric([0 => 'a', 1 => 'b']));
-        $this->assertFalse(Arr::isNumeric([1 => 'a', 2 => 'b']));
-        $this->assertFalse(Arr::isNumeric([1 => 'b', 0 => 'a']));
-        $this->assertFalse(Arr::isNumeric(['a' => 1]));
-        $this->assertTrue(Arr::isNumeric([]));
+    /**
+     * @param $arr
+     * @param $quick
+     * @param $is_assoc
+     * @dataProvider arrayTypeArgs
+     */
+    public function testIsAssoc($arr, $quick, $is_assoc) {
+        $this->assertSame($is_assoc, Arr::isAssoc($arr, $quick));
     }
 
-    function testIsAssoc() {
-        $this->assertFalse(Arr::isAssoc(['a', 'b']));
-        $this->assertFalse(Arr::isAssoc([0 => 'a', 1 => 'b']));
-        $this->assertTrue(Arr::isAssoc([1 => 'a', 2 => 'b']));
-        $this->assertTrue(Arr::isAssoc([1 => 'b', 0 => 'a']));
-        $this->assertTrue(Arr::isAssoc(['a' => 1]));
-        $this->assertFalse(Arr::isAssoc([]));
+    /**
+     * @param $arr
+     * @param $quick
+     * @param $is_assoc
+     * @dataProvider arrayTypeArgs
+     */
+    public function testIsNumeric($arr, $quick, $is_assoc) {
+        $this->assertSame(!$is_assoc, Arr::isNumeric($arr, $quick));
+    }
+
+    public function arrayTypeArgs() {
+        return [
+            [[1,2,3],false,false],
+            [['a'=>1,'b'=>2,'c'=>3],false,true],
+            [[1=>1,2=>2,3=>3],false,true],
+            [[1,2,9=>3],false,true],
+            [[],false,false],
+
+            [[1,2,3],true,false],
+            [['a'=>1,'b'=>2,'c'=>3],true,true],
+            [[1=>1,2=>2,3=>3],true,true],
+            [[1,2,9=>3],true,true],
+            [[],true,false],
+            [[1,2,3,4,5,6,7,8,9,0,'foo'=>'bar',1,2,3,4,5,6,7,8,9,0],true,true],
+            [[0=>0,1=>1,2=>2,3=>3,4=>4,5=>5,6=>6,7=>7,8=>8,9=>9,10=>10,11=>11,12=>12,13=>13,14=>14,15=>15,16=>16,17=>17,18=>18,19=>19],true,false],
+            [[0=>0,1=>1,2=>2,3=>3,4=>4,5=>5,6=>6,7=>7,8=>8,9=>9,10=>10,11=>11,12=>12,13=>13,14=>14,15=>15,16=>16,17=>17,18=>18,19=>19],false,false],
+            [[0=>0,1=>1,2=>2,3=>3,4=>4,5=>5,6=>6,7=>7,8=>8,9=>9,99=>99,11=>11,12=>12,13=>13,14=>14,15=>15,16=>16,17=>17,18=>18,19=>19],false,true],
+            // [[0=>0,1=>1,2=>2,3=>3,4=>4,5=>5,6=>6,7=>7,8=>8,9=>9,99=>99,11=>11,12=>12,13=>13,14=>14,15=>15,16=>16,17=>17,18=>18,19=>19],true,true], // this one tricks the 'quick' test
+            [[0=>0,1=>1,99=>99,3=>3,4=>4,],false,true],
+            [[0=>0,1=>1,99=>99,3=>3,4=>4,],true,true],
+        ];
     }
 
     public static function isOdd($val) {

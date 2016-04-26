@@ -311,7 +311,17 @@ abstract class Str {
         return function_exists('mb_strlen') ? mb_strlen($str,$encoding) : preg_match_all('/./us', $str);
     }
 
-    public static function substrLen($str, $start, $length=null, $encoding=null) {
+    /**
+     * Get part of a string
+     *
+     * @param string $str The string to extract the substring from.
+     * @param int $start If start is non-negative, the returned string will start at the start'th position in string, counting from zero. For instance, in the string 'abcdef', the character at position 0 is 'a', the character at position 2 is 'c', and so forth.
+     *     If start is negative, the returned string will start at the start'th character from the end of string.
+     * @param null|int $length Maximum number of characters to use from str. If omitted or NULL is passed, extract all characters to the end of the string.
+     * @param null|string $encoding The encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.
+     * @return bool|string Returns the portion of str specified by the start and length parameters.
+     */
+    public static function substr($str, $start, $length=null, $encoding=null) {
         if($encoding === null) $encoding = mb_internal_encoding();
         if(function_exists('mb_substr')) {
             return mb_substr($str, $start, $length, $encoding);
@@ -331,6 +341,15 @@ abstract class Str {
         $patt .= ')/Aus';
         preg_match($patt, $str, $matches);
         return isset($matches[1]) ? $matches[1] : false;
+    }
+
+    /**
+     * @param array ...$args
+     * @return bool
+     * @deprecated
+     */
+    public static function substrLen(...$args) {
+        return self::substr(...$args);
     }
 
     public static function cEscapeStr($str) {
@@ -1599,5 +1618,39 @@ REGEX;
     public static function trimExcessZeroes($nbr) {
         if(strpos($nbr,'.')!==false) $nbr = rtrim($nbr,'0');
         return rtrim($nbr,'.');
+    }
+
+    /**
+     * Pad a string to a certain length with another string
+     *
+     * @param string $input The input string
+     * @param int $pad_length If the value of pad_length is negative, less than, or equal to the length of the input string, no padding takes place, and input will be returned.
+     * @param string $pad_string The string to be repeated and used as padding
+     * @param int $pad_type Can be STR_PAD_RIGHT, STR_PAD_LEFT, or STR_PAD_BOTH.
+     * @param null|string $encoding Character encoding
+     * @return string The padded string
+     * @throws NotImplementedException
+     */
+    public static function pad($input, $pad_length, $pad_string=' ', $pad_type=STR_PAD_RIGHT, $encoding=null) {
+        if($encoding === null) $encoding = mb_internal_encoding();
+        $input_length = self::length($input, $encoding);
+        $pad_times = (int)ceil(($pad_length - $input_length)/self::length($pad_string));
+        if($pad_times > 0) {
+            $full_pad_string = str_repeat($pad_string, $pad_times);
+            switch($pad_type) {
+                case STR_PAD_RIGHT:
+                    return $input. self::substr($full_pad_string, $input_length+self::length($full_pad_string)-$pad_length, null, $encoding);
+                case STR_PAD_LEFT:
+                    return self::substr($full_pad_string, 0, $pad_length - $input_length, $encoding) .$input;
+                case STR_PAD_BOTH:
+                    $pad_chars = ($pad_length-$input_length)/2;
+                    $left_pad = (int)floor($pad_chars);
+                    $right_pad = (int)ceil($pad_chars);
+                    return self::substr($full_pad_string, 0, $left_pad, $encoding).$input.self::substr($full_pad_string, self::length($full_pad_string)-$right_pad, null, $encoding);
+                default:
+                    throw new NotImplementedException("\$pad_type=$pad_type");
+            }
+        }
+        return $input;
     }
 }

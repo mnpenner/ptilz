@@ -635,6 +635,41 @@ FAIL CASE:
             [1024, 'iec', 3, null, false, '1.00 KiB'],
         ];
     }
+
+    /**
+     * @param $input
+     * @param $pad_length
+     * @param $pad_string
+     * @param $pad_type
+     * @param $encoding
+     * @param $expected
+     * @throws \Ptilz\Exceptions\NotImplementedException
+     * @dataProvider testPadArgs
+     */
+    function testPad($input, $pad_length, $pad_string, $pad_type, $encoding, $expected) {
+        $this->assertSame($expected, Str::pad($input, $pad_length, $pad_string, $pad_type, $encoding));
+    }
+
+    function testPadArgs() {
+        return [
+            ['a',3,'b',STR_PAD_LEFT,'utf8','bba'],
+            ['a',3,'b',STR_PAD_RIGHT,'utf8','abb'],
+            ['',3,'b',STR_PAD_RIGHT,'utf8','bbb'],
+            ['a',5,'bcd',STR_PAD_LEFT,'utf8','bcdba'],
+            ['a',5,'bcd',STR_PAD_RIGHT,'utf8','adbcd'],
+            ['✓',3,'xx',STR_PAD_LEFT,'utf8','xx✓'],
+            ['✓',3,'xx',STR_PAD_RIGHT,'utf8','✓xx'],
+            ['x',3,'✓',STR_PAD_LEFT,'utf8','✓✓x'],
+            ['x',3,'✓',STR_PAD_RIGHT,'utf8','x✓✓'],
+            ['☺☻',5,'♡♥',STR_PAD_LEFT,'utf8','♡♥♡☺☻'],
+            ['☺☻',5,'♡♥',STR_PAD_RIGHT,'utf8','☺☻♥♡♥'],
+            ['╪',4,'═╡',STR_PAD_BOTH,'utf8','═╪═╡'],
+            ['a',-3,'b',STR_PAD_LEFT,'utf8','a'],
+            ['a',3,'b',STR_PAD_LEFT,'8bit','bba'],
+            ['a',3,'b',STR_PAD_LEFT,'ascii','bba'],
+            ['^',5,'_.-',STR_PAD_BOTH,'8bit','_.^.-'],
+        ];
+    }
 }
 
 class _toStringable {

@@ -1,6 +1,21 @@
 <?php
+/*
+Some things to consider:
+
+> OpenSSL was the culprit. More specifically, the use of openssl_random_pseudo_bytes() when using PHP in forked child processes, as is the case when using PHP with Apache or PHP-FPM. The processes were wrapping, so the children would produce the same random sequences as previous children with the same process IDs.
+
+https://benramsey.com/blog/2016/04/ramsey-uuid/
+https://github.com/ramsey/uuid/issues/117
+https://github.com/ramsey/uuid/issues/90
+https://github.com/paragonie/random_compat
+https://paragonie.com/blog/2015/07/how-safely-generate-random-strings-and-integers-in-php
+https://github.com/ircmaxell/RandomLib
+ */
+
 
 // https://en.wikipedia.org/wiki/Base32#Crockford.27s_Base32
+use Ptilz\Bin;
+
 require __DIR__ . '/../vendor/autoload.php';
 
 
@@ -22,44 +37,17 @@ require __DIR__ . '/../vendor/autoload.php';
 //}
 
 function crockford32_encode($data) {
-    $chars = '0123456789abcdefghjkmnpqrstvwxyz';
-    $mask = 0b11111;
-
-    $dataSize = strlen($data);
-    $res = '';
-    $remainder = 0;
-    $remainderSize = 0;
-
-    for($i = 0; $i < $dataSize; ++$i) {
-        $b = ord($data[$i]);
-        $remainder = ($remainder << 8) | $b;
-        $remainderSize += 8;
-        while($remainderSize >= 5) {
-            $remainderSize -= 5;
-            $c = $remainder & ($mask << $remainderSize);
-            $c >>= $remainderSize;
-            $res .= $chars[$c];
-        }
-    }
-    if($remainderSize > 0) {
-        $remainder <<= (5 - $remainderSize);
-        $c = $remainder & $mask;
-        $res .= $chars[$c];
-    }
-
-    return $res;
+    return implode('', array_map(function ($d) {
+        return '0123456789abcdefghjkmnpqrstvwxyz'[$d];
+    }, array_map('bindec', str_split(str_pad(implode('', array_map(function ($s) {
+        return str_pad($s, 8, '0', STR_PAD_LEFT);
+    }, array_map('decbin', array_map('ord', str_split($data))))),ceil(strlen($data)*8/5)*5,'0',STR_PAD_RIGHT), 5))));
 }
 
 function crockford32_decode($data) {
     $map = [
-        '0' => 0,
-        'O' => 0,
-        'o' => 0,
-        '1' => 1,
-        'I' => 1,
-        'i' => 1,
-        'L' => 1,
-        'l' => 1,
+        '0' => 0, 'O' => 0, 'o' => 0,
+        '1' => 1, 'I' => 1, 'i' => 1, 'L' => 1, 'l' => 1,
         '2' => 2,
         '3' => 3,
         '4' => 4,
@@ -68,78 +56,46 @@ function crockford32_decode($data) {
         '7' => 7,
         '8' => 8,
         '9' => 9,
-        'A' => 10,
-        'a' => 10,
-        'B' => 11,
-        'b' => 11,
-        'C' => 12,
-        'c' => 12,
-        'D' => 13,
-        'd' => 13,
-        'E' => 14,
-        'e' => 14,
-        'F' => 15,
-        'f' => 15,
-        'G' => 16,
-        'g' => 16,
-        'H' => 17,
-        'h' => 17,
-        'J' => 18,
-        'j' => 18,
-        'K' => 19,
-        'k' => 19,
-        'M' => 20,
-        'm' => 20,
-        'N' => 21,
-        'n' => 21,
-        'P' => 22,
-        'p' => 22,
-        'Q' => 23,
-        'q' => 23,
-        'R' => 24,
-        'r' => 24,
-        'S' => 25,
-        's' => 25,
-        'T' => 26,
-        't' => 26,
-        'V' => 27,
-        'v' => 27,
-        'W' => 28,
-        'w' => 28,
-        'X' => 29,
-        'x' => 29,
-        'Y' => 30,
-        'y' => 30,
-        'Z' => 31,
-        'z' => 31,
+        'A' => 10, 'a' => 10,
+        'B' => 11, 'b' => 11,
+        'C' => 12, 'c' => 12,
+        'D' => 13, 'd' => 13,
+        'E' => 14, 'e' => 14,
+        'F' => 15, 'f' => 15,
+        'G' => 16, 'g' => 16,
+        'H' => 17, 'h' => 17,
+        'J' => 18, 'j' => 18,
+        'K' => 19, 'k' => 19,
+        'M' => 20, 'm' => 20,
+        'N' => 21, 'n' => 21,
+        'P' => 22, 'p' => 22,
+        'Q' => 23, 'q' => 23,
+        'R' => 24, 'r' => 24,
+        'S' => 25, 's' => 25,
+        'T' => 26, 't' => 26,
+        'V' => 27, 'v' => 27,
+        'W' => 28, 'w' => 28,
+        'X' => 29, 'x' => 29,
+        'Y' => 30, 'y' => 30,
+        'Z' => 31, 'z' => 31,
     ];
 
-    $data .= "0";
-    $dataSize = strlen($data);
-    $buf = 0;
-    $bufSize = 0;
-    $res = '';
-
-    for($i = 0; $i < $dataSize; ++$i) {
+    $buf = array_fill(0, count($data), 0);
+    $len = strlen($data);
+    for($i=0; $i<$len; ++$i) {
         $c = $data[$i];
         if(!isset($map[$c])) {
-            throw new \Exception("Unsupported character $c (0x".bin2hex($c).") at position $i");
+            throw new \Exception("Unsupported character '$c' (0x".bin2hex($c).") at position $i");
         }
-        $b = $map[$c];
-        $buf = ($buf << 5) | $b;
-        $bufSize += 5;
-        if($bufSize >= 8) {
-            $bufSize -= 8;
-            $b = ($buf & (0xff << $bufSize)) >> $bufSize;
-            $res .= chr($b);
-        }
+        $buf[$i] = $map[$c];
     }
 
-//    dump(decbin($b));
-//    dump(decbin($buf));
-//    dump($bufSize);
+    //dump($buf);
+    //dump(str_split(substr(implode('',array_map(function($x) { return str_pad($x,5,'0',STR_PAD_LEFT); }, array_map('decbin', $buf))),0,floor($len*5/8)*8),8));
+    //dump(implode('',array_map(function($x) { return str_pad($x,5,'0',STR_PAD_LEFT); }, array_map('decbin', $buf))));
+    //dump(str_split(str_pad(implode('',array_map(function($x) { return str_pad($x,5,'0',STR_PAD_LEFT); }, array_map('decbin', $buf))),ceil($len*5/8)*8,'0',STR_PAD_RIGHT),8));
 
-    return $res;
+    return implode('',array_map('chr',array_map('bindec',str_split(substr(implode('',array_map(function($x) { return str_pad($x,5,'0',STR_PAD_LEFT); }, array_map('decbin', $buf))),0,floor($len*5/8)*8),8))));
 }
 
 /**
@@ -151,15 +107,15 @@ function crockford32_decode($data) {
  * - Only 3 more bytes more than base64
  * - Case-insensitive
  *
- * @param bool $raw_output
  * @return string
  * @see http://www.crockford.com/wrmg/base32.html
  */
-function uuid($raw_output=false) {
-    $bytes = openssl_random_pseudo_bytes(16);
-    $bytes[15] = chr(ord($bytes) & 0b11111000); // chop off 3 bits to make 125 bits total
-//    return $raw_output ? $bytes : crockford32_encode($bytes);
-    return $raw_output ? $bytes : substr(crockford32_encode($bytes),0,-1);
+function uuid() {
+    return implode('', array_map(function ($d) {
+        return '0123456789abcdefghjkmnpqrstvwxyz'[$d];
+    },array_map('bindec',array_slice(str_split(implode('', array_map(function ($s) {
+        return str_pad($s, 8, '0', STR_PAD_LEFT);
+    }, array_map('decbin', array_map('ord', str_split(openssl_random_pseudo_bytes(16)))))),5),0,-1))));
 }
 
 //for($i=0; $i<100000; ++$i) {
@@ -169,8 +125,14 @@ function uuid($raw_output=false) {
 //    }
 //}
 
-for($i=0; $i<10; ++$i) {
-    dump(uuid());
+//for($i=0; $i<1; ++$i) {
+//    //$bytes = Bin::secureRandomBytes(mt_rand(1, 100));
+//    //if(crockford32_decode(crockford32_encode($bytes)) !== $bytes) {
+//    //    dump($bytes);
+//    //    exit;
+//    //}
+////    dump(crockford32_encode($bytes));
+////    dump(uuid());
 //    $uuid = uuid();
 //    $raw = crockford32_decode($uuid);
 ////    dump(strlen($uuid));
@@ -180,8 +142,46 @@ for($i=0; $i<10; ++$i) {
 //    dump('base32 '.crockford32_encode($raw));
 //    dump('base64 '.base64_encode($raw));
 //    dump('base16 '.bin2hex($raw));
+//}
+
+for($i=0; $i<10; ++$i) {
+    dump(uuid());
 }
 
+//echo implode(' ',array_map(function($x) { return str_pad($x,5,'0',STR_PAD_RIGHT); },str_split(implode('', array_map(function ($s) {
+//        return str_pad($s, 8, '0', STR_PAD_LEFT);
+//    }, array_map('decbin', array_map('ord', str_split('f0oBaR'))))),5))).PHP_EOL;
+//
+//
+//echo implode(', ',array_map('bindec',array_map(function($x) { return str_pad($x,5,'0',STR_PAD_RIGHT); },str_split(implode('', array_map(function ($s) {
+//    return str_pad($s, 8, '0', STR_PAD_LEFT);
+//}, array_map('decbin', array_map('ord', str_split('f0oBaR'))))),5))));
+
+//dump(crockford32_encode('Mark'));
+//dump(crockford32_decode('9ngq4tr'));
+
+function f2($b, $n) {
+    return array_map('bindec', array_map(function ($x) use ($n) {
+        return str_pad($x, $n, '0', STR_PAD_RIGHT);
+    }, str_split(implode('', array_map(function ($s) {
+        return str_pad($s, 8, '0', STR_PAD_LEFT);
+    }, array_map('decbin', array_map('ord', str_split($b))))), 5)));
+}
+
+
+//function f($b,$n){return array_map('bindec',array_map(function($x)use($n){return str_pad($x,$n,'0');},str_split(implode('',array_map(function($s){return str_pad($s,8,'0',STR_PAD_LEFT);},array_map('decbin',$b))),5)));}
+function f($b, $n) {
+    return array_map('bindec', array_map(function ($x) use ($n) {
+        return str_pad($x, $n, '0');
+    }, str_split(implode('', array_map(function ($s) {
+        return str_pad($s, 8, '0', STR_PAD_LEFT);
+    }, array_map('decbin', $b))), 5)));
+}
+
+
+//echo implode(',',array_map('ord', str_split('f0oBaR')));
+dump(f2('f0oBaR',5));
+dump(f([102,48,111,66,97,82],5));
 
 
 //dump(crockford32_encode("A"));
@@ -192,87 +192,8 @@ for($i=0; $i<10; ++$i) {
 //dump(crockford32_decode("AAAAA"));
 //dump(crockford32_decode("AAAAAA"));
 
-
-
-
 __halt_compiler();
 
-
-http://codegolf.stackexchange.com/a/75950/23090
-
-var f = (a, n, b = 0, t = 0, r = []) =>
-		b < n
-			? a.length
-				? f(a.slice(1), n, b + 8, t * 256 + a[0], r)
-				: b
-					? [...r, t << n - b]
-					: r
-			: f(a, n, b -= n, t & (1 << b) - 1, [...r, t >> b]);
-
-
-
-function bits(a, n, b=0,t=0, r=[]) {
-	if(b < n) {
-		if(a.length) {
-			return bits(a.slice(1), n, b+8, t*256 + a[0], r);
-		} else {
-			return b ? [...r, t << n - b] : r;
-		}
-	} else {
-		b -= n;
-		return bits(a, n, b, t & (1 << b) - 1, [...r, t >> b]);
-	}
-}
-
-
-
-function bits(a, n, b, t, r) {
-	b = b || 0;
-	t = t || 0;
-	r = r || [];
-
-	if (b < n) {
-		if (a.length) {
-			return bits(a.slice(1), n, b + 8, t * 256 + a[0], r);
-		} else {
-			return b ? Array.prototype.concat(r, [t << n - b]) : r;
-		}
-	} else {
-		b -= n;
-		return bits(a, n, b, t & (1 << b) - 1, Array.prototype.concat(r, [t >> b]));
-	}
-}
-
-
-/////////////////
-
-
-function regroupBits(a, n, b=0,t=0, r=[]) {
-	if(b < n) {
-		if(a.length) {
-			return regroupBits(a.slice(1), n, b+8, t*256 + a[0], r);
-		} else {
-			return b ? [...r, t << n - b] : r;
-		}
-	} else {
-		b -= n;
-		return regroupBits(a, n, b, t & (1 << b) - 1, [...r, t >> b]);
-	}
-}
-
-console.log(regroupBits([102,48,111,66,97,82],5));
-
-function regroupBuffer(buf, n) {
-    return regroupBits([...buf].map(ch => ch.codePointAt(0)), n);
-}
-
-console.log(regroupBuffer("f0oBaR", 5));
-
-function uuid() {
-  const alphabet = '0123456789abcdefghjkmnpqrstvwxyz';
-  let bytes = new Uint8Array(16);
-  crypto.getRandomValues(bytes);
-  return regroupBits(bytes, 5).slice(0,-1).map(i => alphabet[i]).join('');
-}
-
-console.log(uuid());
+"uuid   x6xc2d4xh5fwczt94e4xz90vx0"
+"uuid   e195kkce43qx94dz9wc8ntmge"
+"base32 e195kkce43qx94dz9wc8ntmg"

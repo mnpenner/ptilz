@@ -178,4 +178,57 @@ abstract class Shell {
         }
         return $out ?  ' '. self::escapeArg(implode(',', $out)) : '';
     }
+
+    /**
+     * Execute an external program, display raw output in real-time, and buffer output pipes (stdout, stderr) for further processing.
+     *
+     * @param string|array $cmd Command to execute (not escaped)
+     * @param string[] $output_buffers Buffers to capture
+     * @return int Exit status code
+     */
+    public static function tee($cmd, &...$output_buffers) {
+        $proc = proc_open($cmd, array_fill(1, count($output_buffers), ['pipe', 'w']), $pipes);
+        if($pipes) {
+            $filePointers = [];
+            foreach($pipes as $p => $pipe) {
+                stream_set_blocking($pipe, 0);
+                $filePointers[$p] = fopen("php://fd/$p", 'w');
+            }
+            foreach(array_keys($output_buffers) as $b) {
+                $output_buffers[$b] = '';
+            }
+            $sleep = 2000;
+            while($output_buffers) {
+                $readSuccess = false;
+                foreach(array_keys($output_buffers) as $b) {
+                    $p = $b+1;
+                    if(feof($pipes[$p])) {
+                        fclose($pipes[$p]);
+                        unset($pipes[$p]);
+                        unset($output_buffers[$b]);
+                    } else {
+                        $line = fgets($pipes[$b + 1]);
+                        if(strlen($line)) {
+                            $readSuccess = true;
+                            fwrite($filePointers[$p], $line);
+                            $output_buffers[$b] .= $line;
+                        }
+                    }
+                }
+                if($readSuccess) {
+                    $sleep = 2000;
+                } else {
+                    usleep($sleep);
+                    if($sleep < 50000) {
+                        $sleep += 1000;
+                    }
+                }
+            }
+
+            foreach($filePointers as $fp) {
+                fclose($fp);
+            }
+        }
+        return proc_close($proc);
+    }
 }

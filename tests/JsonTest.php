@@ -28,7 +28,12 @@ class JsonTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('new Dog("Bella", "bone")', Json::encode(new Dog('Bella', 'bone')), "IJavaScriptSerializable");
 
         $pretty = ['a'=>1,'b'=>[2,false,'c'=>[4,true]],null];
-        $this->assertSame(str_replace("\n",PHP_EOL,json_encode($pretty, JSON_PRETTY_PRINT)), Json::encode($pretty, JSON::PRETTY_PRINT), "PRETTY_PRINT");
+        $this->assertSame(str_replace("\n",PHP_EOL,json_encode($pretty, JSON_PRETTY_PRINT)), Json::encode($pretty, Json::PRETTY_PRINT), "PRETTY_PRINT");
+        $this->assertSame('[]', Json::encode([]), "Empty array");
+        $this->assertSame('{}', Json::encode(new \stdClass), "Empty object");
+        $std = new \stdClass;
+        $std->foo = 'bar';
+        $this->assertSame('[{},[{"foo":"bar"}]]', Json::encode([new \stdClass,[$std]]), "Standard class properties");
 
     }
 

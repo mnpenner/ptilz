@@ -105,6 +105,8 @@ abstract class Json {
                 $result .= $var->jsSerialize($options);
             } elseif($var instanceof JsonSerializable) {
                 $result .= self::_encode($var->jsonSerialize(), $options, $depth + 1);
+            } else {
+                $result .= json_encode($var, $options);
             }
         } else { // strings, ints and floats
             if(is_string($var) && Bin::hasFlag($options, self::FORCE_UTF8)) {

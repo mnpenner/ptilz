@@ -185,8 +185,12 @@ abstract class Shell {
      * @param string|array $cmd Command to execute (not escaped)
      * @param string[] $output_buffers Buffers to capture
      * @return int Exit status code
+     * @os Linux
      */
     public static function tee($cmd, &...$output_buffers) {
+        if(!Env::isWindows()) { // not sure what Windows equivalent is
+            $cmd = 'script -qfec ' . escapeshellarg($cmd); // needed to fake being a TTY; credit: http://stackoverflow.com/a/1402389/65387
+        }
         $proc = proc_open($cmd, array_fill(1, count($output_buffers), ['pipe', 'w']), $pipes);
         if($pipes) {
             $filePointers = [];

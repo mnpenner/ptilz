@@ -26,9 +26,12 @@ abstract class Env {
      */
     public static function username() {
         if(function_exists('posix_getlogin')) {
-            return posix_getlogin();
+            $login = posix_getlogin();
+            if($login !== false) {
+                return $login;
+            }
         }
-        return getenv('username') ?: getenv('USER');
+        return getenv('USER') ?: getenv('username');
     }
 
     /**

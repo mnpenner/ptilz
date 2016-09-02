@@ -66,21 +66,11 @@ if(!function_exists('intdiv')) {
     }
 }
 
-if(!interface_exists('Throwable')) {
-    /**
-     * Throwable is the base interface for any object that can be thrown via a throw statement in PHP 7,
-     * including Error and Exception.
-     * @link http://php.net/manual/en/class.throwable.php
-     * @since 7.0
-     */
-    class Throwable extends \Exception {} // technically, Exception should extend Throwable, not the other way around, but I can't make that happen :D
-}
-
 if(!class_exists('Error')) {
     /**
      * Error is the base class for all internal PHP errors.
      */
-    class Error extends \Throwable {}
+    class Error extends \Exception {}
 }
 
 if(!class_exists('ArithmeticError')) {

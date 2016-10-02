@@ -339,14 +339,17 @@ abstract class Bin {
     /**
      * Generates a string of pseudo-random bytes, with the number of bytes determined by the length parameter.
      *
-     * @param int $length
-     * @return string
+     * @param int $length The length of the random string that should be returned in bytes.
+     * @return string A string containing the requested number of cryptographically secure random bytes.
      * @throws NotSupportedException
      */
     public static function secureRandomBytes($length) {
-        // todo: update to something more robust; see here: https://github.com/GeorgeArgyros/Secure-random-bytes-in-PHP/blob/master/srand.php
         if($length <= 0) {
             throw new ArgumentOutOfRangeException('length',"Length must be positive");
+        }
+
+        if(function_exists('random_bytes')) {
+            return random_bytes($length);
         }
 
         if(function_exists('openssl_random_pseudo_bytes') && PHP_VERSION_ID >= 50304) {

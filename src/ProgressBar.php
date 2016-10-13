@@ -85,7 +85,7 @@ class ProgressBar {
             return;
         }
         $this->last_line = $full_line;
-        $this->writeline($full_line);
+        $this->_writeLine($full_line);
     }
 
     /**
@@ -109,7 +109,7 @@ class ProgressBar {
      * Overwrite last line with new text
      * @param string $str String to print
      */
-    private function writeline($str) {
+    private function _writeLine($str) {
         $len = Str::length(strip_tags($str));
         if($this->last_str_length) {
             echo "\r".Cli::colorize($str);
@@ -120,6 +120,21 @@ class ProgressBar {
 //            echo Str::pad("\r".$str, $this->last_str_length, ' '); // pad with spaces so there's no residue left at the end
         }
         $this->last_str_length = $len;
+    }
+
+    /**
+     * Write a line of text and push the progress bar down.
+     *
+     * @param string $text
+     */
+    public function writeLine($text) {
+        $lines = preg_split('/\R/', rtrim($text));
+        $this->_writeLine(array_shift($lines));
+        echo PHP_EOL;
+        foreach($lines as $line) {
+            echo $line.PHP_EOL;
+        }
+        $this->render();
     }
 
     /**

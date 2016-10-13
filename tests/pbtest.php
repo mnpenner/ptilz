@@ -16,6 +16,18 @@ $pb = new ProgressBar($count);
 for($i=0; $i<$count; ++$i) {
     $pb->increment();
     usleep(33333);
+    if($i === 200) {
+        $pb->writeLine("hello $i");
+    }
+    if($i === 400) {
+        $pb->writeLine("world $i\n");
+    }
+    if($i === 600) {
+        $pb->writeLine("foo $i\r\n\r\n");
+    }
+    if($i === 800) {
+        $pb->writeLine("foo".PHP_EOL."bar");
+    }
 //    usleep(mt_rand(1e4,2e6));
 }
 

@@ -110,6 +110,14 @@ abstract class Str {
     const WHITESPACE = "\x09\x0A\x0B\x0C\x0D\x20";
 
     /**
+     * Crockford base-32 characters.
+     * 
+     * @see http://www.crockford.com/wrmg/base32.html
+     */
+    const CROCKFORD32 = '0123456789abcdefghjkmnpqrstvwxyz';
+
+
+    /**
      * Tests if a string starts with the given prefix.
      *
      * @param string $subject
@@ -134,7 +142,7 @@ abstract class Str {
     public static function endsWith($subject, $postfix, $ignore_case = false, $encoding = null) {
         return self::contains($subject, $postfix, $ignore_case, -self::length($postfix, $encoding), $encoding);
     }
-
+    
     /**
      * Tests if a string contains a substring.
      *

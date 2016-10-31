@@ -87,7 +87,15 @@ abstract class Uuid {
     }
 
     /**
-     * Ordered UUID.
+     * Ordered UUID. 
+     * 
+     * If you use this as the primary key in your database, insertion order will be maintained.
+     * It can also have performance benefits when inserted into a BTREE indexes. You can also extract the
+     * "create date" of the item down to 1/10,000th of a second without the need for a second column.
+     *
+     * Other than that, it maintains all the same benefits of uuid() -- it's guaranteed to be unique even if you
+     * generate millions of these within the same fraction of a second. It's portable, URL-safe ASCII.
+     * It's case-insensitive. It's 20% shorter than hex.
      * 
      * Example output: "0de4ey5pm5qt1ceh1cvz63r85byr8w"
      * 

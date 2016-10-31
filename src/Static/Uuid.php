@@ -97,6 +97,7 @@ abstract class Uuid {
     public static function ouid() {
         // http://www.wolframalpha.com/input/?i=unix+epoch+%2B+2**50%2F10000+seconds
         // https://www.percona.com/blog/2014/12/19/store-uuid-optimized-way/
+        // https://www.percona.com/blog/2007/03/13/to-uuid-or-not-to-uuid/
         // on my Core i7 6700K, I can only generate up to 9 of these in the same milcrosecond,
         // so that alone already provides a great deal of uniqueness
         
@@ -113,7 +114,7 @@ abstract class Uuid {
         // in other words, you'd have to generate about 500,000,000,000,000 OUIDs within 1/10,000th of a second
         // for a 10% chance of a collision. Even if your system clocks are off, the odds are very low.
         
-        return $prefix . self::_uuid(13);
+        return $prefix . self::_uuid(13); // fixme: if we used '14' here, we'd get back 160 bits instead of 150, which fits nicely in 20 bytes; but then we might as well dump crockford if we're going binary... the advantage of ASCII is that it's portable.
     }
 
     /**

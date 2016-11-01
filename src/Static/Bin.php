@@ -98,10 +98,26 @@ abstract class Bin {
                     $out[$key] = self::_unpack($offset,'d',$repeat,$data);
                     $offset += 8*$repeat;
                     break;
-                case '+uint48':
-                    throw new NotImplementedException($type);
                 case '-uint48':
-                    throw new NotImplementedException($type);
+                    if($repeat === 1) $out[$key] = [];
+                    for($i = 0; $i < $repeat; ++$i) {
+                        $ints = unpack("@$offset/Vlo/vhi", $data);
+                        $sum = BigMath::add($ints['lo'], BigMath::mul($ints['hi'], '4294967296'));
+                        if($repeat === 1) $out[$key] = $sum;
+                        else $out[$key][] = $sum;
+                        $offset += 8;
+                    }
+                    break;
+                case '+uint48':
+                    if($repeat === 1) $out[$key] = [];
+                    for($i = 0; $i < $repeat; ++$i) {
+                        $ints = unpack("@$offset/nhi/Nlo", $data);
+                        $sum = BigMath::add($ints['lo'], BigMath::mul($ints['hi'], '4294967296'));
+                        if($repeat === 1) $out[$key] = $sum;
+                        else $out[$key][] = $sum;
+                        $offset += 8;
+                    }
+                    break;
                 case '-uint64':
                     if($repeat === 1) $out[$key] = [];
                     for($i = 0; $i < $repeat; ++$i) {
@@ -253,14 +269,24 @@ abstract class Bin {
                         $out .= pack('V', $args[$idx]);
                         break;
                     case '+uint48':
-                        throw new NotImplementedException($type);
+                        $out .= pack('nN', (int)bcdiv($args[$idx],'4294967296'), (int)bcmod($args[$idx],'4294967296'));
+                        break;
                     case '-uint48':
-                        throw new NotImplementedException($type);
+                        $out .= pack('Vv', (int)bcmod($args[$idx],'4294967296'), (int)bcdiv($args[$idx],'4294967296'));
+                        break;
                     case '+uint64':
-                        $out .= pack('NN', (int)bcdiv($args[$idx],'4294967296'), (int)bcmod($args[$idx],'4294967296'));
+                        // if(PHP_VERSION_ID >= 50603) {
+                        //     $out .= pack('J', $args[$idx]);
+                        // } else {
+                            $out .= pack('NN', (int)bcdiv($args[$idx], '4294967296'), (int)bcmod($args[$idx], '4294967296'));
+                        // }
                         break;
                     case '-uint64':
-                        $out .= pack('VV', (int)bcmod($args[$idx],'4294967296'), (int)bcdiv($args[$idx],'4294967296'));
+                        // if(PHP_VERSION_ID >= 50603) {
+                        //     $out .= pack('P', $args[$idx]);
+                        // } else {
+                            $out .= pack('VV', (int)bcmod($args[$idx], '4294967296'), (int)bcdiv($args[$idx], '4294967296'));
+                        // }
                         break;
                     case 'float32':
                         $out .= pack('f', $args[$idx]);

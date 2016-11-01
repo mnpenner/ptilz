@@ -31,6 +31,12 @@ class BinTest extends PHPUnit_Framework_TestCase {
             'strings' => ['aa', 'bb', 'cc'],
             'ints' => [1, 2, 3],
         ], Bin::unpack(['strings' => 'str[2]{3}', 'ints' => '-uint16{3}'], "aabbcc\x01\x00\x02\x00\x03\x00"));
+
+        $this->assertSame(0xABC, Bin::unpack('-uint64', "\xBC\x0A\x00\x00\x00\x00\x00\x00"));
+        $this->assertSame(0xABC, Bin::unpack('+uint64', "\x00\x00\x00\x00\x00\x00\x0A\xBC"));
+        $this->assertEquals(['3199925962', '3735928559'], Bin::unpack(['-uint32', '+uint32'], "\xCA\xFE\xBA\xBE\xDE\xAD\xBE\xEF"));
+        $this->assertSame(0xABC, Bin::unpack('-uint48', "\xBC\x0A\x00\x00\x00\x00"));
+        $this->assertSame(0xABC, Bin::unpack('+uint48', "\x00\x00\x00\x00\x0A\xBC"));
     }
 
     function testUnpackZip() {
@@ -91,6 +97,8 @@ class BinTest extends PHPUnit_Framework_TestCase {
             $this->assertSame("\xBC\x0A\x00\x00\x00\x00\x00\x00", Bin::pack('-uint64', 0xABC));
             $this->assertSame("\x00\x00\x00\x00\x00\x00\x0A\xBC", Bin::pack('+uint64', 0xABC));
             $this->assertSame("\xCA\xFE\xBA\xBE\xDE\xAD\xBE\xEF", Bin::pack(['-uint32', '+uint32'], ['3199925962', '3735928559']));
+            $this->assertSame("\xBC\x0A\x00\x00\x00\x00", Bin::pack('-uint48', 0xABC));
+            $this->assertSame("\x00\x00\x00\x00\x0A\xBC", Bin::pack('+uint48', 0xABC));
         }
     }
 

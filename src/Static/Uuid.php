@@ -1,5 +1,7 @@
 <?php namespace Ptilz;
 
+use Ptilz\Exceptions\ArgumentFormatException;
+
 abstract class Uuid {
 
     /**
@@ -9,33 +11,32 @@ abstract class Uuid {
      * @return array
      * @see http://codegolf.stackexchange.com/questions/75935/split-a-byte-array-into-a-bit-array
      */
-    private static function regroupBits($buf, $nbits, $keep_left_over) {
+    private static function _regroupBits($buf, $nbits, $keep_left_over) {
         $mask = (1 << $nbits) - 1;
         $nworkbits = 0;
         $workbuf = 0;
         $buflen = strlen($buf);
-        $resultlen = strlen($buf)*8/$nbits;
-        $resultlen = $keep_left_over ? ceil($resultlen) : floor($resultlen);
-        $result = array_fill(0, $resultlen, 0);
-        $i = 0;
-        $j = 0;
+        $reslen = $buflen*8/$nbits;
+        $reslen = $keep_left_over ? ceil($reslen) : floor($reslen);
+        $result = array_fill(0, $reslen, 0);
+        $b = 0;
+        $r = 0;
 
         while(true) {
             while($nworkbits < $nbits) {
-                if($i >= $buflen) break 2;
+                if($b >= $buflen) break 2;
                 $workbuf <<= 8;
-                $workbuf += ord($buf[$i]);
+                $workbuf |= ord($buf[$b++]);
                 $nworkbits += 8;
-                ++$i;
             }
             $offset = $nworkbits - $nbits;
-            $result[$j++] = ($workbuf >> $offset) & $mask;
+            $result[$r++] = ($workbuf >> $offset) & $mask;
             $nworkbits -= $nbits;
         }
         
         if($nworkbits && $keep_left_over) {
             $workbuf <<= $nbits - $nworkbits;
-            $result[$j] = $workbuf & $mask;
+            $result[$r] = $workbuf & $mask;
         }
 
         return $result;
@@ -59,8 +60,8 @@ abstract class Uuid {
      * @return string
      * @see http://www.crockford.com/wrmg/base32.html
      */
-    public static function uuid() {
-        return self::_uuid(16);
+    public static function unique() {
+        return self::_crockford(16);
     }
 
     /**
@@ -69,9 +70,9 @@ abstract class Uuid {
      * @param int $bytes
      * @return string
      */
-    private static function _uuid($bytes) {
+    private static function _crockford($bytes) {
         $bytes = Bin::secureRandomBytes($bytes);
-        $bits = self::regroupBits($bytes, 5, false);
+        $bits = self::_regroupBits($bytes, 5, false);
 
         return implode('', array_map(function ($x) {
             return Str::CROCKFORD32[$x];
@@ -82,8 +83,23 @@ abstract class Uuid {
      * Number of milcroseconds since unix epoch. Where a "milcrosecond" is 1/10,000th of a second or 100 microseconds.
      * @return int
      */
-    private static function milcrotime() {
+    private static function _milcrotime() {
+        if(self::$testNow !== null) {
+            return self::$testNow;
+        }
         return (int)round(microtime(true)*10000);
+    }
+
+    private static $testNow = null;
+
+    /**
+     * For testing only. Fixes the date used by ordered in binary UUIDs.
+     *
+     * @param int $milcrotime
+     * @deprecated Testing only. Setting this will reduce the uniqueness of the UUIDs.
+     */
+    public static function setTestNow($milcrotime) {
+        self::$testNow = $milcrotime;
     }
 
     /**
@@ -93,7 +109,7 @@ abstract class Uuid {
      * It can also have performance benefits when inserted into a BTREE indexes. You can also extract the
      * "create date" of the item down to 1/10,000th of a second without the need for a second column.
      *
-     * Other than that, it maintains all the same benefits of uuid() -- it's guaranteed to be unique even if you
+     * Other than that, it maintains all the same benefits of unique() -- it's guaranteed to be unique even if you
      * generate millions of these within the same fraction of a second. It's portable, URL-safe ASCII.
      * It's case-insensitive. It's 20% shorter than hex.
      * 
@@ -102,14 +118,14 @@ abstract class Uuid {
      * @return string
      * @throws \Exception
      */
-    public static function ouid() {
+    public static function ordered() {
         // http://www.wolframalpha.com/input/?i=unix+epoch+%2B+2**50%2F10000+seconds
         // https://www.percona.com/blog/2014/12/19/store-uuid-optimized-way/
         // https://www.percona.com/blog/2007/03/13/to-uuid-or-not-to-uuid/
         // on my Core i7 6700K, I can only generate up to 9 of these in the same milcrosecond,
         // so that alone already provides a great deal of uniqueness
         
-        $prefix = Math::decToAnyBase(self::milcrotime(), null, Str::CROCKFORD32);
+        $prefix = Math::decToAnyBase(self::_milcrotime(), null, Str::CROCKFORD32);
         if(strlen($prefix) > 10) {
             throw new \Exception("Are you still using this function in the year 5537? It seems to have overflowed.");
         } else {
@@ -122,16 +138,37 @@ abstract class Uuid {
         // in other words, you'd have to generate about 500,000,000,000,000 OUIDs within 1/10,000th of a second
         // for a 10% chance of a collision. Even if your system clocks are off, the odds are very low.
         
-        return $prefix . self::_uuid(13); // fixme: if we used '14' here, we'd get back 160 bits instead of 150, which fits nicely in 20 bytes; but then we might as well dump crockford if we're going binary... the advantage of ASCII is that it's portable.
+        return $prefix . self::_crockford(13); // fixme: if we used '14' here, we'd get back 160 bits instead of 150, which fits nicely in 20 bytes; but then we might as well dump crockford if we're going binary... the advantage of ASCII is that it's portable.
     }
 
     /**
-     * @param string $ouid An OUID as returned by \Ptilz\Uuid::ouid. i.e., a 10+ char string encoded with Crockford-32.
+     * @param string $uuid Ordered or binary UUID
      * @return \DateTime
+     * @throws ArgumentFormatException
      */
-    public static function extractDate($ouid) {
-        $prefix = substr($ouid, 0, 10);
-        $milcrotime = Math::anyBaseToDec($prefix, null, Str::CROCKFORD32);
+    public static function extractDate($uuid) {
+        if(preg_match('#[0123456789abcdefghjkmnpqrstvwxyz]{30}\z#A',$uuid)) {
+            $prefix = substr($uuid, 0, 10);
+            $milcrotime = Math::anyBaseToDec($prefix, null, Str::CROCKFORD32);
+        } elseif(strlen($uuid) === 20) {
+            $prefix = substr($uuid, 0, 6);
+            $milcrotime = Bin::unpack('+uint48', $prefix);
+        } else {
+            throw new ArgumentFormatException('uuid');
+        }
         return date_create_from_format('U.u', number_format($milcrotime/10000,6,'.',''));
+    }
+
+    /**
+     * Binary UUID.
+     *
+     * Similar to the ordered UUID, but in binary.
+     *
+     * @return string 20 bytes
+     */
+    public static function binary() {
+        // let's use 48 bits (892 years) for the timestamp here instead of 50 because it fits nicely into 6 bytes
+        // http://www.wolframalpha.com/input/?i=2**48%2F10000+seconds
+        return Bin::pack('+uint48',self::_milcrotime()).Bin::secureRandomBytes(14);
     }
 }

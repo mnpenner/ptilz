@@ -395,14 +395,14 @@ class IterTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testRangeArgs() {
-        $d1 = new DateTime("2016-11-01T12:16:30-07:00");
-        $d2 = new DateTime("2016-11-02T12:16:30-07:00");
-        $d3 = new DateTime("2016-11-03T12:16:30-07:00");
-        $d4 = new DateTime("2016-11-04T12:16:30-07:00");
+        $d1 = new DateTime("2016-11-01T12:16:30.123456-07:00");
+        $d2 = new DateTime("2016-11-02T12:16:30.123456-07:00");
+        $d3 = new DateTime("2016-11-03T12:16:30.123456-07:00");
+        $d4 = new DateTime("2016-11-04T12:16:30.123456-07:00");
 
-        $h1 = new DateTime("1960-01-01T00:00:00-00:00");
-        $h2 = new DateTime("1960-01-01T01:01:01-00:00");
-        $h3 = new DateTime("1960-01-01T02:02:02-00:00");
+        $h1 = new DateTime("1960-01-01T00:00:00.123456-00:00");
+        $h2 = new DateTime("1960-01-01T01:01:01.123456-00:00");
+        $h3 = new DateTime("1960-01-01T02:02:02.123456-00:00");
 
         return [
             [range(3,11), 3, 11],

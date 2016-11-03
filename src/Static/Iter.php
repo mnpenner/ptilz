@@ -295,18 +295,16 @@ class Iter {
             } elseif(!$step instanceof \DateInterval) {
                 throw new ArgumentTypeException('step',['int','string',\DateInterval::class]);
             }
-            $d = \DateTime::createFromFormat('U.u',$start->format('U.u'),$start->getTimezone());
+            $d = \DateTimeImmutable::createFromFormat('U.u',$start->format('U.u'),$start->getTimezone());
             if($start < $end) {
                 while($d <= $end) {
                     yield $d;
-                    $d = clone $d;
-                    $d->add($step);
+                    $d = $d->add($step);
                 }
             } else {
                 while($d >= $end) {
                     yield $d;
-                    $d = clone $d;
-                    $d->sub($step);
+                    $d = $d->sub($step);
                 }
             }
         } else {

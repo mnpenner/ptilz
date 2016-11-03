@@ -86,3 +86,11 @@ if(!class_exists('DivisionByZeroError')) {
      */
     class DivisionByZeroError extends \ArithmeticError {}
 }
+
+if(!function_exists('swap')) {
+    function swap(&$a, &$b) {
+        $t = $a;
+        $a = $b;
+        $b = $t;
+    }
+}

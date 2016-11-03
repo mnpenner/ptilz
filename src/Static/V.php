@@ -177,6 +177,65 @@ abstract class V {
             $ret .= '.0'; // PHP 7 now adds returns "3.0" for `var_export(3.)` instead of "3"
         }
         return $ret;
+    }
 
+    public static function isType($v, $type) {
+        switch($type) {
+            case 'bool':
+            case 'boolean':
+                return is_bool($v);
+            case 'int':
+            case 'integer':
+            case 'long':
+                return is_int($v);
+            case 'float':
+            case 'real':
+            case 'double':
+                return is_float($v);
+            case 'null':
+                return $v === null;
+            case 'true':
+                return $v === true;
+            case 'false':
+                return $v === false;
+            case 'resource':
+                return is_resource($v);
+            case 'string':
+                return is_string($v);
+            case 'object':
+                return is_object($v);
+            case 'array':
+                return is_array($v);
+            // TODO: add support for array<string, string> ? https://docs.hhvm.com/hack/collections/introduction#array-typing
+        }
+        return is_a($v, $type, true);
+    }
+
+    public static function isOneOfType($v, $types) {
+        foreach($types as $type) {
+            if(self::isType($v, $type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static function assertOneOfType($value, $expectedTypes, $paramName=null) {
+        if(!self::isOneOfType($value, $expectedTypes)) {
+            throw new ArgumentTypeException($paramName, $expectedTypes);
+        }
+        // $message = "Argument ";
+        // if(strlen($paramName)) {
+        //     $message .= "`$paramName` ";
+        // }
+        // $message .= "was not one of the expected types: ";
+        // if(!is_array($expectedTypes)) {
+        //     $expectedTypes = explode('|', (string)$expectedTypes);
+        // }
+        // $message .= ' ' . Arr::readable(array_map(function ($t) {
+        //         return "`" . trim($t) . "`";
+        //     }, $expectedTypes), ' or ');
+        //
+        // assert(self::isOneOfType($value, $expectedTypes), $message);
     }
 }

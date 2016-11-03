@@ -330,6 +330,62 @@ class IterTest extends PHPUnit_Framework_TestCase {
             [$evenInput, $even, Iter::CALL_BOTH|Iter::RETURN_VALUE, [8,10,12]],
         ];
     }
+
+    function testReduce() {
+        $dates = [
+            new DateTime("2016-11-03T12:16:30-07:00"),
+            new DateTime("2016-11-03T12:15:30-07:00"),
+            new DateTime("2016-11-02T12:16:30-07:00"),
+            $maxDate = new DateTime("2016-11-03T12:16:30-08:00"),
+            new DateTime("2016-11-03T12:16:30-06:00"),
+        ];
+
+        $numbers = [
+            9,
+            4,
+            5,
+            1
+        ];
+
+        $maxFunc = function ($d1, $d2) {
+            return $d1 < $d2 ? $d2 : $d1;
+        };
+
+
+        $this->assertSame($maxDate, Iter::reduce($dates, $maxFunc));
+        $this->assertSame(9, Iter::reduce($numbers, $maxFunc));
+
+        $numberIter = new ArrayIterator($numbers);
+        $numberIter->next();
+        $numberIter->next(); // foreach always starts at the beginning, so this should too!
+
+        $this->assertSame(9, Iter::reduce($numberIter, $maxFunc));
+
+        $gen = function() {
+            yield 3;
+            yield 4;
+            yield 2;
+        };
+
+        $this->assertSame(4, Iter::reduce($gen(), $maxFunc));
+        $this->assertSame(3, Iter::reduce([2,1,3], $maxFunc, PHP_INT_MIN));
+        $this->assertSame(PHP_INT_MIN, Iter::reduce([], $maxFunc, PHP_INT_MIN));
+    }
+
+    /**
+     * @expectedException \Ptilz\Exceptions\ArgumentTypeException
+     */
+    public function testAssert() {
+        Iter::assert(null);
+    }
+
+    /**
+     * @expectedException \Ptilz\Exceptions\ArgumentTypeException
+     * @expectedExceptionMessageRegExp /\bqfwpiY9205Pg8Dfdh50gyXj\b/
+     */
+    public function testAssert2() {
+        Iter::assert(null, 'qfwpiY9205Pg8Dfdh50gyXj');
+    }
 }
 
 class Countable_1454626764 implements Countable {

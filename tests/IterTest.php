@@ -386,6 +386,38 @@ class IterTest extends PHPUnit_Framework_TestCase {
     public function testAssert2() {
         Iter::assert(null, 'qfwpiY9205Pg8Dfdh50gyXj');
     }
+
+    /**
+     * @dataProvider testRangeArgs
+     */
+    public function testRange($exp, ...$args) {
+        $this->assertEquals($exp,iterator_to_array(Iter::range(...$args)));
+    }
+
+    public function testRangeArgs() {
+        $d1 = new DateTime("2016-11-01T12:16:30-07:00");
+        $d2 = new DateTime("2016-11-02T12:16:30-07:00");
+        $d3 = new DateTime("2016-11-03T12:16:30-07:00");
+        $d4 = new DateTime("2016-11-04T12:16:30-07:00");
+
+        $h1 = new DateTime("1960-01-01T00:00:00-00:00");
+        $h2 = new DateTime("1960-01-01T01:01:01-00:00");
+        $h3 = new DateTime("1960-01-01T02:02:02-00:00");
+
+        return [
+            [range(3,11), 3, 11],
+            [range(3,11,2), 3, 11, 2],
+            [range(3,11,-2), 3, 11, -2],
+            [range(17,4,-3), 17, 4, -3],
+            [range(17,4,3), 17, 4, 3],
+            [[$d1,$d2,$d3,$d4], $d1, $d4],
+            [[$d4,$d3,$d2,$d1], $d4, $d1],
+            [[$d1,$d3], $d1, $d4, 2],
+            [[$d4,$d2], $d4, $d1, 2],
+            [[$h1,$h2,$h3], $h1, $h3, 'PT1H1M1S'],
+            [[$h1,$h2,$h3], $h1, $h3, new DateInterval('PT1H1M1S')],
+        ];
+    }
 }
 
 class Countable_1454626764 implements Countable {

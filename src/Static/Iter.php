@@ -278,14 +278,49 @@ class Iter {
     }
 
     /**
-     * @param int|float $start
-     * @param int|float $end
-     * @param int|float $step
-     * @return \Generator
-     * @throws \Ptilz\Exceptions\NotImplementedException
+     * Iterates over the given range.
+     *
+     * @param int|float|\DateTimeInterface $start Start (inclusive)
+     * @param int|float|\DateTimeInterface $end End (inclusive)
+     * @param int|float|\DateInterval $step
+     * @return Generator
+     * @throws ArgumentTypeException
      */
-    public static function range($start, $end, $step = null) {
-        throw new NotImplementedException;
+    public static function range($start, $end, $step = 1) {
+        if($start instanceof \DateTimeInterface && $end instanceof \DateTimeInterface) {
+            if(is_int($step)) {
+                $step = new \DateInterval("P${step}D");
+            } elseif(is_string($step)) {
+                $step = new \DateInterval($step);
+            } elseif(!$step instanceof \DateInterval) {
+                throw new ArgumentTypeException('step',['int','string',\DateInterval::class]);
+            }
+            $d = \DateTime::createFromFormat('U.u',$start->format('U.u'),$start->getTimezone());
+            if($start < $end) {
+                while($d <= $end) {
+                    yield $d;
+                    $d = clone $d;
+                    $d->add($step);
+                }
+            } else {
+                while($d >= $end) {
+                    yield $d;
+                    $d = clone $d;
+                    $d->sub($step);
+                }
+            }
+        } else {
+            $step = abs($step);
+            if($start < $end) {
+                for($i = $start; $i <= $end; $i += $step) {
+                    yield $i;
+                }
+            } else {
+                for($i = $start; $i >= $end; $i -= $step) {
+                    yield $i;
+                }
+            }
+        }
     }
 
 

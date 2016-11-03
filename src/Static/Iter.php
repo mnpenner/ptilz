@@ -22,6 +22,55 @@ class Iter {
     }
 
     /**
+     * Applies a function against an accumulator and each value of the iteratable to reduce it to a single value.
+     *
+     * @param array|Traversable $trav
+     * @param callable $callback
+     * @param mixed $initialValue
+     * @return mixed
+     */
+    public static function reduce($trav, callable $callback, $initialValue=null) {
+        $iter = self::get($trav);
+        if(func_num_args() < 3) {
+            $value = $iter->current();
+            $iter->next();
+        } else {
+            $value = $initialValue;
+        }
+        for(;$iter->valid(); $iter->next()) {
+            $value = call_user_func($callback, $value, $iter->current());
+        }
+        return $value;
+    }
+
+    /**
+     * Gets an iterator from any traversable
+     *
+     * @param array|Traversable $trav
+     * @param bool $rewind Rewind the iterator, like foreach does
+     * @return \Iterator
+     * @throws ArgumentTypeException
+     */
+    public static function get($trav, $rewind=true) {
+        if(is_array($trav)) {
+            return new \ArrayIterator($trav);
+        }
+        if($trav instanceof \IteratorAggregate) {
+            return $trav->getIterator();
+        }
+        if($trav instanceof \Iterator) {
+            if($rewind) {
+                $trav->rewind();
+            }
+            return $trav;
+        }
+        if($trav instanceof \Traversable) {
+            return new \IteratorIterator($trav);
+        }
+        throw new ArgumentTypeException('trav',['array',\Traversable::class]);
+    }
+
+    /**
      * Return just the keys from $callback
      */
     const RETURN_KEY = 1;
@@ -53,6 +102,7 @@ class Iter {
      * @param callable|null $callback Function to call for each element
      * @param int $flags Affects what's passed to $callback and what's returned (yielded)
      * @return Generator
+     * @deprecated The `$flags` parameter is kind of weird
      */
     public static function filter($trav, callable $callback=null, $flags=7) {
         if($callback === null) {
@@ -95,17 +145,13 @@ class Iter {
     }
 
     /**
-     * Asserts that the argument is foreachable. If not, an exception will be thrown.
+     * Asserts that a value is iterable (foreach-able). Throws an exception if it isn't.
      *
-     * @param mixed $obj
-     * @param null|string $name
-     * @throws \Ptilz\Exceptions\ArgumentTypeException
+     * @param mixed $value
+     * @param string $name
      */
-    public static function assert($obj, $name=null) {
-        if(!self::isIterable($obj)) {
-            // TODO: parse debug_backtrace to get variable name
-            throw new ArgumentTypeException($name,['array',Traversable::class]);
-        }
+    public static function assert($value, $name=null) {
+        V::assertOneOfType($value, ['array', \Traversable::class], $name);
     }
 
     /**
@@ -244,4 +290,5 @@ class Iter {
 
 
     // TODO: wrap all Iterators and Generators in a new IEnumerable class that implements some methods from LINQ: https://msdn.microsoft.com/en-us/library/9eekhta0(v=vs.110).aspx
+    // - Laravel collections already do something like this
 }

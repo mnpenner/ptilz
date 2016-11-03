@@ -168,7 +168,7 @@ abstract class Uuid {
      */
     public static function binary() {
         // let's use 48 bits (892 years) for the timestamp here instead of 50 because it fits nicely into 6 bytes
-        // http://www.wolframalpha.com/input/?i=2**48%2F10000+seconds
+        // http://www.wolframalpha.com/input/?i=unix+epoch+%2B+2**48%2F10000+seconds => will overflow in the year 2861
         return Bin::pack('+uint48',self::_milcrotime()).Bin::secureRandomBytes(14);
     }
 }

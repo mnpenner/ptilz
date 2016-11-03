@@ -277,6 +277,23 @@ class Iter {
         }
     }
 
+    private static function _toInterval($x, $allowNegative) {
+        if(is_int($x)) {
+            $interval = new \DateInterval("P".abs($x)."D");
+            if($allowNegative && $x < 0) {
+                $interval->invert = 1;
+            }
+            return $interval;
+        }
+        if(is_string($x)) {
+            return new \DateInterval($x);
+        }
+        if($x instanceof \DateInterval) {
+            return $x;
+        }
+        throw new ArgumentTypeException('step',['int','string',\DateInterval::class]);
+    }
+
     /**
      * Iterates over the given range.
      *
@@ -287,16 +304,15 @@ class Iter {
      * @throws ArgumentTypeException
      */
     public static function range($start, $end, $step = 1) {
-        if($start instanceof \DateTimeInterface && $end instanceof \DateTimeInterface) {
-            if(is_int($step)) {
-                $step = new \DateInterval("P${step}D");
-            } elseif(is_string($step)) {
-                $step = new \DateInterval($step);
-            } elseif(!$step instanceof \DateInterval) {
-                throw new ArgumentTypeException('step',['int','string',\DateInterval::class]);
-            }
+        if($start instanceof \DateTimeInterface) {
+            $step = self::_toInterval($step, false);
+
             $d = \DateTimeImmutable::createFromFormat('U.u',$start->format('U.u'),$start->getTimezone());
-            if($start < $end) {
+            if(!($end instanceof \DateTimeInterface)) {
+                $end = $d->add(self::_toInterval($end, true));
+            }
+
+            if($d < $end) {
                 while($d <= $end) {
                     yield $d;
                     $d = $d->add($step);

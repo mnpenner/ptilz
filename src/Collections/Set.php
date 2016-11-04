@@ -6,7 +6,6 @@ use Countable;
 use IteratorAggregate;
 use Ptilz\Exceptions\ArgumentTypeException;
 use Ptilz\Iter;
-use Ptilz\V;
 
 class Set implements IteratorAggregate, Countable {
     private $set;
@@ -18,15 +17,15 @@ class Set implements IteratorAggregate, Countable {
             } elseif(is_array($iter)) {
                 $this->set = self::fill($iter);
             } elseif(Iter::isIterable($iter)) {
-                $this->set = array();
+                $this->set = [];
                 foreach($iter as $i) {
                     $this->set[$i] = true;
                 }
             } else {
-                throw new ArgumentTypeException(__CLASS__ . ' must be initialized with an array or iterable; ' . V::getType($iter) . ' provided');
+                throw new ArgumentTypeException('iter', [self::class, 'array', \Traversable::class]);
             }
         } else {
-            $this->set = array();
+            $this->set = [];
         }
     }
 
@@ -40,7 +39,11 @@ class Set implements IteratorAggregate, Countable {
         }
     }
 
-    // todo: rename to unionWith? https://msdn.microsoft.com/en-us/library/bb342097.aspx
+    /**
+     * @param array ...$range
+     * @deprecated Replaced by `unionWith`
+     * @see \Ptilz\Collections\Set::unionWith
+     */
     public function addRange(...$range) {
         foreach($range as $values) {
             foreach ($values as $v) {
@@ -48,6 +51,18 @@ class Set implements IteratorAggregate, Countable {
             }
         }
     }
+
+    public function unionWith($x) {
+        if($x instanceof self) {
+            $other = $x->set;
+        } elseif(is_array($x)) {
+            $other = self::fill($x);
+        } else {
+            throw new ArgumentTypeException('x', ['array',self::class]);
+        }
+        $this->set = array_replace($this->set, $other);
+    }
+
 
     public function remove(...$value) {
         foreach($value as $v) {
@@ -59,15 +74,11 @@ class Set implements IteratorAggregate, Countable {
         return array_fill_keys($a, true);
     }
 
-    private static function merge() {
-        $arrays = func_get_args();
-        $result = array_shift($arrays);
-        foreach($arrays as $a) {
-            foreach($a as $x => $_) {
-                $result[$x] = true;
-            }
+    private static function merge(...$arrays) {
+        if(!$arrays) {
+            return [];
         }
-        return $result;
+        return array_replace(...$arrays);
     }
 
     public function intersect($x) {
@@ -76,16 +87,16 @@ class Set implements IteratorAggregate, Countable {
         } elseif(is_array($x)) {
             return new Set(array_keys(array_intersect_key($this->set, self::fill($x))));
         }
-        throw new ArgumentTypeException('Cannot intersect set with object of type ' . V::getType($x));
+        throw new ArgumentTypeException('x', ['array',self::class]);
     }
 
     public function union($x) {
-        if($x instanceof Set) {
+        if($x instanceof self) {
             return new Set(array_keys(self::merge($this->set, $x->set)));
         } elseif(is_array($x)) {
             return new Set(array_keys(self::merge($this->set, self::fill($x))));
         }
-        throw new ArgumentTypeException('Cannot union set with object of type ' . V::getType($x));
+        throw new ArgumentTypeException('x', ['array',self::class]);
     }
 
     public function count() {
@@ -97,7 +108,7 @@ class Set implements IteratorAggregate, Countable {
     }
 
     public function getIterator() {
-        return new ArrayIterator(array_keys($this->set));
+        return new ArrayIterator($this->toArray());
     }
 
     public function __toString() {

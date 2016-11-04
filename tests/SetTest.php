@@ -43,6 +43,13 @@ class SetTest extends PHPUnit_Framework_TestCase {
         $this->assertSame([2,3,4,5],$s1->union($s2)->toArray());
     }
 
+    function testUnionWith() {
+        $s1 = new Set([2,3,4]);
+        $s2 = new Set([3,4,5]);
+        $s1->unionWith($s2);
+        $this->assertSame([2,3,4,5],$s1->toArray());
+    }
+
     function testCount() {
         $s1 = new Set([1,2,3,4]);
         $this->assertSame(4,$s1->count());

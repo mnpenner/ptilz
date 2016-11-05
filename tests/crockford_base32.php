@@ -136,7 +136,7 @@ function uuid() {
 //    $uuid = uuid();
 //    $raw = crockford32_decode($uuid);
 ////    dump(strlen($uuid));
-////    dump(strlen($raw)); // fixme: wtf?? where'd the last byte go?
+////    dump(strlen($raw)); // wtf?? where'd the last byte go?
 ////    $uuid = openssl_random_pseudo_bytes(16);
 //    dump('uuid   '.$uuid);
 //    dump('base32 '.crockford32_encode($raw));

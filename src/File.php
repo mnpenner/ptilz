@@ -2,6 +2,7 @@
 namespace Ptilz;
 
 use Exception;
+use Ptilz\Exceptions\ArgumentFormatException;
 use Ptilz\Exceptions\ArgumentTypeException;
 use Ptilz\Exceptions\InvalidOperationException;
 
@@ -335,15 +336,105 @@ class File {
      * @return \Generator
      */
     public function lines($bufferSize = 4096) {
-        while(($buffer = fgets($this->fp, $bufferSize)) !== false) {
-            yield rtrim($buffer);
+        while(($buffer = stream_get_line($this->fp, $bufferSize)) !== false) {
+            yield $buffer;
         }
         if(!feof($this->fp)) {
             throw new InvalidOperationException("Failed to read line");
         }
     }
 
-    // TODO:
-    // add this: https://www.npmjs.com/package/sanitize-filename
-    // and this: http://stackoverflow.com/a/1078898/65387
+    /**
+     * Splits a filename into basename and extension
+     *
+     * @param string $filename Filename (without path)
+     * @param bool $allowDoubleExt Allow common "double" extensions like .tar.gz
+     * @return array [basename, extension]
+     */
+    public static function splitFileName($filename, $allowDoubleExt) {
+        $dot = mb_strrpos($filename, '.');
+
+        if($dot === false || $dot === 0 || $dot === mb_strlen($filename) - 1) {
+            return [$filename, ''];
+        }
+
+        $extension = mb_substr($filename, $dot);
+        $basename = mb_substr($filename, 0, $dot);
+
+        if($allowDoubleExt && preg_match('#\.(gz|bzip2|lzma2?|xz|lz4|lzop?|7z|Z)\z#A',$extension)) {
+            $dot = mb_strrpos($basename, '.');
+            if($dot >= 1 && $dot < mb_strlen($basename) - 1) {
+                $extension = mb_substr($basename, $dot) . $extension;
+                $basename = mb_substr($filename, 0, $dot);
+            }
+        }
+
+        return [$basename, $extension];
+    }
+
+    // TODO: add this: https://www.npmjs.com/package/sanitize-filename
+
+    /**
+     * Finds a unique filename by appending a number if the desired filename is taken.
+     *
+     * @param string $path Full file path including directory, filename and extension.
+     * @param string $patt sprintf filename pattern. Passed 3 args: filename, number, extension.
+     * @return static
+     * @throws ArgumentFormatException
+     * @throws Exception
+     */
+    public static function nextAvailableFile($path, $patt = '%s (%d)%s') {
+        // credit: http://stackoverflow.com/a/1078898/65387
+        $fp = @fopen($path, 'x+');
+
+        if($fp !== false) {
+            return new static($fp, $path);
+        }
+
+        $dirname = dirname($path);
+        $basename = basename($path);
+
+        list($filename, $ext) = self::splitFileName($basename, true);
+
+        if(sprintf($patt, 'filename', 2, 'ext') === $patt) {
+            throw new ArgumentFormatException('numberPatt', "must contain a %s placeholder");
+        }
+
+        for($i=0; $i<3;++$i) {
+            $min = 1;
+            $max = 2;
+            $newPath = null;
+
+            while(true) {
+                $newPath = $dirname.DIRECTORY_SEPARATOR.sprintf($patt, $filename, $max, $ext);
+                if(!file_exists($newPath)) {
+                    break;
+                }
+                $min = $max;
+                $max *= 2;
+            }
+
+
+            while($max != $min + 1) {
+                $pivot = intdiv($max + $min, 2);
+                $newPath = $dirname.DIRECTORY_SEPARATOR.sprintf($patt, $filename, $pivot, $ext);
+                if(file_exists($newPath)) {
+                    $min = $pivot;
+                } else {
+                    $max = $pivot;
+                }
+            }
+
+            $newPath = $dirname.DIRECTORY_SEPARATOR.sprintf($patt, $filename, $max, $ext);
+
+            $fp = @fopen($newPath, 'x+');
+
+            if($fp !== false) {
+                return new static($fp, $newPath);
+            }
+        }
+
+        // file was scooped up before we could get a lock on it; try again from the beginning
+        throw new \Exception("Stuck in an endless race");
+    }
 }

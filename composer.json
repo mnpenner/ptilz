@@ -12,7 +12,8 @@
     "prefer-stable": true,
     "require": {
         "php": ">=5.6",
-        "ext-bcmath": "*"
+        "ext-bcmath": "*",
+        "ext-mbstring": "*"
     },
     "require-dev": {
         "symfony/var-dumper": "^2.7",

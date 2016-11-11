@@ -365,7 +365,7 @@ abstract class Str {
     }
 
     /**
-     * Split a string into an array using a delimiter, working from left to right, up to the specified number of elements.
+     * Split a string into an array using a delimiter, working from right to left, up to the specified number of elements.
      *
      * @param string $str   The input string.
      * @param string $delim The boundary string.
@@ -375,18 +375,18 @@ abstract class Str {
      * @throws NotImplementedException
      */
     public static function split($str, $delim, $limit = PHP_INT_MAX, $pad = null) {
-        throw new NotImplementedException();
-    }
-
-    /**
-     * Join the elements of a traversable to form a string.
-     *
-     * @param array|\Traversable $trav
-     * @param string $glue
-     * @return string
-     */
-    public static function join($trav, $glue = '') {
-        return implode($glue, is_array($trav) ? $trav : iterator_to_array($trav, false));
+        $parts = [];
+        for($i = $limit; $i > 1; --$i) {
+            $pos = mb_strpos($str, $delim);
+            if($pos === false) break;
+            $parts[] = substr($str, 0, $pos);
+            $str = mb_substr($str, $pos + 1);
+        }
+        $parts[] = $str;
+        if(func_get_args() >= 4 && $limit !== PHP_INT_MAX && count($parts) < $limit) {
+            $parts = array_pad($parts, $limit, $pad);
+        }
+        return $parts;
     }
 
     /**
@@ -401,10 +401,10 @@ abstract class Str {
     public static function rsplit($str, $delim, $limit = PHP_INT_MAX, $pad = null) {
         $parts = [];
         for($i = $limit; $i > 1; --$i) {
-            $pos = strrpos($str, $delim);
+            $pos = mb_strrpos($str, $delim);
             if($pos === false) break;
             array_unshift($parts, substr($str, $pos + 1));
-            $str = substr($str, 0, $pos);
+            $str = mb_substr($str, 0, $pos);
         }
         array_unshift($parts, $str);
         if(func_get_args() >= 4 && $limit !== PHP_INT_MAX && count($parts) < $limit) {
@@ -412,6 +412,18 @@ abstract class Str {
         }
         return $parts;
     }
+
+    /**
+     * Join the elements of a traversable to form a string.
+     *
+     * @param array|\Traversable $trav
+     * @param string $glue
+     * @return string
+     */
+    public static function join($trav, $glue = '') {
+        return implode($glue, is_array($trav) ? $trav : iterator_to_array($trav, false));
+    }
+
 
     /**
      * @static
@@ -767,7 +779,7 @@ REGEX;
             throw new ArgumentFormatException('str',"String must be wrapped in quotes");
         }
         $end = $str[strlen($str)-1];
-        $inner = self::substrLen($str,1,-1);
+        $inner = self::substr($str,1,-1);
         if($str[0] === '"' && $end === '"') {
             return self::interpretDoubleQuotedString($inner);
         }

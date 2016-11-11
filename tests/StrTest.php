@@ -60,10 +60,18 @@ class StrTest extends PHPUnit_Framework_TestCase {
         $this->assertRegExp('~[abc123]{30}\z~A', Str::random(30, 'abc123'));
     }
 
+    function testSplit() {
+        $this->assertSame(['a', 'b'], Str::split('a:b', ':'));
+        $this->assertSame(['a', 'b:c'], Str::split('a:b:c', ':', 2));
+        $this->assertSame(['a', 'b', 'x', 'x'], Str::split('a:b', ':', 4, 'x'));
+        $this->assertSame(['','','',''], Str::split('aaa', 'a'));
+    }
+
     function testRsplit() {
         $this->assertSame(['a', 'b'], Str::rsplit('a:b', ':'));
         $this->assertSame(['a:b', 'c'], Str::rsplit('a:b:c', ':', 2));
         $this->assertSame(['a', 'b', 'x', 'x'], Str::rsplit('a:b', ':', 4, 'x'));
+        $this->assertSame(['','','',''], Str::rsplit('aaa', 'a'));
     }
 
     function testReplaceAssoc() {

@@ -678,6 +678,18 @@ FAIL CASE:
             ['^',5,'_.-',STR_PAD_BOTH,'8bit','_.^.-'],
         ];
     }
+
+    function testSplitQuery() {
+        $this->assertSame(['so','simple'],Str::splitSearchQuery('so simple'),"smoke test");
+        $this->assertSame(['plz','halp','so lost','much  confuse'],Str::splitSearchQuery(' plz  halp  "so lost" "much  confuse" '),"strings and spaces");
+        $this->assertSame(['文字','化け'],Str::splitSearchQuery('文字 化け'),"unicode");
+        $this->assertSame(["o'clock"],Str::splitSearchQuery('"o\'clock"'),"quoted quote");
+        $this->assertSame(["o'clock"],Str::splitSearchQuery("o\\'clock"),"escaped quote");
+        $this->assertSame(["o","clock"],Str::splitSearchQuery("o'clock'"),"clock is quoted");
+        $this->assertSame(["o","clock"],Str::splitSearchQuery("o'clock"),"unterminated string"); // FIXME: I think this should return a single term
+        $this->assertSame([],Str::splitSearchQuery(" \r\n\0"),"all whitespace");
+        $this->assertSame([],Str::splitSearchQuery('"'),"a dangling quote");
+    }
 }
 
 class _toStringable {

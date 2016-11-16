@@ -621,21 +621,28 @@ abstract class Arr {
         return array_fill(0, $times, $val);
     }
 
-
     /**
      * Shuffle an array, maintaining keys.
-     *
+     * 
      * @param array $array
      * @return array
      */
     public static function shuffle(array $array) {
-        $keys = array_keys($array);
-        shuffle($keys);
-        $result = [];
-        foreach($keys as $k) {
-            $result[$k] = $array[$k];
+        if(count($array) <= 1) {
+            return [];
         }
-        return $result;
+        $rand = [];
+        foreach($array as $_) {
+            $rand[] = random_bytes(16); // 16 bytes should be more than enough to guarantee each element gets a unique value
+        }
+        asort($rand, SORT_STRING);
+        $shuffled = [];
+        $keys = array_keys($array);
+        foreach($rand as $i => $_) {
+            $k = $keys[$i];
+            $shuffled[$k] = $array[$k];
+        }
+        return $shuffled;
     }
 
     /**

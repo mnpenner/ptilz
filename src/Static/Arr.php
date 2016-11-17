@@ -623,26 +623,25 @@ abstract class Arr {
 
     /**
      * Shuffle an array, maintaining keys.
-     * 
+     *
      * @param array $array
+     * @param bool $maintainIndexes
      * @return array
      */
-    public static function shuffle(array $array) {
+    public static function shuffle(array $array, $maintainIndexes = true) {
         if(count($array) <= 1) {
             return [];
         }
-        $rand = [];
-        foreach($array as $_) {
-            $rand[] = random_bytes(16); // 16 bytes should be more than enough to guarantee each element gets a unique value
+        $len = count($array);
+        $rand = str_split(Bin::secureRandomBytes($len * 16), 16);
+        if($maintainIndexes) {
+            $keys = array_keys($array);
+            array_multisort($rand, SORT_STRING, $keys, $array);
+            return array_combine($keys, $array);
+        } else {
+            array_multisort($rand, SORT_STRING, $array);
+            return $array;
         }
-        asort($rand, SORT_STRING);
-        $shuffled = [];
-        $keys = array_keys($array);
-        foreach($rand as $i => $_) {
-            $k = $keys[$i];
-            $shuffled[$k] = $array[$k];
-        }
-        return $shuffled;
     }
 
     /**

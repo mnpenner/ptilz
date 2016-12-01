@@ -57,7 +57,7 @@ class ProgressBar {
      * Print the progressbar.
      */
     public function render() {
-        $percent = min($this->current/$this->max,1);
+        $percent = $this->max ? min($this->current/$this->max,1) : 1;
         $now = microtime(true);
         if($percent < 1 && $this->last_render_time !== null && ($now - $this->last_render_time) < 0.033333) {
             return; // rate-limit to 30 FPS

@@ -57,12 +57,16 @@ class ProgressBar {
      * Print the progressbar.
      */
     public function render() {
-        $percent = $this->max ? min($this->current/$this->max,1) : 1;
         $now = microtime(true);
-        if($percent < 1 && $this->last_render_time !== null && ($now - $this->last_render_time) < 0.033333) {
+        if($this->max < $this->current && $this->last_render_time !== null && ($now - $this->last_render_time) < 0.033333) {
             return; // rate-limit to 30 FPS
         }
         $this->last_render_time = $now;
+        $this->_render();
+    }
+    
+    private function _render() {
+        $percent = $this->max ? min($this->current/$this->max,1) : 1;
         $inner_width = $this->width;
         $dt = microtime(true) - $this->start_time;
         if($dt >= 5 && $percent >= 0.03 && $percent < 1) {
@@ -134,7 +138,7 @@ class ProgressBar {
         foreach($lines as $line) {
             echo $line.PHP_EOL;
         }
-        $this->render();
+        $this->_render();
     }
 
     /**

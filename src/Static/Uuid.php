@@ -93,7 +93,7 @@ abstract class Uuid {
     private static $testNow = null;
 
     /**
-     * For testing only. Fixes the date used by ordered in binary UUIDs.
+     * For testing only. Fixes the date used by ordered and binary UUIDs.
      *
      * @param int $milcrotime
      * @deprecated Testing only. Setting this will reduce the uniqueness of the UUIDs.

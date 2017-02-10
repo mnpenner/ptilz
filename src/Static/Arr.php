@@ -630,7 +630,7 @@ abstract class Arr {
      */
     public static function shuffle(array $array, $maintainIndexes = true) {
         if(count($array) <= 1) {
-            return [];
+            return $array;
         }
         $len = count($array);
         $rand = str_split(Bin::secureRandomBytes($len * 16), 16);
@@ -685,13 +685,12 @@ abstract class Arr {
      * @param string[] $array
      * @param string $delimiter
      * @param string $lastDelimiter
+     * @param bool $serial_comma
      * @return string
+     * @deprecated Use \Ptilz\Arr::readable
      */
     public static function toSentence($array, $delimiter = ', ', $lastDelimiter = ' and ', $serial_comma=false) {
-        // todo: implement $serial_comma
-        if(count($array) <= 2) return implode($lastDelimiter, $array);
-        $lastElement = array_pop($array);
-        return implode($delimiter, $array) . $lastDelimiter . $lastElement;
+        return self::readable($array, $lastDelimiter, $delimiter, $serial_comma);
     }
 
     /**

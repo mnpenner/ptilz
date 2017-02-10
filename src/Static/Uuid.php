@@ -156,7 +156,7 @@ abstract class Uuid {
         } else {
             throw new ArgumentFormatException('uuid');
         }
-        return date_create_from_format('U.u', number_format($milcrotime/10000,6,'.',''));
+        return date_create_from_format('U.u', number_format($milcrotime/10000,6,'.',''), new \DateTimeZone('UTC'));
     }
 
     /**

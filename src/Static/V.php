@@ -117,6 +117,9 @@ abstract class V {
      * @return string Type
      */
     public static function getType($var) {
+        if(is_float($var)) return 'float';
+        if(is_int($var)) return 'int';
+        if(is_bool($var)) return 'bool';
         if(is_object($var)) return get_class($var);
         if(is_resource($var)) return self::resourceName($var);
         return gettype($var);
@@ -171,12 +174,37 @@ abstract class V {
      * @return string
      */
     public static function export($var) {
-        if(is_string($var)) return Str::export($var);
-        $ret = var_export($var, true);
-        if(is_float($var) && strpos($ret,'.') === false) {
-            $ret .= '.0'; // PHP 7 now adds returns "3.0" for `var_export(3.)` instead of "3"
+        if(is_string($var)) {
+            return Str::export($var);
         }
-        return $ret;
+        if(is_float($var)) {
+            $ret = var_export($var, true);
+            if(strpos($ret,'.') === false) {
+                $ret .= '.0';
+            }
+            return $ret;
+        }
+        if($var === null) {
+            return 'null';
+        }
+        if($var === true) {
+            return 'true';
+        }
+        if($var === false) {
+            return 'false';
+        }
+        if(is_array($var)) {
+            if(Arr::isAssoc($var)) {
+                $tmp = [];
+                foreach($var as $k=>$v) {
+                    $tmp[] = static::export($k).'=>'.self::export($v);
+                }
+                return '['.implode(',',$tmp).']';
+            } else {
+                return '['.implode(',',array_map(__METHOD__,$var)).']';
+            }
+        }
+        return var_export($var, true);
     }
 
     public static function isType($v, $type) {

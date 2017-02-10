@@ -69,9 +69,10 @@ class UuidTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testExtractDate() {
-        $this->assertEquals(new DateTime("2016-10-31 21:13:07.187700"), Uuid::extractDate('0de4ey5pm5qt1ceh1cvz63r85byr8w'));
+        $utc = new DateTimeZone('UTC');
+        $this->assertEquals(new DateTime('2016-10-31 21:13:07.187700', $utc), Uuid::extractDate('0de4ey5pm5qt1ceh1cvz63r85byr8w'));
         // $this->assertEquals(new DateTime("2016-10-31 21:13:07.187700"), Uuid::extractDate('0de4ey5pm5'));
-        $this->assertEquals(new DateTime('2016-10-31 22:05:37.000000'), Uuid::extractDate('0de4fw6yggr2yj71dwkzjw6rmqy8w0'));
+        $this->assertEquals(new DateTime('2016-10-31 22:05:37.000000', $utc), Uuid::extractDate('0de4fw6yggr2yj71dwkzjw6rmqy8w0'));
     }
 
     public function testExtractDate2() {

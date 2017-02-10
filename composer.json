@@ -26,6 +26,6 @@
         "files": ["src/bootstrap.php"]
     },
     "scripts": {
-        "test": "phpunit"
+        "test": "phpunit --color=always"
     }
 }

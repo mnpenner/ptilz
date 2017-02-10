@@ -21,20 +21,28 @@ class CsvReader implements IteratorAggregate {
     private $escape;
     /** @var int  */
     private $max_length;
+    /** @var string */
+    private $line_ending;
 
     /**
-     * @param string $filename    Filename of CSV
-     * @param bool|int $header    True to use the first row as array keys, integer to skip this many lines before reading the header, false to use numeric indices
-     * @param int $skip_lines     Skip this many lines (after the header) before reading data
-     * @param string $delimiter   Field delimiter (one character only)
-     * @param string $enclosure   Field enclosure character (one character only)
-     * @param string $escape      Escape character (one character only)
-     * @param int $max_length     Must be greater than the longest line (in characters) to be found in the CSV file (allowing for trailing line-end characters). Omitting this parameter (or setting it to 0 in PHP 5.0.4 and later) the maximum line length is not limited, which is slightly slower.
-     *
-     * @throws Exception
+     * @param string $filename  Filename of CSV
+     * @param bool|int $header  True to use the first row as array keys, integer to skip this many lines before reading the header, false to use numeric indices
+     * @param int $skip_lines   Skip this many lines (after the header) before reading data
+     * @param string $delimiter Field delimiter (one character only)
+     * @param string $enclosure Field enclosure character (one character only)
+     * @param string $escape    Escape character (one character only)
+     * @param int $max_length   Must be greater than the longest line (in characters) to be found in the CSV file (allowing for trailing line-end characters). Omitting this parameter (or setting it to 0 in PHP 5.0.4 and later) the maximum line length is not limited, which is slightly slower.
+     * @param string $line_ending Line ending character(s). Usually "\n", "\r" or "\r\n".
+     * 
+     * @throws InvalidOperationException
      */
-    public function __construct($filename, $header = false, $skip_lines = 0, $delimiter = ',', $enclosure = '"', $escape = '\\', $max_length = 0) {
+    public function __construct($filename, $header = false, $skip_lines = 0, $delimiter = ',', $enclosure = '"', $escape = '\\', $max_length = 0, $line_ending = "\n") {
         $this->fp = fopen($filename, 'r');
+        $this->delimiter = $delimiter;
+        $this->enclosure = $enclosure;
+        $this->escape = $escape;
+        $this->max_length = $max_length;
+        $this->line_ending = $line_ending;
         if($this->fp === false) throw new InvalidOperationException("Could not open '$filename' for reading'");
         if($header !== false) {
             if(is_int($header)) {
@@ -42,22 +50,30 @@ class CsvReader implements IteratorAggregate {
                     fgets($this->fp);
                 }
             }
-            $this->headers = fgetcsv($this->fp);
+            $this->headers = $this->readline();
         }
         while($skip_lines--) {
             fgets($this->fp);
         }
         $this->start_pos = ftell($this->fp);
-        $this->delimiter = $delimiter;
-        $this->enclosure = $enclosure;
-        $this->escape = $escape;
-        $this->max_length = $max_length;
+      
     }
-
+    
+    /**
+     * Reads a line from the CSV and advances the internal pointer.
+     *
+     * If `$header` was enabled, this will return an associative array with each element indexed by its header name.
+     * Otherwise, this will return a numeric array.
+     * 
+     * @return array
+     */
     public function readline() {
-        $line = fgetcsv($this->fp, $this->max_length, $this->delimiter, $this->enclosure, $this->escape);
-        if($line !== false && $this->headers) {
-            $line = self::zipdict($this->headers, $line);
+        $line = stream_get_line($this->fp, $this->max_length, $this->line_ending);
+        if($line !== false) {
+            $line = str_getcsv($line, $this->delimiter, $this->enclosure, $this->escape);
+            if($line !== false && $this->headers) {
+                $line = self::zipdict($this->headers, $line);
+            }
         }
         return $line;
     }

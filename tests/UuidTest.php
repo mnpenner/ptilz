@@ -76,7 +76,7 @@ class UuidTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testExtractDate2() {
-        $now = new DateTime();
+        $now = DateTime::createFromFormat('U.u',microtime(true));
         $soon = new DateTime('+2 seconds');
         for($i=0; $i<256; ++$i) {
             $uuid = Uuid::ordered();

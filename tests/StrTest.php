@@ -220,6 +220,13 @@ FAIL CASE:
         $this->assertSame('', Str::classify(''));
         $this->assertSame('AddUserTable', Str::classify('Add user table'));
         $this->assertSame('AddUserTable', Str::classify('AddUserTable'));
+        $this->assertSame('HtmlSpecialChars', Str::classify('HTMLSpecialChars'));
+        $this->assertSame('HtmlDocument', Str::classify('HtmlDocument'));
+        $this->assertSame('HtmlDocument', Str::classify('HTML Document'));
+        $this->assertSame('NotFoundHttpException', Str::classify('NotFoundHttpException'));
+        $this->assertSame('NotFoundHttpException', Str::classify('NotFoundHTTPException'));
+        $this->assertSame('NaïveParser', Str::classify('naïve+parser'));
+        $this->assertSame('ÉléphantFärt', Str::classify('éléphant|FÄRT'));
     }
 
     function testUnderscored() {

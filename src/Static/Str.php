@@ -862,8 +862,10 @@ REGEX;
      * @return string
      */
     public static function classify($str, $prefix=null) {
-        $name = implode('',array_map('ucfirst',self::splitCodeWords($str)));
-        if(strlen($prefix) && preg_match('#\d#A',$name)) {
+        $name = implode('',array_map(function($w) {
+            return mb_strtoupper(mb_substr($w,0,1)).mb_strtolower(mb_substr($w,1));
+        },self::splitCodeWords($str)));
+        if(strlen($prefix) && !preg_match('#[a-zA-Z_\x7f-\xff]#A',$name)) {
             $name = $prefix.$name;
         }
         return $name;
@@ -1150,9 +1152,8 @@ REGEX;
     protected static function splitCodeWords($str, $encoding=null) {
         if($encoding === null) $encoding = mb_internal_encoding();
         $str = str_replace("'",'',$str); // strip apostrophes
-        $str = preg_replace_callback('~\p{Lu}+~u',function($m) use ($encoding) {
-            $w = mb_strtolower($m[0], $encoding);
-            return ' ' . (mb_strlen($w, $encoding) > 1 ? mb_substr($w, 0, -1, $encoding) . ' ' . mb_substr($w, -1, null, $encoding) : $w);
+        $str = preg_replace_callback('~\p{Lu}(\p{Lu}(?!\p{Ll}))*~u',function($m) use ($encoding) {
+            return ' '.$m[0];
         },$str); // split CamelCase words
         $str = preg_replace('~\A[^\pL\pN]+|[^\pL\pN]+\z~u','',$str); // trim punctuation off ends
         return preg_split('~[^\pL\pN]+~u',$str);

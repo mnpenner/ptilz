@@ -1151,10 +1151,10 @@ REGEX;
      */
     protected static function splitCodeWords($str, $encoding=null) {
         if($encoding === null) $encoding = mb_internal_encoding();
-        $str = str_replace("'",'',$str); // strip apostrophes
-        $str = preg_replace_callback('~\p{Lu}(\p{Lu}(?!\p{Ll}))*~u',function($m) use ($encoding) {
+        $str = preg_replace_callback('~(?<![\'’])\p{Lu}(\p{Lu}(?!\p{Ll}))*~u',function($m) use ($encoding) {
             return ' '.$m[0];
         },$str); // split CamelCase words
+        $str = preg_replace('~[\'’](?=s(?!\pL))~ui','',$str); // strip possessive apostrophes
         $str = preg_replace('~\A[^\pL\pN]+|[^\pL\pN]+\z~u','',$str); // trim punctuation off ends
         return preg_split('~[^\pL\pN]+~u',$str);
     }

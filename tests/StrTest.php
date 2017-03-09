@@ -227,6 +227,21 @@ FAIL CASE:
         $this->assertSame('NotFoundHttpException', Str::classify('NotFoundHTTPException'));
         $this->assertSame('NaïveParser', Str::classify('naïve+parser'));
         $this->assertSame('ÉléphantFärt', Str::classify('éléphant|FÄRT'));
+        $this->assertSame('LInjectionSql', Str::classify("L'injection SQL"));
+        $this->assertSame('MeetTheJonsesDog', Str::classify("Meet the Jonses' Dog"));
+        $this->assertSame('MarksKeyboard', Str::classify("Mark's[keyboard]"));
+        $this->assertSame('AugustusDagger', Str::classify("Augustus'<DAGGER>"));
+        $this->assertSame('Toms', Str::classify("Tom's"));
+        $this->assertSame('TomsHardware', Str::classify("Tom's Hardware"));
+        $this->assertSame('TomsHardware', Str::classify("Tom’s Hardware"));
+        $this->assertSame('TomsHardware', Str::classify("Tom'sHardware"));
+        $this->assertSame('TomShardware', Str::classify("tom'shardware"));
+        $this->assertSame('Thomas', Str::classify("Thomas'"));
+        $this->assertSame('ThomasHardware', Str::classify("Thomas'Hardware"));
+        $this->assertSame('ThomasHardware', Str::classify("Thomas' Hardware"));
+        $this->assertSame('BaconCheeseDelight', Str::classify("bacon-cheese-delight"));
+        $this->assertSame('1sComplement', Str::classify("1's complement"));
+        $this->assertSame('TwosComplement', Str::classify("TWO'S COMPLEMENT"));
     }
 
     function testUnderscored() {

@@ -750,6 +750,7 @@ REGEX;
      */
     public static function isBinary($str) {
         // alternatively, we can use http://php.net/manual/en/function.mb-check-encoding.php or (bool) preg_match('//u', $str);
+        // fixme: don't flag ANSI color codes as binary!
         return preg_match('~[^\x20-\x7E\t\r\n]~', $str) > 0;
     }
 

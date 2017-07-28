@@ -266,4 +266,14 @@ abstract class V {
         //
         // assert(self::isOneOfType($value, $expectedTypes), $message);
     }
+
+    public static function compare($a, $b) {
+        if($a < $b) {
+            return -1;
+        }
+        if($a > $b) {
+            return 1;
+        }
+        return 0;
+    }
 }

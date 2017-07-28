@@ -697,4 +697,25 @@ class ArrTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('A or B', Arr::toSentence(['A', 'B'], '; ', ' or ', true));
         $this->assertSame('A; B; or C', Arr::toSentence(['A', 'B', 'C'], '; ', ' or ', true));
     }
+
+    /**
+     * @covers \Ptilz\Arr::binarySearch
+     */
+    public function testBinarySearch() {
+        $counting = [0, 1, 2, 3];
+        $this->assertSame(2,Arr::binarySearch($counting,2));
+        $this->assertSame(0,Arr::binarySearch($counting,0));
+        $this->assertSame(3,Arr::binarySearch($counting,3));
+        $this->assertSame(~0,Arr::binarySearch([],3));
+        
+        $even = [2, 4, 6];
+        $this->assertSame(~1,Arr::binarySearch($even,3));
+        $this->assertSame(~2,Arr::binarySearch([2,4,6],5));
+        $this->assertSame(~3,Arr::binarySearch([2,4,6],7));
+        $this->assertSame(~0,Arr::binarySearch([2,4,6],1));
+        
+        $alpha = ['alpha', 'BRAVO', 'Charle', 'delta'];
+        $this->assertSame(1,Arr::binarySearch($alpha,'bravo','strcasecmp'));
+        $this->assertSame(~2,Arr::binarySearch($alpha,'buzz','strcasecmp'));
+    }
 }

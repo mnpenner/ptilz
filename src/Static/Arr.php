@@ -721,4 +721,35 @@ abstract class Arr {
             $array[] = $key;
         }
     }
+
+    /**
+     * Searches for a value in sorted array. If found, returns the index of the match.
+     * If not found, return value will be less than zero. Specifically, it will contain
+     * the bitwise complement of the index of the next element that is larger than
+     * the target value, i.e. the index where the value should be inserted to maintain order.
+     * 
+     * @param array $array Array to search
+     * @param mixed $target Target value to search for
+     * @param null|callable $cmp Compare function, like `strcmp`
+     * @return int
+     */
+    public static function binarySearch(array $array, $target, $cmp = null) {
+        if($cmp === null) {
+            $cmp = V::class . '::compare';
+        }
+        $L = 0;
+        $R = count($array) - 1;
+        while($L <= $R) {
+            $m = (int)(($L + $R) / 2);
+            $c = $cmp($array[$m], $target);
+            if($c < 0) {
+                $L = $m + 1;
+            } elseif($c > 0) {
+                $R = $m - 1;
+            } else {
+                return $m;
+            }
+        }
+        return ~($L > $R ? $L : $m);
+    }
 }

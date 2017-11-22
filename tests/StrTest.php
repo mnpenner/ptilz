@@ -242,6 +242,9 @@ FAIL CASE:
         $this->assertSame('BaconCheeseDelight', Str::classify("bacon-cheese-delight"));
         $this->assertSame('1sComplement', Str::classify("1's complement"));
         $this->assertSame('TwosComplement', Str::classify("TWO'S COMPLEMENT"));
+        $this->assertSame('EfryTpagaNumber', Str::classify("EFRY TPAGA number"));
+        $this->assertSame("ChrisMuseum", Str::classify("chris' museum"));
+        $this->assertSame("ChrisMuseum", Str::classify("chris’ museum"));
     }
 
     function testUnderscored() {

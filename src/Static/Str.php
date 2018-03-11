@@ -884,7 +884,7 @@ REGEX;
      * @return bool True if $str fits a UTF-8 model, false otherwise.
      */
     private static function seemsUtf8($str) {
-        $length = self::length($str);
+        $length = strlen($str);
         for($i = 0; $i < $length; $i++) {
             $c = ord($str[$i]);
             if($c < 0x80) $n = 0; // 0bbbbbbb

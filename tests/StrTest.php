@@ -453,6 +453,10 @@ FAIL CASE:
         $this->assertSame("Je suis alle a l'ecole",Str::removeDiacritics("Je suis allé à l'école"));
         $this->assertSame("Un elephant a l'oree du bois",Str::removeDiacritics('Un éléphant à l\'orée du bois'));
         $this->assertSame("usuario o contrasena incorrectos",Str::removeDiacritics("usuario o contraseña incorrectos")); // http://stackoverflow.com/questions/1017599/how-do-i-remove-accents-from-characters-in-a-php-string#comment43187391_25414406
+
+        // https://bitbucket.org/mnpenner/ptilz/issues/13/str-removediacritics-converts-wrongly https://stackoverflow.com/a/49185286/65387
+        $this->assertSame("Oe",Str::removeDiacritics(implode('',array_map('chr',[195,150,195,169])))); // "Öé" in UTF-8
+        $this->assertSame("Oe",Str::removeDiacritics(implode('',array_map('chr',[214,233])))); // "Öé" in ISO-8859-1
     }
 
     function testQuote() {

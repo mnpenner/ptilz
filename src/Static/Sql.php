@@ -11,6 +11,10 @@ use Ptilz\Internal\RawSql;
 // FIXME: make this class non-static; it won't work well with multiple connections if the $connection is static!
 // this might actually make more sense if we make it abstract (or an interface) and then extend it for Pdo, mysql, mysqli etc with a generic quote() function!
 
+/**
+ * @deprecated Use PdoPlus
+ * @see https://bitbucket.org/nucleuslabs/pdoplus
+ */
 abstract class Sql {
     /** @var PDO|mysqli|resource Connection used for escaping values  */
     public static $connection = null;

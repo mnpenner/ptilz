@@ -21,6 +21,7 @@ class JsonTest extends PHPUnit_Framework_TestCase {
             ]), "Json::raw");
         $this->assertSame('{"__type":"Person","name":"Mark","gender":"Male"}', Json::encode(new Person('Mark', 'Male')), "JsonSerializable");
         $this->assertSame('"/<\\/script>/"', Json::encode("/</script>/", JSON_ESCAPE_SCRIPTS), 'JSON_ESCAPE_SCRIPTS');
+        $this->assertSame('"<\/ScRiPt><script>alert(\'hack!\')<\/script>"', Json::encode("</ScRiPt><script>alert('hack!')</script>", JSON_ESCAPE_SCRIPTS), 'JSON_ESCAPE_SCRIPTS');
         $this->assertSame('"/</script>/"', Json::encode("/</script>/", JSON_UNESCAPED_SLASHES), 'JSON_UNESCAPED_SLASHES');
         $this->assertSame('"\u00c8"', Json::encode(chr(200), JSON_FORCE_UTF8), "JSON_FORCE_UTF8");
         $this->assertSame('"È"', Json::encode(chr(200), JSON_FORCE_UTF8 | JSON_UNESCAPED_UNICODE), "JSON_FORCE_UTF8 | JSON_UNESCAPED_UNICODE");

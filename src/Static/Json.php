@@ -61,7 +61,7 @@ abstract class Json {
         $result = self::_encode($var, $options);
 
         if(Bin::hasFlag($options, self::ESCAPE_SCRIPTS)) {
-            return str_replace('</script>', '<\/script>', $result);
+            return preg_replace('#</(script)#i', '<\/$1', $result);
         }
 
         return $result;

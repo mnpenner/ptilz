@@ -12,5 +12,4 @@ syntax: regexp
 
 # special files
 (?<![^/])Thumbs\.db$
-^composer\.lock$
 ^phpunit\.phar$

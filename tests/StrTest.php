@@ -333,9 +333,9 @@ FAIL CASE:
     }
 
     function testMbReplace() {
-        $this->assertSame('bbb',Str::mbReplace('a','b','aaa','auto',$count1));
+        $this->assertSame('bbb',Str::mbReplace('a','b','aaa',null,$count1));
         $this->assertSame(3,$count1);
-        $this->assertSame('ccc',Str::mbReplace(['a','b'],['b','c'],'aaa','auto',$count2));
+        $this->assertSame('ccc',Str::mbReplace(['a','b'],['b','c'],'aaa',null,$count2));
         $this->assertSame(6,$count2);
         $this->assertSame("\xbf\x5c\x27",Str::mbReplace("\x27","\x5c\x27","\xbf\x27",'iso-8859-1'));
         $this->assertSame("\xbf\x27",Str::mbReplace("\x27","\x5c\x27","\xbf\x27",'gbk'));

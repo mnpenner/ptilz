@@ -21,7 +21,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Ptilz\\": ["src/", "src/Static/"]
+            "Ptilz\\": "src/"
         },
         "files": ["src/bootstrap.php"]
     },
@@ -29,6 +29,7 @@
         "test": "phpunit --color=always"
     },
     "config": {
+        "optimize-autoloader": true,
         "platform": {
             "php": "7.1"
         }

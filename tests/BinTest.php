@@ -127,6 +127,27 @@ class BinTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(hex2bin('00000000ffffffff'), Bin::pack('+double', 2.1219957905E-314),'',1.e-100);
     }
 
+    function testPackPolygon() {
+        $polyFormat = [
+            'srid' => '-uint32',
+            'byteorder' => 'byte',
+            'type' => '-uint32',
+            'unknown' => '-uint32',
+            'length' => '-uint32',
+        ];
+
+        $bin = Bin::pack($polyFormat, [
+            'srid' => 0,
+            'byteorder' => 1,
+            'type' => 3,
+            'unknown' => 1,
+            'length' => 3,
+        ]);
+        $bin .= Bin::pack('-double{6}', [1, 1, 2, 2, 1, 1]);
+
+        $this->assertSame(hex2bin('0000000001030000000100000003000000000000000000F03F000000000000F03F00000000000000400000000000000040000000000000F03F000000000000F03F'), $bin);
+    }
+
     function testLength() {
         $this->assertSame(0, Bin::length(''));
         $this->assertSame(36, Bin::length('thequickbrownfoxjumpedoverthelazydog'));

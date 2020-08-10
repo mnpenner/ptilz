@@ -35,7 +35,7 @@ abstract class Bin {
 
 
     /**
-     * @param string|int $format
+     * @param string|array $format
      * @param string $data Packed binary data
      * @param int $offset Starting offset in bytes. Will be updated as data is read.
      * @return array|mixed

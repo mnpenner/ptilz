@@ -91,11 +91,33 @@ abstract class Bin {
                     $offset += 4*$repeat;
                     break;
                 case 'float32':
+                case 'float':
                     $out[$key] = self::_unpack($offset,'f',$repeat,$data);
                     $offset += 4*$repeat;
                     break;
                 case 'float64':
+                case 'double':
                     $out[$key] = self::_unpack($offset,'d',$repeat,$data);
+                    $offset += 8*$repeat;
+                    break;
+                case '-float':
+                case '-float32':
+                    $out[$key] = self::_unpack($offset,'g',$repeat,$data);
+                    $offset += 4*$repeat;
+                    break;
+                case '+float':
+                case '+float32':
+                    $out[$key] = self::_unpack($offset,'G',$repeat,$data);
+                    $offset += 4*$repeat;
+                    break;
+                case '-double':
+                case '-float64':
+                    $out[$key] = self::_unpack($offset,'e',$repeat,$data);
+                    $offset += 8*$repeat;
+                    break;
+                case '+double':
+                case '+float64':
+                    $out[$key] = self::_unpack($offset,'E',$repeat,$data);
                     $offset += 8*$repeat;
                     break;
                 case '-uint48':
@@ -214,7 +236,8 @@ abstract class Bin {
                     | byte
                     | u?int
                     | [-+]?u?int(?:16|32|48|64)
-                    | float(?:32|64)
+                    | [-+]?float(?:32|64)?
+                    | [-+]?double
                 )
                 | (?<type>str) (?:\[ (?<len>[^\]]+) \])?
                 | (?<type>@) (?<len>[-+]?\d+)
@@ -288,11 +311,29 @@ abstract class Bin {
                             $out .= pack('VV', (int)bcmod($args[$idx], '4294967296'), (int)bcdiv($args[$idx], '4294967296'));
                         // }
                         break;
+                    case 'float':
                     case 'float32':
                         $out .= pack('f', $args[$idx]);
                         break;
+                    case 'double':
                     case 'float64':
                         $out .= pack('d', $args[$idx]);
+                        break;
+                    case '-float':
+                    case '-float32':
+                        $out .= pack('g', $args[$idx]);
+                        break;
+                    case '+float':
+                    case '+float32':
+                        $out .= pack('G', $args[$idx]);
+                        break;
+                    case '-float64':
+                    case '-double':
+                        $out .= pack('e', $args[$idx]);
+                        break;
+                    case '+float64':
+                    case '+double':
+                        $out .= pack('E', $args[$idx]);
                         break;
                     case 'str':
                         $formatStr = 'a';

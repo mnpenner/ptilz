@@ -37,6 +37,19 @@ class BinTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(['3199925962', '3735928559'], Bin::unpack(['-uint32', '+uint32'], "\xCA\xFE\xBA\xBE\xDE\xAD\xBE\xEF"));
         $this->assertSame(0xABC, Bin::unpack('-uint48', "\xBC\x0A\x00\x00\x00\x00"));
         $this->assertSame(0xABC, Bin::unpack('+uint48', "\x00\x00\x00\x00\x0A\xBC"));
+
+
+        $this->assertEquals(9.183409485952689E-41, Bin::unpack('-float', hex2bin('ffff0000')),'',1.e-100);
+        $this->assertEquals(9.183409485952689E-41, Bin::unpack('-float32', hex2bin('ffff0000')),'',1.e-100);
+
+        $this->assertEquals(9.183409485952689E-41, Bin::unpack('+float', hex2bin('0000ffff')),'',1.e-100);
+        $this->assertEquals(9.183409485952689E-41, Bin::unpack('+float32', hex2bin('0000ffff')),'',1.e-100);
+
+        $this->assertEquals(2.1219957905E-314, Bin::unpack('-float64', hex2bin('ffffffff00000000')),'',1.e-100);
+        $this->assertEquals(2.1219957905E-314, Bin::unpack('-double', hex2bin('ffffffff00000000')),'',1.e-100);
+
+        $this->assertEquals(2.1219957905E-314, Bin::unpack('+float64', hex2bin('00000000ffffffff')),'',1.e-100);
+        $this->assertEquals(2.1219957905E-314, Bin::unpack('+double', hex2bin('00000000ffffffff')),'',1.e-100);
     }
 
     function testUnpackZip() {
@@ -100,6 +113,18 @@ class BinTest extends PHPUnit_Framework_TestCase {
             $this->assertSame("\xBC\x0A\x00\x00\x00\x00", Bin::pack('-uint48', 0xABC));
             $this->assertSame("\x00\x00\x00\x00\x0A\xBC", Bin::pack('+uint48', 0xABC));
         }
+
+        $this->assertEquals(hex2bin('ffff0000'), Bin::pack('-float', 9.183409485952689E-41),'',1.e-100);
+        $this->assertEquals(hex2bin('ffff0000'), Bin::pack('-float32', 9.183409485952689E-41),'',1.e-100);
+
+        $this->assertEquals(hex2bin('0000ffff'), Bin::pack('+float', 9.183409485952689E-41),'',1.e-100);
+        $this->assertEquals(hex2bin('0000ffff'), Bin::pack('+float32', 9.183409485952689E-41),'',1.e-100);
+
+        $this->assertEquals(hex2bin('ffffffff00000000'), Bin::pack('-float64', 2.1219957905E-314),'',1.e-100);
+        $this->assertEquals(hex2bin('ffffffff00000000'), Bin::pack('-double', 2.1219957905E-314),'',1.e-100);
+
+        $this->assertEquals(hex2bin('00000000ffffffff'), Bin::pack('+float64', 2.1219957905E-314),'',1.e-100);
+        $this->assertEquals(hex2bin('00000000ffffffff'), Bin::pack('+double', 2.1219957905E-314),'',1.e-100);
     }
 
     function testLength() {

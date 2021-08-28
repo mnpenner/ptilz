@@ -12,6 +12,14 @@ I aim to provide full test coverage of every function, but I'm not quite there y
 
 Most functions have doc-comments; read them! If usage still isn't clear check out the unit tests in the `tests/` folder.
 
+## Install
+
+```sh
+composer require mnpenner/ptilz
+```
+
+Find on [Packagist](https://packagist.org/packages/mnpenner/ptilz).
+
 ## Issues
 
 Please report them on [the issue tracker](https://github.com/mnpenner/ptilz/issues).

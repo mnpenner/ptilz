@@ -14,7 +14,7 @@ Most functions have doc-comments; read them! If usage still isn't clear check ou
 
 ## Issues
 
-Please report them on [the issue tracker](https://bitbucket.org/mnpenner/ptilz/issues).
+Please report them on [the issue tracker](https://github.com/mnpenner/ptilz/issues).
 
 ## Contributing
 

@@ -143,6 +143,28 @@ abstract class Math {
     }
 
     /**
+     * Generates a random number within a specified range.
+     *
+     * @param int|float $min Minimum value (inclusive)
+     * @param int|float $max Maximum value (exclusive)
+     * @return float A pseudo-random float value
+     * @throws \Exception if an appropriate source of randomness cannot be found.
+     * @throws \InvalidArgumentException if $min > $max
+     */
+    public static function randFloatExclusive($min = 0, $max = 1) {
+        if(func_num_args() === 1) {
+            $max = $min;
+            $min = 0;
+        } elseif($min > $max) {
+            throw new \InvalidArgumentException("Min cannot be greater than max");
+        }
+        do {
+            $value = $min + random_int(0, 2 ** 53 - 1) / (2 ** 53) * ($max - $min);
+        } while($value >= $max);  // can sometimes happen due to floating point rounding errors
+        return $value;
+    }
+
+    /**
      * Generate a random number within the specified range and the given step size.
      *
      * @param int|float $min

@@ -7,6 +7,13 @@ if(!defined('PHP_INT_MIN')) {
     define('PHP_INT_MIN', ~PHP_INT_MAX);
 }
 
+if(!defined('PHP_FLOAT_EPSILON')) {
+    /**
+     * Smallest representable positive number x, so that x + 1.0 != 1.0. Available as of PHP 7.2.0.
+     */
+    define('PHP_FLOAT_EPSILON', 2.2204460492503E-16);
+}
+
 if(!function_exists('with')) {
     /**
      * Return the given object. Useful for chaining.

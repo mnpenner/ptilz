@@ -158,4 +158,42 @@ class MathTest extends PHPUnit_Framework_TestCase {
         $this->setExpectedException(ArgumentOutOfRangeException::class);
         Math::mod(5,-1);
     }
+
+    function testRandFloatExclusiveDefaultRange() {
+        for($i = 0; $i < 1000; ++$i) {
+            $value = Math::randFloatExclusive();
+            $this->assertGreaterThanOrEqual(0, $value);
+            $this->assertLessThan(1, $value);
+        }
+    }
+
+    function testRandFloatExclusiveOneArg() {
+        for($i = 0; $i < 1000; ++$i) {
+            $value = Math::randFloatExclusive(37);
+            $this->assertGreaterThanOrEqual(0, $value);
+            $this->assertLessThan(37, $value);
+        }
+    }
+
+    function testRandFloatExclusiveNegatives() {
+        for($i=0; $i<1000; ++$i) {
+            $value = Math::randFloatExclusive(-4,-3);
+            $this->assertGreaterThanOrEqual(-4,$value);
+            $this->assertLessThan(-3,$value);
+        }
+    }
+
+    function testRandFloatExclusiveAlwaysLessThanMax() {
+        $max = 2.22E-16;
+        for($i=0; $i<1000; ++$i) {
+            $value = Math::randFloatExclusive(0,$max);
+            $this->assertGreaterThanOrEqual(0,$value);
+            $this->assertLessThan($max,$value);
+        }
+    }
+
+    function testRandFloatExclusiveArgException() {
+        $this->setExpectedException(InvalidArgumentException::class);
+        Math::randFloatExclusive(1,0);
+    }
 }

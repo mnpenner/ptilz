@@ -304,7 +304,7 @@ class IterTest extends TestCase {
     }
 
 
-    function filterTests() {
+    public static function filterTests() {
         $odd = function ($var) {
             return ($var & 1);
         };
@@ -405,6 +405,7 @@ class IterTest extends TestCase {
             [[3,4,5,6,7,8,9,10,11], 3, 11],
             [[3,5,7,9,11], 3, 11, 2],
             [[3,5,7,9,11], 3, 11, -2],
+            [[11,9,7,5,3], 11, 3, -2],
             [[17,14,11,8,5], 17, 4, -3],
             [[17,14,11,8,5], 17, 4, 3],
 

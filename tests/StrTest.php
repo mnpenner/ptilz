@@ -515,7 +515,7 @@ FAIL CASE:
         $this->assertEquals($expected, Str::fileSize($size, $spec, $digits, $decimals, $trim), $message);
     }
 
-    public function fileSizeTests() {
+    public static function fileSizeTests() {
         return [
             [999, 'iec', 3, null, false, '999 B'],
             [1000, 'iec', 3, null, false, '1000 B'],

@@ -59,7 +59,7 @@ class ArrTest extends TestCase {
         $this->assertSame(!$is_assoc, Arr::isNumeric($arr, $quick));
     }
 
-    public function arrayTypeArgs() {
+    public static function arrayTypeArgs() {
         return [
             [[1,2,3],false,false],
             [['a'=>1,'b'=>2,'c'=>3],false,true],

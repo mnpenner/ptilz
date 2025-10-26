@@ -11,7 +11,7 @@ class FileTest extends TestCase {
         $this->assertSame($exp, File::splitFileName(...$args));
     }
 
-    public function dataSplitFileName() {
+    public static function dataSplitFileName() {
         return [
             [['foo', '.bar'], 'foo.bar', true],
             [['foo', '.tar.gz'], 'foo.tar.gz', true],

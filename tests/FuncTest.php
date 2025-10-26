@@ -1,8 +1,9 @@
 <?php
 use Ptilz\Func;
 use Ptilz\Iter;
+use PHPUnit\Framework\TestCase;
 
-class FuncTest extends PHPUnit_Framework_TestCase {
+class FuncTest extends TestCase {
     function testArity() {
         $this->assertSame(3, Func::arity(function($a,$b,$c){}));
         $this->assertSame(1, Func::arity('is_numeric'));

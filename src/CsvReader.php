@@ -91,42 +91,43 @@ class CsvReader implements IteratorAggregate {
         fclose($this->fp);
     }
 
-    public function rewind() {
+    public function rewind(): void {
         fseek($this->fp, $this->start_pos, SEEK_SET);
     }
 
-    public function getIterator() {
+    public function getIterator(): \Traversable {
         return new CsvIterator($this);
     }
 }
 
 class CsvIterator implements Iterator {
-    private $csv;
-    private $line;
-    private $line_nbr;
+    private CsvReader $csv;
+    /** @var array|false */
+    private $line = false;
+    private int $line_nbr = -1;
 
     public function __construct(CsvReader $csv) {
         $this->csv = $csv;
     }
 
-    public function current() {
+    public function current(): mixed {
         return $this->line;
     }
 
-    public function next() {
+    public function next(): void {
         $this->line = $this->csv->readline();
         ++$this->line_nbr;
     }
 
-    public function key() {
+    public function key(): mixed {
         return $this->line_nbr;
     }
 
-    public function valid() {
+    public function valid(): bool {
         return $this->line !== false;
     }
 
-    public function rewind() {
+    public function rewind(): void {
         $this->csv->rewind();
         $this->line_nbr = -1;
         $this->next();

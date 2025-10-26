@@ -1,7 +1,8 @@
 <?php
 use Ptilz\V;
+use PHPUnit\Framework\TestCase;
 
-class VarTest extends PHPUnit_Framework_TestCase {
+class VarTest extends TestCase {
 
     /**
      * @covers \Ptilz\V::toString

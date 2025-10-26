@@ -2,19 +2,20 @@
 
 
 use Ptilz\BitStream;
+use PHPUnit\Framework\TestCase;
 
-class CsvReaderTest extends PHPUnit_Framework_TestCase {
+class CsvReaderTest extends TestCase {
     /** @var \Ptilz\CsvReader::__construct */
     private $reader;
 
     /**
      * @covers \Ptilz\CsvReader::__construct
      */
-    protected function setUp() {
+    protected function setUp(): void {
         $this->reader = new \Ptilz\CsvReader(__DIR__ . '/sample.csv', true, 0, ',', '"', '\\', 0, "\r");
     }
 
-    protected function tearDown() {
+    protected function tearDown(): void {
         unset($this->reader);
     }
 

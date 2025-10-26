@@ -1,7 +1,8 @@
 <?php
 use Ptilz\Arr;
+use PHPUnit\Framework\TestCase;
 
-class ArrTest extends PHPUnit_Framework_TestCase {
+class ArrTest extends TestCase {
 
     /**
      * @covers \Ptilz\Arr::get

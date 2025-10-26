@@ -2,8 +2,9 @@
 use Ptilz\BigMath;
 use Ptilz\Exceptions\ArgumentOutOfRangeException;
 use Ptilz\Math;
+use PHPUnit\Framework\TestCase;
 
-class MathTest extends PHPUnit_Framework_TestCase {
+class MathTest extends TestCase {
     function testClamp() {
         $this->assertEquals(5, Math::clamp(4, 5, 10));
         $this->assertEquals(10, Math::clamp(11, 5, 10));
@@ -48,10 +49,10 @@ class MathTest extends PHPUnit_Framework_TestCase {
     }
 
     function testToInt() {
-        $this->assertInternalType('int', BigMath::toInt(PHP_INT_MIN));
-        $this->assertInternalType('int', BigMath::toInt(0));
+        $this->assertIsInt(BigMath::toInt(PHP_INT_MIN));
+        $this->assertIsInt(BigMath::toInt(0));
         $this->assertSame(PHP_INT_MAX, BigMath::toInt(PHP_INT_MAX));
-        $this->assertInternalType('string', BigMath::toInt(bcadd(PHP_INT_MAX, 1)));
+        $this->assertIsString(BigMath::toInt(bcadd(PHP_INT_MAX, 1)));
     }
 
     function testAdd() {
@@ -150,12 +151,12 @@ class MathTest extends PHPUnit_Framework_TestCase {
     }
 
     function testMod2() {
-        $this->setExpectedException(ArgumentOutOfRangeException::class);
+        $this->expectException(ArgumentOutOfRangeException::class);
         Math::mod(5,0);
     }
 
     function testMod3() {
-        $this->setExpectedException(ArgumentOutOfRangeException::class);
+        $this->expectException(ArgumentOutOfRangeException::class);
         Math::mod(5,-1);
     }
 
@@ -193,7 +194,7 @@ class MathTest extends PHPUnit_Framework_TestCase {
     }
 
     function testRandFloatExclusiveArgException() {
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         Math::randFloatExclusive(1,0);
     }
 }

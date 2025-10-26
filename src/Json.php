@@ -106,14 +106,19 @@ abstract class Json {
             } elseif($var instanceof JsonSerializable) {
                 $result .= self::_encode($var->jsonSerialize(), $options, $depth + 1);
             } else {
-                $result .= json_encode($var, $options);
+                $encoded = json_encode($var, $options);
+                $error_code = json_last_error();
+                if($error_code !== JSON_ERROR_NONE) {
+                    throw new InvalidOperationException(json_last_error_msg(), $error_code);
+                }
+                $result .= self::escapeLineTerminators($encoded);
             }
         } else { // strings, ints and floats
             if(is_string($var) && Bin::hasFlag($options, self::FORCE_UTF8)) {
                 $var = Str::forceUtf8($var);
             }
 
-            $result .= json_encode($var, $options);
+            $encoded = json_encode($var, $options);
             $error_code = json_last_error();
             if($error_code !== JSON_ERROR_NONE) {
                 $message = json_last_error_msg();
@@ -122,9 +127,19 @@ abstract class Json {
                 }
                 throw new InvalidOperationException($message, $error_code);
             }
+
+            if(is_string($var)) {
+                $encoded = self::escapeLineTerminators($encoded);
+            }
+
+            $result .= $encoded;
         }
 
         return $result;
+    }
+
+    private static function escapeLineTerminators(string $json): string {
+        return str_replace(["\u{2028}", "\u{2029}"], ['\u2028', '\u2029'], $json);
     }
 
     /**

@@ -1,7 +1,8 @@
 <?php
 use Ptilz\Uuid;
+use PHPUnit\Framework\TestCase;
 
-class UuidTest extends PHPUnit_Framework_TestCase {
+class UuidTest extends TestCase {
     
     public function testUuid() {
         $found = [];
@@ -12,7 +13,7 @@ class UuidTest extends PHPUnit_Framework_TestCase {
                 $this->fail("Duplicate UUID found");
             }
             $uuids[$uuid] = true;
-            $this->assertRegExp('#[0123456789abcdefghjkmnpqrstvwxyz]{25}\z#A', $uuid);
+            $this->assertMatchesRegularExpression('#[0123456789abcdefghjkmnpqrstvwxyz]{25}\z#A', $uuid);
             for($j=0; $j<strlen($uuid); ++$j) {
                 if(!isset($found[$j])) {
                     $found[$j] = [];
@@ -41,7 +42,7 @@ class UuidTest extends PHPUnit_Framework_TestCase {
                 $this->fail("Duplicate OUID found");
             }
             $ouids[$ouid] = true;
-            $this->assertRegExp('#[0123456789abcdefghjkmnpqrstvwxyz]{30}\z#A', $ouid);
+            $this->assertMatchesRegularExpression('#[0123456789abcdefghjkmnpqrstvwxyz]{30}\z#A', $ouid);
             for($j=0; $j<strlen($ouid); ++$j) {
                 @$found[$j][$ouid[$j]] = true;
             }

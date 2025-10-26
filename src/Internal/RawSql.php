@@ -6,13 +6,13 @@ namespace Ptilz\Internal;
  * @internal
  */
 class RawSql {
-    private $data;
+    private string $data;
 
-    function __construct($str) {
+    function __construct(string $str) {
         $this->data = $str;
     }
 
-    function __toString() {
+    function __toString(): string {
         return $this->data;
     }
 }

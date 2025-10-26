@@ -1,7 +1,8 @@
 <?php
 use Ptilz\Sql;
+use PHPUnit\Framework\TestCase;
 
-class SqlTest extends PHPUnit_Framework_TestCase {
+class SqlTest extends TestCase {
 
 
     function testFormat() {

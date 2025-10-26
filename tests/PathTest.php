@@ -1,7 +1,8 @@
 <?php
 use Ptilz\Path;
+use PHPUnit\Framework\TestCase;
 
-class PathTest extends PHPUnit_Framework_TestCase {
+class PathTest extends TestCase {
 
     function testIsAbsolute() {
         Path::setWindowsMode(false);

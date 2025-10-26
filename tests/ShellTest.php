@@ -1,11 +1,12 @@
 <?php
 use Ptilz\Env;
 use Ptilz\Shell;
+use PHPUnit\Framework\TestCase;
 
-class ShellTest extends PHPUnit_Framework_TestCase {
+class ShellTest extends TestCase {
     function testCmdExists() {
         $this->assertTrue(Shell::cmdExists('cd'), "cd");
-        $this->assertTrue(Shell::cmdExists('phpunit'), "phpunit");
+        $this->assertTrue(Shell::cmdExists('php'), "php");
         $this->assertFalse(Shell::cmdExists('Dpzqjcmi1yX8qULqzANUd20IIWU9w1A4UlXOAnPn'), "random (not-existent) command");
     }
 

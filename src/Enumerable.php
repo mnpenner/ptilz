@@ -4,8 +4,7 @@ use Ptilz\Exceptions\ArgumentTypeException;
 use Traversable;
 
 class Enumerable implements \IteratorAggregate {
-    /** @var array|Traversable */
-    private $foreachable;
+    private iterable $foreachable;
 
     /**
      * @param array|Traversable $foreachable
@@ -16,11 +15,11 @@ class Enumerable implements \IteratorAggregate {
         $this->foreachable = $foreachable;
     }
 
-    public function getIterator() {
+    public function getIterator(): \Traversable {
         return Iter::toIterator($this->foreachable);
     }
 
-    public function toArray() {
+    public function toArray(): array {
         return Iter::toArray($this->foreachable);
     }
 }

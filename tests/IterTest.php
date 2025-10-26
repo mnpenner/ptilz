@@ -1,7 +1,8 @@
 <?php
 use Ptilz\Iter;
+use PHPUnit\Framework\TestCase;
 
-class IterTest extends PHPUnit_Framework_TestCase {
+class IterTest extends TestCase {
     function testToArray() {
         $generator = function () {
             yield 1;
@@ -372,29 +373,25 @@ class IterTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(PHP_INT_MIN, Iter::reduce([], $maxFunc, PHP_INT_MIN));
     }
 
-    /**
-     * @expectedException \Ptilz\Exceptions\ArgumentTypeException
-     */
     public function testAssert() {
+        $this->expectException(\Ptilz\Exceptions\ArgumentTypeException::class);
         Iter::assert(null);
     }
 
-    /**
-     * @expectedException \Ptilz\Exceptions\ArgumentTypeException
-     * @expectedExceptionMessageRegExp /\bqfwpiY9205Pg8Dfdh50gyXj\b/
-     */
     public function testAssert2() {
+        $this->expectException(\Ptilz\Exceptions\ArgumentTypeException::class);
+        $this->expectExceptionMessageMatches('/\bqfwpiY9205Pg8Dfdh50gyXj\b/');
         Iter::assert(null, 'qfwpiY9205Pg8Dfdh50gyXj');
     }
 
     /**
-     * @dataProvider testRangeArgs
+     * @dataProvider rangeArgs
      */
     public function testRange($exp, ...$args) {
         $this->assertEquals($exp,iterator_to_array(Iter::range(...$args)));
     }
 
-    public function testRangeArgs() {
+    public static function rangeArgs() {
         $d1 = new DateTime("2016-11-01T12:16:30.123456-07:00");
         $d2 = new DateTime("2016-11-02T12:16:30.123456-07:00");
         $d3 = new DateTime("2016-11-03T12:16:30.123456-07:00");
@@ -405,11 +402,11 @@ class IterTest extends PHPUnit_Framework_TestCase {
         $h3 = new DateTime("1960-01-01T02:02:02.123456-00:00");
 
         return [
-            [range(3,11), 3, 11],
-            [range(3,11,2), 3, 11, 2],
-            [range(3,11,-2), 3, 11, -2],
-            [range(17,4,-3), 17, 4, -3],
-            [range(17,4,3), 17, 4, 3],
+            [[3,4,5,6,7,8,9,10,11], 3, 11],
+            [[3,5,7,9,11], 3, 11, 2],
+            [[3,5,7,9,11], 3, 11, -2],
+            [[17,14,11,8,5], 17, 4, -3],
+            [[17,14,11,8,5], 17, 4, 3],
 
             [[$d1,$d2,$d3,$d4], $d1, $d4],
             [[$d4,$d3,$d2,$d1], $d4, $d1],

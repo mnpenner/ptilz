@@ -801,7 +801,7 @@ REGEX;
      */
     public static function quote($string, $lquo = '"', $rquo = null, $esc = null) {
         if($rquo === null) $rquo = $lquo;
-        if(strlen($esc)) {
+        if($esc !== null && $esc !== '') {
             $string = str_replace($rquo, $esc.$rquo, $string);
         }
         return $lquo.$string.$rquo;
@@ -839,7 +839,7 @@ REGEX;
      */
     public static function forceUtf8($str) {
         if(!mb_check_encoding($str, 'UTF-8')) {
-            return utf8_encode($str);
+            return mb_convert_encoding($str, 'UTF-8', 'ISO-8859-1');
         }
         return $str;
     }
@@ -866,7 +866,7 @@ REGEX;
         $name = implode('',array_map(function($w) {
             return mb_strtoupper(mb_substr($w,0,1)).mb_strtolower(mb_substr($w,1));
         },self::splitCodeWords($str)));
-        if(strlen($prefix) && !preg_match('#[a-zA-Z_\x7f-\xff]#A',$name)) {
+        if($prefix !== null && $prefix !== '' && !preg_match('#[a-zA-Z_\x7f-\xff]#A',$name)) {
             $name = $prefix.$name;
         }
         return $name;
@@ -1591,6 +1591,7 @@ REGEX;
                 }
             }
 
+            $decimals = max(0, (int)$decimals);
             $size = number_format($size, $decimals, null, '');
         } elseif($decimals !== null) {
             if($u < $lastIndex && abs(round($size, $decimals)) >= $thresh) {

@@ -1,8 +1,9 @@
 <?php
 use Ptilz\Cli;
 use Ptilz\Path;
+use PHPUnit\Framework\TestCase;
 
-class CliTest extends PHPUnit_Framework_TestCase {
+class CliTest extends TestCase {
 
     function testWidth() {
         $width = Cli::width(0);

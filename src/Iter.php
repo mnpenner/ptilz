@@ -104,7 +104,7 @@ class Iter {
      * @return Generator
      * @deprecated The `$flags` parameter is kind of weird
      */
-    public static function filter($trav, callable $callback=null, $flags=7) {
+    public static function filter($trav, ?callable $callback=null, $flags=7) {
         if($callback === null) {
             $callback = [V::class,'isTruthy'];
         }
@@ -189,10 +189,10 @@ class Iter {
      * Returns true if every value passes the callback
      *
      * @param array|Traversable $trav
-     * @param callable $callback Defaults to V::isTruthy
+     * @param callable|null $callback Defaults to V::isTruthy
      * @return bool
      */
-    public static function all($trav, callable $callback=null) {
+    public static function all($trav, ?callable $callback=null) {
         if($callback === null) $callback = [V::class,'isTruthy'];
         foreach($trav as $v) {
             if(!$callback($v)) {
@@ -206,10 +206,10 @@ class Iter {
      * Returns true if any value passes the callback
      *
      * @param array|Traversable $trav
-     * @param callable $callback Defaults to V::isTruthy
+     * @param callable|null $callback Defaults to V::isTruthy
      * @return bool
      */
-    public static function any($trav, callable $callback=null) {
+    public static function any($trav, ?callable $callback=null) {
         if($callback === null) $callback = [V::class,'isTruthy'];
         foreach($trav as $v) {
             if($callback($v)) {

@@ -2,8 +2,9 @@
 
 
 use Ptilz\BitStream;
+use PHPUnit\Framework\TestCase;
 
-class BitStreamTest extends PHPUnit_Framework_TestCase {
+class BitStreamTest extends TestCase {
 
     function test1() {
         $stream = new BitStream(chr(0b11100000));

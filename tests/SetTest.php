@@ -1,8 +1,9 @@
 <?php
 
 use Ptilz\Collections\Set;
+use PHPUnit\Framework\TestCase;
 
-class SetTest extends PHPUnit_Framework_TestCase {
+class SetTest extends TestCase {
 
     /**
      * @covers \Ptilz\Collections\Set::__construct

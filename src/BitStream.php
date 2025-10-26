@@ -5,14 +5,13 @@
 // implement PSR7 stream
 
 class BitStream {
-    /** @var string */
-    protected $data;
+    protected string $data;
     /** @var int Length in bits */
-    protected $length;
+    protected int $length;
     /** @var int Position in bits */
-    protected $pos;
+    protected int $pos;
 
-    public function __construct($data, $length = null) {
+    public function __construct(string $data, ?int $length = null) {
         $this->data = $data;
         $this->length = $length !== null ? $length : strlen($data) * 8;
         $this->pos = 0;
@@ -25,7 +24,7 @@ class BitStream {
      * @param int $total_bits The actual number of bits that were read
      * @return int
      */
-    public function read($nbits = 1, &$total_bits=null) {
+    public function read(int $nbits = 1, ?int &$total_bits=null): int|false {
         if($this->eof()) {
             $total_bits = 0;
             return false;
@@ -77,15 +76,15 @@ class BitStream {
      *
      * @return bool
      */
-    public function eof() {
+    public function eof(): bool {
         return $this->pos >= $this->length;
     }
 
-    public function rewind() {
+    public function rewind(): void {
         $this->pos = 0;
     }
 
-    public function seek($offset, $whence = SEEK_SET) {
+    public function seek(int $offset, int $whence = SEEK_SET): void {
         switch($whence) {
             case SEEK_SET:
                 $this->pos = $offset;
@@ -102,7 +101,7 @@ class BitStream {
     }
 
 
-    function __toString() {
+    public function __toString(): string {
         $so_far = 0;
         $str = implode(PHP_EOL, array_map(function ($s) use (&$so_far) {
             $nbits = strlen($s) * 8;

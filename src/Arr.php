@@ -28,8 +28,15 @@ abstract class Arr {
         }
         if(array_key_exists($key, $arr)) {
             $result = $arr[$key];
-            if($type) {
-                if(!settype($result, $type)) {
+            if($type !== null) {
+                $normalizedType = strtolower($type);
+                $validTypes = ['bool','boolean','int','integer','float','double','string','array','object','null'];
+                if(!in_array($normalizedType, $validTypes, true)) {
+                    return $default;
+                }
+                try {
+                    settype($result, $normalizedType);
+                } catch(\ValueError $e) {
                     return $default;
                 }
             }
@@ -49,20 +56,23 @@ abstract class Arr {
      */
     public static function getDeep(array $arr, $key, $default = null) {
         // todo: merge with above??
-        $name = strtok($key, '[');
-        if(!isset($arr[$name])) return $default;
+        $offset = strpos($key, '[');
+        $name = $offset === false ? $key : substr($key, 0, $offset);
+        if(!array_key_exists($name, $arr)) return $default;
         $ret = &$arr[$name];
-        $rem = strtok(null);
-        if($rem) {
-            $rem = explode('[', str_replace(']', '', $rem));
-            while(($k = array_shift($rem)) !== null) {
-                if(!isset($ret[$k])) {
-                    if($k === '') { // empty brackets[] -- TODO: stop and return result as an array with any remaining keys passed to pluck?
-                        continue;
+        if($offset !== false) {
+            $segments = explode('[', str_replace(']', '', substr($key, $offset + 1)));
+            foreach($segments as $segment) {
+                if($segment === '') {
+                    if((is_array($ret) || $ret instanceof \ArrayAccess) && isset($ret[''])) {
+                        $ret = &$ret[''];
                     }
+                    continue;
+                }
+                if(!isset($ret[$segment])) {
                     return $default;
                 }
-                $ret = &$ret[$k];
+                $ret = &$ret[$segment];
             }
         }
         return $ret;
@@ -192,7 +202,7 @@ abstract class Arr {
     public static function zip() {
         $result = [];
         $func_args = func_get_args();
-        $keys = call_user_func_array('self::keysUnion', $func_args);
+        $keys = self::keysUnion(...$func_args);
 
         foreach($keys as $i) {
             $result[$i] = [];
@@ -345,10 +355,10 @@ abstract class Arr {
      * Removes all elements from an array that do not pass the filter.
      *
      * @param array $input Array to filter
-     * @param callable $callback A function with the signature function($value, $key)
+     * @param callable|null $callback A function with the signature function($value, $key)
      * @return array
      */
-    public static function filter(array $input, callable $callback = null) {
+    public static function filter(array $input, ?callable $callback = null) {
         if($input === []) return [];
         if($callback === null) {
             $callback = [V::class,'isTruthy'];
@@ -527,7 +537,8 @@ abstract class Arr {
      * @return array
      */
     public static function keysUnion(array $array1){
-        return array_keys(call_user_func_array('self::merge', func_get_args()));
+        $args = func_get_args();
+        return array_keys(self::merge(...$args));
     }
 
     /**

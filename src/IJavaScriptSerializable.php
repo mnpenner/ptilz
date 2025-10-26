@@ -11,5 +11,5 @@ interface IJavaScriptSerializable {
      * @param int $options The options that were passed to Json::encode
      * @return string
      */
-    public function jsSerialize($options);
+    public function jsSerialize(int $options): string;
 }

@@ -1,6 +1,7 @@
 <?php
+use PHPUnit\Framework\TestCase;
 
-class BootstrapTest extends PHPUnit_Framework_TestCase {
+class BootstrapTest extends TestCase {
     function testIntdiv() {
         $this->assertSame(1,intdiv(3,2));
         $this->assertSame(-1,intdiv(-3,2));
@@ -13,12 +14,12 @@ class BootstrapTest extends PHPUnit_Framework_TestCase {
 
 
     function testInddiv0() {
-        $this->setExpectedException(DivisionByZeroError::class);
-        $this->assertFalse(intdiv(1, 0));
+        $this->expectException(DivisionByZeroError::class);
+        intdiv(1, 0);
     }
 
     function testInddiv1() {
-        $this->setExpectedException(ArithmeticError::class);
-        $this->assertFalse(intdiv(PHP_INT_MIN, -1));
+        $this->expectException(ArithmeticError::class);
+        intdiv(PHP_INT_MIN, -1);
     }
 }

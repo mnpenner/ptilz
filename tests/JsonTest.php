@@ -2,13 +2,14 @@
 use Ptilz\Exceptions\InvalidOperationException;
 use Ptilz\IJavaScriptSerializable;
 use Ptilz\Json;
+use PHPUnit\Framework\TestCase;
 
-class JsonTest extends PHPUnit_Framework_TestCase {
+class JsonTest extends TestCase {
     function testEncode() {
         $this->assertSame('"str"', Json::encode('str'));
         $this->assertSame('"123"', Json::encode('123'));
         $this->assertSame('123', Json::encode('123', JSON_NUMERIC_CHECK));
-        $this->assertSame('"J\u2028S"', Json::encode('J S'), "Safe handling of special characters for JavaScript compatibility"); // http://timelessrepo.com/json-isnt-a-javascript-subset
+        $this->assertSame('"J\u2028S"', Json::encode("J\u{2028}S"), "Safe handling of special characters for JavaScript compatibility"); // http://timelessrepo.com/json-isnt-a-javascript-subset
         $this->assertSame('[1,2,3]', Json::encode([1, 2, 3]));
         $this->assertSame('{"0":1,"1":2,"2":3}', Json::encode([1, 2, 3], JSON_FORCE_OBJECT));
         $this->assertSame('{"1":1,"2":2,"3":3}', Json::encode([1 => 1, 2, 3]));
@@ -39,7 +40,8 @@ class JsonTest extends PHPUnit_Framework_TestCase {
     }
 
     function testEncodeException() {
-        $this->setExpectedException('Ptilz\Exceptions\InvalidOperationException', null, JSON_ERROR_UTF8);
+        $this->expectException(InvalidOperationException::class);
+        $this->expectExceptionCode(JSON_ERROR_UTF8);
         Json::encode(chr(200));
     }
 
@@ -50,7 +52,8 @@ class JsonTest extends PHPUnit_Framework_TestCase {
     }
 
     function testDecodeException() {
-        $this->setExpectedException(InvalidOperationException::class, null, JSON_ERROR_SYNTAX);
+        $this->expectException(InvalidOperationException::class);
+        $this->expectExceptionCode(JSON_ERROR_SYNTAX);
         Json::decode("'str'"); // strings must be quoted with double-quotes in JSON
     }
 }
@@ -65,7 +68,7 @@ class Person implements JsonSerializable {
     }
 
 
-    function jsonSerialize() {
+    public function jsonSerialize(): mixed {
         return [
             '__type' => __CLASS__,
             'name' => $this->name,
@@ -83,7 +86,7 @@ class Dog implements IJavaScriptSerializable {
         $this->favToy = $favToy;
     }
 
-    function jsSerialize($options) {
+    public function jsSerialize(int $options): string {
         return 'new Dog('.json_encode($this->name, $options).', '.json_encode($this->favToy, $options).')';
     }
 }

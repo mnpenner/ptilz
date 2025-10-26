@@ -4,10 +4,11 @@ use Ptilz\BitStream;
 use Ptilz\Math;
 use Ptilz\Str;
 use Ptilz\V;
+use PHPUnit\Framework\TestCase;
 
 mb_internal_encoding('UTF-8');
 
-class StrTest extends PHPUnit_Framework_TestCase {
+class StrTest extends TestCase {
     function testStartsWith() {
         $this->assertTrue(Str::startsWith("abc","a"));
         $this->assertFalse(Str::startsWith("abc","A"));
@@ -57,7 +58,7 @@ class StrTest extends PHPUnit_Framework_TestCase {
     }
 
     function testRandom() {
-        $this->assertRegExp('~[abc123]{30}\z~A', Str::random(30, 'abc123'));
+        $this->assertMatchesRegularExpression('~[abc123]{30}\z~A', Str::random(30, 'abc123'));
     }
 
     function testSplit() {
@@ -392,7 +393,7 @@ FAIL CASE:
 
             $patt = '/['.preg_quote($alpha,'/').']{'.$min.','.$max.'}\z/A';
 
-            $this->assertRegExp($patt,$enc,$msg);
+            $this->assertMatchesRegularExpression($patt,$enc,$msg);
 
             //$this->assertGreaterThanOrEqual($min,$outlen, $msg);
             //$this->assertLessThanOrEqual($max,$outlen, $msg);
@@ -681,13 +682,13 @@ FAIL CASE:
      * @param $encoding
      * @param $expected
      * @throws \Ptilz\Exceptions\NotImplementedException
-     * @dataProvider testPadArgs
+     * @dataProvider padArgs
      */
     function testPad($input, $pad_length, $pad_string, $pad_type, $encoding, $expected) {
         $this->assertSame($expected, Str::pad($input, $pad_length, $pad_string, $pad_type, $encoding));
     }
 
-    function testPadArgs() {
+    public static function padArgs() {
         return [
             ['a',3,'b',STR_PAD_LEFT,'utf8','bba'],
             ['a',3,'b',STR_PAD_RIGHT,'utf8','abb'],

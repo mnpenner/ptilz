@@ -7,16 +7,16 @@ use Ptilz\IJavaScriptSerializable;
  * @internal
  */
 class RawJson implements IJavaScriptSerializable {
-    private $data;
+    private string $data;
 
     /**
      * @param string $str Valid JSON string.
      */
-    function __construct($str) {
+    function __construct(string $str) {
         $this->data = (string)$str;
     }
 
-    function __toString() {
+    function __toString(): string {
         return $this->data;
     }
 
@@ -28,7 +28,7 @@ class RawJson implements IJavaScriptSerializable {
      * @param int $options The options that were passed to Json::encode
      * @return string
      */
-    public function jsSerialize($options) {
+    public function jsSerialize(int $options): string {
         return $this->data;
     }
 }

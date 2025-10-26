@@ -9,18 +9,16 @@ use Ptilz\Arr;
  * @seealso http://php.net/manual/en/class.logicexception.php
  */
 class ArgumentTypeException extends ArgumentException {
-    public function __construct($paramName, $expectedType = null, $code = 0, Exception $previous = null) {
-        $message = "Argument ";
-        if(strlen($paramName)) {
+    public function __construct($paramName, $expectedType = null, $code = 0, ?Exception $previous = null) {
+        $message = 'Argument ';
+        if(is_string($paramName) && $paramName !== '') {
             $message .= "`$paramName` ";
+        } elseif($paramName !== null) {
+            $message .= '`' . (string)$paramName . '` ';
         }
-        $message .= "was not of the expected type";
+        $message .= 'was not of the expected type';
         if($expectedType) {
-            if(is_array($expectedType)) {
-                $types = $expectedType;
-            } else {
-                $types = explode('|', (string)$expectedType);
-            }
+            $types = is_array($expectedType) ? $expectedType : explode('|', (string)$expectedType);
             $message .= ' ' . Arr::readable(array_map(function ($t) {
                     return "`" . trim($t) . "`";
                 }, $types), ' or ');

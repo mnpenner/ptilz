@@ -1,7 +1,8 @@
 <?php
 use Ptilz\Html;
+use PHPUnit\Framework\TestCase;
 
-class HtmlTest extends PHPUnit_Framework_TestCase {
+class HtmlTest extends TestCase {
 
     function testAttrs() {
         $this->assertSame('', Html::attrs([]));
